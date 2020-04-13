@@ -64,11 +64,7 @@ namespace GameEngine.FSM
 
             foreach (FSMState<T> state in states)
             {
-                if (m_States.ContainsKey(state.StateId))
-                    throw new ArgumentException($"A state machine cannot have multiple states with same id {state.StateId}", "states");
-
-                m_States.Add(state.StateId, state);
-                state.AttachToFSM(this);
+                AddState(state);
             }
 
             if (!m_States.ContainsKey(initialStateId))
@@ -149,6 +145,8 @@ namespace GameEngine.FSM
 
             if (!m_States.ContainsKey(resetStateId))
                 throw new ArgumentException($"The reset state {resetStateId} is not a valid state", "resetStateId");
+
+            CurrentStateId = resetStateId;
         }
 
         /// <summary>
@@ -187,6 +185,31 @@ namespace GameEngine.FSM
             {
                 SwitchToNextState();
             }
+        }
+
+        /// <summary>
+        /// Add a new state in the collection of states attached to the FSM. The FSM can now enter this state.
+        /// </summary>
+        /// <param name="state">The new FSM state.</param>
+        public void AddState(FSMState<T> state)
+        {
+            if (m_States.ContainsKey(state.StateId))
+                throw new ArgumentException($"A state machine cannot have multiple states with same id {state.StateId}", "states");
+
+            m_States.Add(state.StateId, state);
+            state.AttachToFSM(this);
+        }
+
+        /// <summary>
+        /// Remove a state from the collection of states attached to the FSM. The FSM can no longer enter this state.
+        /// </summary>
+        /// <param name="stateId"></param>
+        public void RemoveState(T stateId)
+        {
+            if (stateId.Equals(CurrentStateId))
+                throw new InvalidOperationException($"Cannot remove state {stateId} because the FSM is currently in that state.");
+            
+            m_States.Remove(stateId);
         }
 
         private void SwitchToNextState()
