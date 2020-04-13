@@ -11,14 +11,14 @@ namespace GameEngine.FSM
         /// <summary>
         /// The state id, which is the value of the T Enum corresponding to the state.
         /// </summary>
-        public abstract T StateId { get; }
+        public abstract T Id { get; }
 
         /// <summary>
         /// A name identifying the state and the FSM it is part of.
         /// </summary>
         public string Name
         {
-            get => $"{m_FSM.Name}_{StateId}";
+            get => $"{m_FSM.Name}_{Id}";
         }
 
         /// <summary>

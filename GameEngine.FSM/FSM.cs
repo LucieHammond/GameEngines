@@ -67,9 +67,7 @@ namespace GameEngine.FSM
                 AddState(state);
             }
 
-            if (!m_States.ContainsKey(initialStateId))
-                throw new ArgumentException($"The initial state {initialStateId} is not a valid state", "initialStateId");
-
+            CheckStateValidity(initialStateId);
             CurrentStateId = initialStateId;
         }
 
@@ -143,9 +141,7 @@ namespace GameEngine.FSM
                 throw new InvalidOperationException($"The state machine cannot be reset while running");
 #endif
 
-            if (!m_States.ContainsKey(resetStateId))
-                throw new ArgumentException($"The reset state {resetStateId} is not a valid state", "resetStateId");
-
+            CheckStateValidity(resetStateId);
             CurrentStateId = resetStateId;
         }
 
@@ -163,8 +159,7 @@ namespace GameEngine.FSM
                 throw new InvalidOperationException($"The state machine should be started before changing state");
 #endif
 
-            if (!m_States.ContainsKey(stateId))
-                throw new ArgumentException($"The state {stateId} is not part of the state machine", "stateId");
+            CheckStateValidity(stateId);
 
             if (ignoreIfCurrentState && stateId.Equals(CurrentStateId))
                 return;
@@ -193,10 +188,10 @@ namespace GameEngine.FSM
         /// <param name="state">The new FSM state.</param>
         public void AddState(FSMState<T> state)
         {
-            if (m_States.ContainsKey(state.StateId))
-                throw new ArgumentException($"A state machine cannot have multiple states with same id {state.StateId}", "states");
+            if (m_States.ContainsKey(state.Id))
+                throw new ArgumentException($"A state machine cannot have multiple states with same id {state.Id}", "states");
 
-            m_States.Add(state.StateId, state);
+            m_States.Add(state.Id, state);
             state.AttachToFSM(this);
         }
 
@@ -210,6 +205,22 @@ namespace GameEngine.FSM
                 throw new InvalidOperationException($"Cannot remove state {stateId} because the FSM is currently in that state.");
             
             m_States.Remove(stateId);
+        }
+
+        /// <summary>
+        /// Tell if a state is part of the FSM, that means if the FSM can enter that state.
+        /// </summary>
+        /// <param name="stateId">The id of the state to check</param>
+        /// <returns>If the FSM contains that state</returns>
+        public bool IsValidState(T stateId)
+        {
+            return m_States.ContainsKey(stateId);
+        }
+
+        protected void CheckStateValidity(T stateId)
+        {
+            if (!m_States.ContainsKey(stateId))
+                throw new ArgumentException($"The state {stateId} is not a valid state");
         }
 
         private void SwitchToNextState()
