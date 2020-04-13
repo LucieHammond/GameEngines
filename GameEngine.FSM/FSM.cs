@@ -33,12 +33,11 @@ namespace GameEngine.FSM
         /// </summary>
         public double CurrentStateDuration
         {
-            get => m_CurrentStateTimeWatch.Elapsed.TotalSeconds;
+            get => m_CurrentStateTimeWatch != null ? m_CurrentStateTimeWatch.Elapsed.TotalSeconds : 0;
         }
 
-#if CHECK_OPERATIONS_CONTEXT
+
         private bool m_Running;
-#endif
         private Dictionary<T, FSMState<T>> m_States;
 
         private bool m_StateChangeRequested;
@@ -58,9 +57,7 @@ namespace GameEngine.FSM
             Name = name;
             m_States = new Dictionary<T, FSMState<T>>();
             m_StateChangeRequested = false;
-#if CHECK_OPERATIONS_CONTEXT
             m_Running = false;
-#endif
 
             foreach (FSMState<T> state in states)
             {
@@ -79,7 +76,6 @@ namespace GameEngine.FSM
 #if CHECK_OPERATIONS_CONTEXT
             if (m_Running)
                 throw new InvalidOperationException($"The state machine is already started");
-            m_Running = true;
 #endif
 
             foreach (KeyValuePair<T, FSMState<T>> stateEntry in m_States)
@@ -89,6 +85,8 @@ namespace GameEngine.FSM
 
             CurrentState.Enter();
             m_CurrentStateTimeWatch = Stopwatch.StartNew();
+
+            m_Running = true;
         }
 
         /// <summary>
@@ -118,7 +116,6 @@ namespace GameEngine.FSM
 #if CHECK_OPERATIONS_CONTEXT
             if (!m_Running)
                 throw new InvalidOperationException($"The state machine should be started before Stop");
-            m_Running = false;
 #endif
 
             m_CurrentStateTimeWatch.Stop();
@@ -128,6 +125,8 @@ namespace GameEngine.FSM
             {
                 stateEntry.Value.Unload();
             }
+
+            m_Running = false;
         }
 
         /// <summary>
@@ -193,6 +192,9 @@ namespace GameEngine.FSM
 
             m_States.Add(state.Id, state);
             state.AttachToFSM(this);
+
+            if (m_Running)
+                m_States[state.Id].Initialize();
         }
 
         /// <summary>
@@ -201,8 +203,13 @@ namespace GameEngine.FSM
         /// <param name="stateId"></param>
         public void RemoveState(T stateId)
         {
+            CheckStateValidity(stateId);
+
             if (stateId.Equals(CurrentStateId))
                 throw new InvalidOperationException($"Cannot remove state {stateId} because the FSM is currently in that state.");
+
+            if (m_Running)
+                m_States[stateId].Unload();
             
             m_States.Remove(stateId);
         }

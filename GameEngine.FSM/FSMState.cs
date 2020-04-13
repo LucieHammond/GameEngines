@@ -18,7 +18,7 @@ namespace GameEngine.FSM
         /// </summary>
         public string Name
         {
-            get => $"{m_FSM.Name}_{Id}";
+            get => m_FSM != null ? $"{m_FSM.Name}_{Id}" : $"detached_{Id}";
         }
 
         /// <summary>
