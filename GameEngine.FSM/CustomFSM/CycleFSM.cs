@@ -48,11 +48,13 @@ namespace GameEngine.FSM.CustomFSM
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
         /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
-        public void MoveToNextState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
+        /// <returns>The id of the current state.</returns>
+        public T MoveToNextState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
             m_CurrentStateIndex++;
             m_CurrentStateIndex %= m_StateOrderedList.Count;
             SetState(m_StateOrderedList[m_CurrentStateIndex], immediate, ignoreIfCurrentState, priority);
+            return m_StateOrderedList[m_CurrentStateIndex];
         }
 
         /// <summary>

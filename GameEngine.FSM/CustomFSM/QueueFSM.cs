@@ -33,7 +33,8 @@ namespace GameEngine.FSM.CustomFSM
         /// <param name="states">A list of states representing all the possible states, ordered in the way they have to be visited.</param>
         public QueueFSM(string name, List<FSMState<T>> states) : base(name, states, states[0].Id)
         {
-            for(int i = 1; i < states.Count; i++)
+            m_StateQueue = new Queue<T>();
+            for (int i = 1; i < states.Count; i++)
             {
                 m_StateQueue.Enqueue(states[i].Id);
             } 

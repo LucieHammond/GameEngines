@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace GameEnginesTest
+namespace GameEnginesTest.FSM
 {
     /// <summary>
-    /// Unit tests for the class GameEngine.FSM.FSM<T>
+    /// Unit tests for the class FSM
+    /// <see cref="FSM{T}"/>
     /// </summary>
     [TestClass]
     public class FSMTest

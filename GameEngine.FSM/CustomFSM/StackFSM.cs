@@ -6,7 +6,7 @@ namespace GameEngine.FSM.CustomFSM
     /// <summary>
     /// A state machine that transitions accross its states following a stack pattern.
     /// Use this FSM if you want to remember the states you passed in and come back to them later in reverse order.
-    /// The states to cross and remember are represented by a stack such as the state on top of the stack always corresponds to the FSM's current state.
+    /// The states to remember are represented by a stack such as the state on top of the stack always corresponds to the last visited state (where to go back when the current is popped).
     /// The stack is modified using PushState and PopState operations that will result in a change of state for the FSM.
     /// </summary>
     /// <typeparam name="T">An enum describing all possible states of this state machine.</typeparam>
@@ -15,7 +15,7 @@ namespace GameEngine.FSM.CustomFSM
         private Stack<T> m_StatesStack;
 
         /// <summary>
-        /// Constructor of the StackFSM. At first, the stack is composed of only one state : the initial state.
+        /// Constructor of the StackFSM. At first, the stack is empty : no previous state to remember.
         /// </summary>
         /// <param name="name">The name of the StackFSM.</param>
         /// <param name="states">An IEnumerable containing all the possible states of the StackFSM.</param>
@@ -23,11 +23,10 @@ namespace GameEngine.FSM.CustomFSM
         public StackFSM(string name, IEnumerable<FSMState<T>> states, T initialStateId) : base(name, states, initialStateId)
         {
             m_StatesStack = new Stack<T>();
-            m_StatesStack.Push(initialStateId);
         }
 
         /// <summary>
-        /// Push a state on top of the stack in order to transition to that state while remembering the previous state.
+        /// Transition to a new state while pushing the current one on top of the stack to remember it.
         /// </summary>
         /// <param name="stateId">The id of the requested state (should be already part of FSM)</param>
         /// <param name="immediate">immediate argument used when setting new state</param>
@@ -36,12 +35,12 @@ namespace GameEngine.FSM.CustomFSM
         /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         public void PushState(T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
-            m_StatesStack.Push(stateId);
+            m_StatesStack.Push(CurrentStateId);
             SetState(stateId, immediate, ignoreIfCurrentState, priority);
         }
 
         /// <summary>
-        /// Pop the state placed on top of the stack in order to come back to the state below.
+        /// Pop the state placed on top of the stack in order to come back to it.
         /// </summary>
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
@@ -51,13 +50,13 @@ namespace GameEngine.FSM.CustomFSM
         public T PopState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
             T stateId = m_StatesStack.Pop();
-            SetState(m_StatesStack.Peek(), immediate, ignoreIfCurrentState, priority);
+            SetState(stateId, immediate, ignoreIfCurrentState, priority);
 
             return stateId;
         }
 
         /// <summary>
-        /// Try to pop the state placed on top of the stack in order to come back to the state below.
+        /// Try to pop the state placed on top of the stack in order to come back to it.
         /// </summary>
         /// <param name="stateId">out : the id of the withdrawn state, if there was a state to withdraw (stack was not empty)</param>
         /// <param name="immediate">immediate argument used when setting new state</param>
@@ -69,7 +68,7 @@ namespace GameEngine.FSM.CustomFSM
         {
             if (m_StatesStack.TryPop(out stateId))
             {
-                SetState(m_StatesStack.Peek(), immediate, ignoreIfCurrentState, priority);
+                SetState(stateId, immediate, ignoreIfCurrentState, priority);
                 return true;
             }
 
