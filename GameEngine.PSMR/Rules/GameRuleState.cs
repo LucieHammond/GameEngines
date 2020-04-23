@@ -1,7 +1,7 @@
 ﻿namespace GameEngine.PSMR.Rules
 {
     /// <summary>
-    /// All possible states that a Game Rule can take during its lifecycle
+    /// All possible states a GameRule can take during its lifecycle
     /// </summary>
     public enum GameRuleState
     {

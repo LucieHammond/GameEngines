@@ -11,7 +11,7 @@
         Rule,
 
         /// <summary>
-        /// The dependency provider is a GameService that is part of the ServiceMode executed by the parent game process
+        /// The dependency provider is a GameService that is part of the ServiceMode executed by the parent GameProcess
         /// </summary>
         Service,
 

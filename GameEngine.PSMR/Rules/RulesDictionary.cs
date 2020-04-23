@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace GameEngine.PSMR.Rules
 {
     /// <summary>
-    /// A dictionary structure for storing game rules. 
+    /// A dictionary structure for storing GameRules. 
     /// The dictionary can contain only one rule instance per type of rule and this instance can be retrieved given its type
     /// </summary>
     public class RulesDictionary : Dictionary<Type, GameRule>

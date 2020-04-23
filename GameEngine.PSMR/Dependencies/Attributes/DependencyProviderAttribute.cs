@@ -3,8 +3,8 @@
 namespace GameEngine.PSMR.Dependencies.Attributes
 {
     /// <summary>
-    /// An attribute to use on game rules or game services when you want to enable other rules to reference them via customized interfaces.
-    /// The game rule playing the role of the dependency provider must implement the interface that the dependency consumers will use.
+    /// An attribute to use on GameRules or GameServices in order to enable other rules to reference them via customized interfaces
+    /// When used as a dependency provider, a GameRule must implement the interface that the dependency consumers will use
     /// All providers will be found and referenced using reflexion.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]

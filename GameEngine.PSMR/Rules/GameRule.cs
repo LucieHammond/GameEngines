@@ -1,4 +1,8 @@
-﻿using System;
+﻿using GameEngine.PSMR.Dependencies;
+using GameEngine.PSMR.Dependencies.Attributes;
+using GameEngine.PSMR.Process;
+using GameEngine.PSMR.Services.Standard;
+using System;
 
 namespace GameEngine.PSMR.Rules
 {
@@ -7,6 +11,9 @@ namespace GameEngine.PSMR.Rules
     /// </summary>
     public abstract class GameRule
     {
+        [DependencyConsumer(DependencyType.Service, true)]
+        private IProcessAccessor ProcessAccessor { get; }
+
         /// <summary>
         /// Name of the rule, which correspond to its type formatted as string
         /// </summary>
@@ -21,6 +28,16 @@ namespace GameEngine.PSMR.Rules
         /// Warn that something went wrong during the rule lifecycle (when set to true)
         /// </summary>
         public bool ErrorDetected { get; private set; }
+
+        /// <summary>
+        /// Reference to the Game Process that is responsible for running that rule
+        /// </summary>
+        protected GameProcess m_Process => ProcessAccessor.GetCurrentProcess();
+
+        /// <summary>
+        /// An object giving time information about the process pace (delta time, frame count, time since startup ...)
+        /// </summary>
+        protected IProcessTime m_Time => m_Process.Time;
 
         /// <summary>
         /// Default constructor of a Game Rule

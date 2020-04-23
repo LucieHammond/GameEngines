@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace GameEngine.PSMR.Dependencies
 {
+    /// <summary>
+    /// A structure for storing available dependency interfaces and their associated implementations
+    /// </summary>
     internal class DependencyProvider
     {
         private Dictionary<Type, object> m_Dependencies;

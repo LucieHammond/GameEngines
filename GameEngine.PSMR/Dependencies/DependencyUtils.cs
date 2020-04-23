@@ -8,6 +8,9 @@ using System.Reflection;
 
 namespace GameEngine.PSMR.Dependencies
 {
+    /// <summary>
+    /// A class providing utils methods for exctracting or injecting dependencies with reflexion
+    /// </summary>
     internal static class DependencyUtils
     {
         internal static DependencyProvider ExtractDependencies(RulesDictionary rules)

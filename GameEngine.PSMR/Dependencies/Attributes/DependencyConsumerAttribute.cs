@@ -3,9 +3,9 @@
 namespace GameEngine.PSMR.Dependencies.Attributes
 {
     /// <summary>
-    /// An attribute to use with game rule properties when you want to make them reference other rules or services via customized interfaces.
-    /// The implementation of the interface to give to the property playing the role of a dependency consumer will be found among dependency providers.
-    /// The value of the property will be injected using reflexion.
+    /// An attribute to use on GameRule properties in order to make them reference other rules or services via customized interfaces
+    /// When used as a dependency consumer, a property must have an interface type so that its value can be found among dependency providers
+    /// The value of the property will be injected using reflexion 
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class DependencyConsumerAttribute : Attribute
