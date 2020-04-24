@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameEngine.PSMR.Dependencies.Attributes
+namespace GameEngine.PSMR.Rules.Dependencies.Attributes
 {
     /// <summary>
     /// An attribute to use on GameRule properties in order to make them reference other rules or services via customized interfaces

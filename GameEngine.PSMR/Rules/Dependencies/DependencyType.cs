@@ -1,4 +1,4 @@
-﻿namespace GameEngine.PSMR.Dependencies
+﻿namespace GameEngine.PSMR.Rules.Dependencies
 {
     /// <summary>
     /// Possible types of dependency injections, corresponding to different kind of providers

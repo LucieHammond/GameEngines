@@ -1,5 +1,5 @@
-﻿using GameEngine.PSMR.Dependencies;
-using GameEngine.PSMR.Modes;
+﻿using GameEngine.PSMR.Modes;
+using GameEngine.PSMR.Rules.Dependencies;
 using GameEngine.PSMR.Services;
 using Microsoft.Extensions.Configuration;
 using System;

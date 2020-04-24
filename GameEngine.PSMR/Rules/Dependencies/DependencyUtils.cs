@@ -1,12 +1,11 @@
-﻿using GameEngine.PSMR.Dependencies.Attributes;
-using GameEngine.PSMR.Rules;
+﻿using GameEngine.PSMR.Rules.Dependencies.Attributes;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace GameEngine.PSMR.Dependencies
+namespace GameEngine.PSMR.Rules.Dependencies
 {
     /// <summary>
     /// A class providing utils methods for exctracting or injecting dependencies with reflexion

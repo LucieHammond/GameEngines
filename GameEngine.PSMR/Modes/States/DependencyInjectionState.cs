@@ -1,6 +1,6 @@
 ﻿using GameEngine.FSM;
-using GameEngine.PSMR.Dependencies;
 using GameEngine.PSMR.Modes.Policies;
+using GameEngine.PSMR.Rules.Dependencies;
 using System;
 using System.Diagnostics;
 

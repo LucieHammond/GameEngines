@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameEngine.PSMR.Dependencies
+namespace GameEngine.PSMR.Rules.Dependencies
 {
     /// <summary>
     /// Exception thrown when a required dependency is not found amoung providers, most likely because the rule or service implementing it is missing

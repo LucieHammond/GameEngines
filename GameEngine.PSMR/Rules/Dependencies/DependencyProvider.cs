@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GameEngine.PSMR.Dependencies
+namespace GameEngine.PSMR.Rules.Dependencies
 {
     /// <summary>
     /// A structure for storing available dependency interfaces and their associated implementations

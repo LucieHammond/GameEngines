@@ -1,6 +1,6 @@
-﻿using GameEngine.PSMR.Dependencies;
-using GameEngine.PSMR.Dependencies.Attributes;
-using GameEngine.PSMR.Process;
+﻿using GameEngine.PSMR.Process;
+using GameEngine.PSMR.Rules.Dependencies;
+using GameEngine.PSMR.Rules.Dependencies.Attributes;
 using GameEngine.PSMR.Services.Standard;
 using System;
 
