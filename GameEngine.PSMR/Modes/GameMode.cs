@@ -2,6 +2,7 @@
 using GameEngine.FSM.CustomFSM;
 using GameEngine.PSMR.Modes.Policies;
 using GameEngine.PSMR.Modes.States;
+using GameEngine.PSMR.Process;
 using GameEngine.PSMR.Rules;
 using GameEngine.PSMR.Rules.Scheduling;
 using GameEngine.PSMR.Services;
@@ -53,6 +54,7 @@ namespace GameEngine.PSMR.Modes
 
         internal bool IsServiceMode;
         internal IConfiguration InitialConfiguration;
+        internal GameProcess ParentProcess;
 
         internal RulesDictionary Rules;
         internal List<Type> InitUnloadOrder;
@@ -64,11 +66,12 @@ namespace GameEngine.PSMR.Modes
         private QueueFSM<GameModeState> m_StateMachine;
         private bool m_IsPaused;
 
-        internal GameMode(IGameModeSetup setup, IConfiguration initialConfiguration)
+        internal GameMode(IGameModeSetup setup, IConfiguration initialConfiguration, GameProcess parentProcess)
         {
             Name = $"{setup.Name}Mode";
             IsServiceMode = setup is IServiceSetup;
             InitialConfiguration = initialConfiguration;
+            ParentProcess = parentProcess;
             Rules = new RulesDictionary();
             m_IsPaused = false;
 
@@ -161,12 +164,28 @@ namespace GameEngine.PSMR.Modes
                     Pause();
                     return true;
                 case OnErrorBehaviour.UnloadMode:
+                    try
+                    {
+                        ParentProcess.SwitchToGameMode(ErrorPolicy.FallbackMode);
+                    }
+                    catch (Exception)
+                    {
+                        ParentProcess.SwitchToGameMode(null);
+                    }
+                    return true;
                 case OnErrorBehaviour.PauseAll:
+                    ParentProcess.Pause();
+                    return true;
                 case OnErrorBehaviour.StopAll:
-                    throw new NotImplementedException();
+                    ParentProcess.Stop();
+                    return true;
                 default:
                     return false;
             }
         }
     }
 }
+
+
+
+

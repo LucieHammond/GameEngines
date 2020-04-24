@@ -39,11 +39,16 @@ namespace GameEngine.PSMR.Modes.States
                 {
                     m_InternalProvider = DependencyUtils.ExtractDependencies(m_GameMode.Rules);
 
+                    if (m_GameMode.IsServiceMode)
+                    {
+                        m_GameMode.ParentProcess.ServiceProvider = m_InternalProvider;
+                    }
+
                     if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
                         return;
                 }
 
-                DependencyProvider serviceProvider = null;
+                DependencyProvider serviceProvider = m_GameMode.ParentProcess.ServiceProvider;
                 DependencyProvider ruleProvider = m_GameMode.IsServiceMode ? null : m_InternalProvider;
                 DependencyUtils.InjectDependencies(m_GameMode.Rules, serviceProvider, ruleProvider, m_GameMode.InitialConfiguration);
 

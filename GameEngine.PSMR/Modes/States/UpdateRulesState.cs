@@ -1,5 +1,6 @@
 ﻿using GameEngine.FSM;
 using GameEngine.PSMR.Modes.Policies;
+using GameEngine.PSMR.Process;
 using GameEngine.PSMR.Rules;
 using System;
 using System.Diagnostics;
@@ -14,9 +15,9 @@ namespace GameEngine.PSMR.Modes.States
         public override GameModeState Id => GameModeState.UpdateRules;
 
         private GameMode m_GameMode;
+        private IProcessTime m_Time;
         private Stopwatch m_RuleUpdateTime;
         private PerformancePolicy m_Performance;
-        private int m_FrameCount;
 
         public UpdateRulesState(GameMode gameMode)
         {
@@ -27,12 +28,12 @@ namespace GameEngine.PSMR.Modes.States
         public override void Enter()
         {
             m_Performance = m_GameMode.PerformancePolicy;
-            m_FrameCount = 0;
+            m_Time = m_GameMode.ParentProcess.Time;
         }
 
         public override void Update()
         {
-            foreach (GameRule rule in m_GameMode.Rules.GetRulesInOrderForFrame(m_GameMode.UpdateScheduler, m_FrameCount))
+            foreach (GameRule rule in m_GameMode.Rules.GetRulesInOrderForFrame(m_GameMode.UpdateScheduler, m_Time.FrameCount))
             {
                 bool blockingException = false;
                 try
@@ -59,7 +60,6 @@ namespace GameEngine.PSMR.Modes.States
                         break;
                 }
             }
-            m_FrameCount++;
         }
 
         public override void Exit()
