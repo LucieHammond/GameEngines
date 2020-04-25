@@ -143,7 +143,7 @@ namespace GameEngine.PSMR.Modes
         {
             foreach (KeyValuePair<Type, GameRule> ruleInfo in Rules)
             {
-                ruleInfo.Value.OnQuit();
+                ruleInfo.Value.BaseQuit();
             }
         }
 

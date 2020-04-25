@@ -30,7 +30,7 @@ namespace GameEngine.PSMR.Rules
         /// </summary>
         /// <param name="pack">The rule pack</param>
         /// <exception cref="ArgumentException">Thrown is case one of the rules provokes a type collision with some previously added rules</exception>
-        public void AddRulesPack(IGameRulesPack pack)
+        public void AddRulePack(IGameRulePack pack)
         {
             foreach (GameRule rule in pack.GetRules())
             {

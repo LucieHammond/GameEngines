@@ -6,6 +6,11 @@
     public class SchedulePattern
     {
         /// <summary>
+        /// Unique shared reference to the default schedule pattern, planning events every frame
+        /// </summary>
+        public static SchedulePattern Default = new SchedulePattern();
+
+        /// <summary>
         /// Number of frames to count between two scheduled events.
         /// For example, 1 = update every frame, 2 = update one frame out of two, 0 = never update
         /// </summary>
@@ -33,7 +38,7 @@
 
         internal bool IsFrameIncluded(int frameCount)
         {
-            if (Frequency == 0)
+            if (frameCount < 0 || Frequency == 0)
                 return false;
 
             return frameCount % Frequency == Offset;

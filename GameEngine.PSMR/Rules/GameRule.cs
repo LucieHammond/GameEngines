@@ -64,6 +64,14 @@ namespace GameEngine.PSMR.Rules
         protected abstract void Unload();
 
         /// <summary>
+        /// The place where to define quick and synchronous termination operations for the rule. Will be called when the application is abruptly closed
+        /// </summary>
+        protected virtual void OnQuit()
+        {
+            Unload();
+        }
+
+        /// <summary>
         /// Call this method to attest that the rule has correctly been initialized. This mecanism allows asynchronous initialization
         /// </summary>
         protected void MarkInitialized()
@@ -126,9 +134,9 @@ namespace GameEngine.PSMR.Rules
             Unload();
         }
 
-        internal void OnQuit()
+        internal void BaseQuit()
         {
-            Unload();
+            OnQuit();
         }
     }
 }

@@ -35,6 +35,16 @@ namespace GameEngine.PSMR.Modes.States
                 m_GameMode.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameMode.Rules.ContainsKey(ruleType)).ToList();
                 m_GameMode.UpdateScheduler = m_Setup.GetUpdateScheduler().Where((scheduler) => m_GameMode.Rules.ContainsKey(scheduler.RuleType)).ToList();
 
+                if (m_GameMode.InitUnloadOrder.GroupBy((type) => type).Any((group) => group.Count() > 1))
+                {
+                    throw new Exception("InitUnloadOrder contains duplicated rules : each rule should be initialized and unloaded only once");
+                }
+
+                if (m_GameMode.UpdateScheduler.GroupBy((scheduler) => scheduler.RuleType).Any((group) => group.Count() > 1))
+                {
+                    throw new Exception("UpdateScheduler contains duplicated rules : rules are not supposed to be updated more than once per frame");
+                }
+
                 m_GameMode.GoToNextState();
             }
             catch (Exception)

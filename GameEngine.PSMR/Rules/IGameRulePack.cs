@@ -5,7 +5,7 @@ namespace GameEngine.PSMR.Rules
     /// <summary>
     /// Represent a group of GameRules that are linked to each other and therefore need to be added together in a process
     /// </summary>
-    public interface IGameRulesPack
+    public interface IGameRulePack
     {
         /// <summary>
         /// Create and return the group of linked game rules
