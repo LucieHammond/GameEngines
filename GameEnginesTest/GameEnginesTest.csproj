@@ -1,8 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -17,7 +16,14 @@
     <ProjectReference Include="..\GameEngine.Core\GameEngine.Core.csproj" />
     <ProjectReference Include="..\GameEngine.ECS\GameEngine.ECS.csproj" />
     <ProjectReference Include="..\GameEngine.FSM\GameEngine.FSM.csproj" />
-    <ProjectReference Include="..\GameEngine.PSMR\GameEngine.PSMR.csproj" />
+    <ProjectReference Include="..\GameEngine.PJR\GameEngine.PJR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="IntegrationTests\" />
+    <Folder Include="APITests\" />
+    <Folder Include="EndToEndTests\" />
+    <Folder Include="Tools\Mocks\" />
   </ItemGroup>
 
 </Project>

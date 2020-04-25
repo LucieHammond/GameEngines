@@ -1,4 +1,5 @@
-﻿using GameEngine.PSMR.Rules;
+﻿using GameEngine.PJR.Process;
+using GameEngine.PJR.Rules;
 using System;
 
 namespace GameEnginesTest.Tools.Dummy
@@ -14,6 +15,8 @@ namespace GameEnginesTest.Tools.Dummy
         public Action OnUnload;
         public Action OnUpdate;
         public Action OnOnQuit;
+
+        public GameProcess Process => m_Process;
 
         public DummyGameRule() : base()
         {
