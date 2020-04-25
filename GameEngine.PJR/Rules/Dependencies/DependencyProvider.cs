@@ -20,7 +20,7 @@ namespace GameEngine.PJR.Rules.Dependencies
             if (!interfaceType.IsInterface)
                 throw new ArgumentException($"Cannot add {interfaceType} as dependency because {interfaceType} is not an interface");
 
-            if (!dependency.GetType().IsAssignableFrom(interfaceType))
+            if (!interfaceType.IsAssignableFrom(dependency.GetType()))
                 throw new ArgumentException($"The class {dependency.GetType()} does not implement the interface {interfaceType} that it is supposed to provide");
 
             if (m_Dependencies.ContainsKey(interfaceType))

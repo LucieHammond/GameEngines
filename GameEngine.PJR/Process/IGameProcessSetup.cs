@@ -1,5 +1,4 @@
-﻿using GameEngine.PJR.Jobs;
-using GameEngine.PJR.Process.Modes;
+﻿using GameEngine.PJR.Process.Modes;
 using GameEngine.PJR.Process.Services;
 using System.Collections.Generic;
 

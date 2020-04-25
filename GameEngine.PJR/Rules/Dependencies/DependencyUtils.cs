@@ -30,7 +30,8 @@ namespace GameEngine.PJR.Rules.Dependencies
         {
             foreach (KeyValuePair<Type, GameRule> ruleInfo in rules)
             {
-                foreach (FieldInfo field in ruleInfo.Key.GetFields().Where(field => field.IsDefined(typeof(DependencyConsumerAttribute), false)))
+                foreach (FieldInfo field in ruleInfo.Key.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .Where(field => field.IsDefined(typeof(DependencyConsumerAttribute), true)))
                 {
                     DependencyConsumerAttribute consumerAtt = field.GetCustomAttribute<DependencyConsumerAttribute>();
 
@@ -51,7 +52,7 @@ namespace GameEngine.PJR.Rules.Dependencies
                             }
                             break;
                         case DependencyType.Config:
-                            if (!field.FieldType.IsAssignableFrom(typeof(IConfiguration)))
+                            if (!typeof(IConfiguration).IsAssignableFrom(field.FieldType))
                                 throw new InvalidCastException($"Cannot use config dependency with a field of type {field.FieldType}. The type should be IConfiguration");
 
                             if (configuration != null)

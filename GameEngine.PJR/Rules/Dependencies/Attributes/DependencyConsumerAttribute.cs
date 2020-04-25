@@ -3,11 +3,11 @@
 namespace GameEngine.PJR.Rules.Dependencies.Attributes
 {
     /// <summary>
-    /// An attribute to use on GameRule properties in order to make them reference other rules or services via customized interfaces
-    /// When used as a dependency consumer, a property must have an interface type so that its value can be found among dependency providers
-    /// The value of the property will be injected using reflexion 
+    /// An attribute to use on GameRule fields in order to make them reference other rules or services via customized interfaces
+    /// When used as a dependency consumer, a field must have an interface type so that its value can be found among dependency providers
+    /// The value of the field will be injected using reflexion 
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
     public class DependencyConsumerAttribute : Attribute
     {
         /// <summary>

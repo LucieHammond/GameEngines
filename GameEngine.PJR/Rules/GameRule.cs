@@ -12,7 +12,7 @@ namespace GameEngine.PJR.Rules
     public abstract class GameRule
     {
         [DependencyConsumer(DependencyType.Service, true)]
-        private IProcessAccessor ProcessAccessor { get; }
+        internal IProcessAccessor ProcessAccessor;
 
         /// <summary>
         /// Name of the rule, which correspond to its type formatted as string

@@ -23,7 +23,6 @@
     <Folder Include="IntegrationTests\" />
     <Folder Include="APITests\" />
     <Folder Include="EndToEndTests\" />
-    <Folder Include="Tools\Mocks\" />
   </ItemGroup>
 
 </Project>

@@ -32,7 +32,7 @@ namespace GameEngine.PJR.Jobs.States
             {
                 m_GameJob.ErrorPolicy = m_Setup.GetErrorPolicy();
                 m_GameJob.PerformancePolicy = m_Setup.GetPerformancePolicy();
-                
+
                 m_Setup.SetRules(ref m_GameJob.Rules);
                 if (m_GameJob.IsServiceJob)
                     (m_GameJob as IServiceSetup).CheckOnlyServices(m_GameJob.Rules);
