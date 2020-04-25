@@ -1,11 +1,11 @@
 ﻿using GameEngine.FSM.CustomFSM;
-using GameEnginesTest.Mocks;
-using GameEnginesTest.Utils;
+using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.FSM
+namespace GameEnginesTest.ComponentTests.FSM
 {
     /// <summary>
     /// Component tests for the class StackFSM
@@ -21,7 +21,7 @@ namespace GameEnginesTest.FSM
             // Example : (1) -> 1|(2) -> 1|2|(3) -> 1|2|3|(4) -> 1|2|(3) -> 1|(2) -> (1)
 
             // Create and start stack FSM with FirstState as initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             StackFSM<StatesEnumTest> stackFsm = new StackFSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
             stackFsm.Start();
             Assert.AreEqual(StatesEnumTest.FirstState, stackFsm.CurrentStateId);
@@ -56,7 +56,7 @@ namespace GameEnginesTest.FSM
             // Example : (1) -> 1|(2) -> 1 -> 1|(3) -> 1 -> 1|(4) -> 1
 
             // Create and start stack FSM with FirstState as initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             StackFSM<StatesEnumTest> stackFsm = new StackFSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
             stackFsm.Start();
             Assert.AreEqual(StatesEnumTest.FirstState, stackFsm.CurrentStateId);
@@ -88,7 +88,7 @@ namespace GameEnginesTest.FSM
         public void CanUseSameStateMultipleTimes()
         {
             // Create and start stack FSM with FirstState as initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             StackFSM<StatesEnumTest> stackFsm = new StackFSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
             stackFsm.Start();
 
@@ -109,7 +109,7 @@ namespace GameEnginesTest.FSM
         public void PopFailsWhenStackIsEmpty()
         {
             // Create and start stack FSM with FirstState as initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             StackFSM<StatesEnumTest> stackFsm = new StackFSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
             stackFsm.Start();
             Assert.AreEqual(StatesEnumTest.FirstState, stackFsm.CurrentStateId);

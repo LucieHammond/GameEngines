@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GameEngine.FSM.CustomFSM;
-using GameEnginesTest.Mocks;
 using System.Collections.Generic;
-using GameEnginesTest.Utils;
 using GameEngine.FSM;
 using System;
+using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Utils;
 
-namespace GameEnginesTest.FSM
+namespace GameEnginesTest.ComponentTests.FSM
 {
     /// <summary>
     /// Component tests for the class QueueFSM
@@ -21,11 +21,11 @@ namespace GameEnginesTest.FSM
             // If predefined path is an ordered list of all states -> use second simplified constructor
             List<FSMState<StatesEnumTest>> orderedStates = new List<FSMState<StatesEnumTest>>()
             {
-                new MockFSMState(StatesEnumTest.FirstState),
-                new MockFSMState(StatesEnumTest.FourthState),
-                new MockFSMState(StatesEnumTest.ThirdState),
-                new MockFSMState(StatesEnumTest.FifthState),
-                new MockFSMState(StatesEnumTest.SecondState)
+                new DummyFSMState(StatesEnumTest.FirstState),
+                new DummyFSMState(StatesEnumTest.FourthState),
+                new DummyFSMState(StatesEnumTest.ThirdState),
+                new DummyFSMState(StatesEnumTest.FifthState),
+                new DummyFSMState(StatesEnumTest.SecondState)
             };
             QueueFSM<StatesEnumTest> simpleQueueFsm = new QueueFSM<StatesEnumTest>("TestFSM", orderedStates);
             simpleQueueFsm.Start();
@@ -46,7 +46,7 @@ namespace GameEnginesTest.FSM
             simpleQueueFsm.Stop();
 
             // If predefined path is custom -> use first constructor
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
             order.Enqueue(StatesEnumTest.FirstState);
             order.Enqueue(StatesEnumTest.ThirdState);
@@ -76,7 +76,7 @@ namespace GameEnginesTest.FSM
         public void ManageMovesOnLateDefinedPath()
         {
             // Use first constructor to create a queueFsm with only an initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
             order.Enqueue(StatesEnumTest.FirstState);
             QueueFSM<StatesEnumTest> queueFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
@@ -112,7 +112,7 @@ namespace GameEnginesTest.FSM
         public void CanUseSameStateMultipleTimes()
         {
             // Create and start queue FSM with SecondState as initial state
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
             order.Enqueue(StatesEnumTest.SecondState);
             QueueFSM<StatesEnumTest> stackFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
@@ -133,7 +133,7 @@ namespace GameEnginesTest.FSM
         [TestMethod]
         public void DequeueFailsWhenQueueIsEmpty()
         {
-            List<MockFSMState> states = FSMUtils.GetMockStateCollection();
+            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
             Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
 
             // Cannot create queue FSM with no initial state to dequeue -> throw InvalidOperationException
