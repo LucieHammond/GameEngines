@@ -1,9 +1,9 @@
 ﻿using GameEngine.PJR.Rules.Dependencies.Attributes;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Config = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Rules.Dependencies
 {
@@ -26,7 +26,7 @@ namespace GameEngine.PJR.Rules.Dependencies
             return dependencyProvider;
         }
 
-        internal static void InjectDependencies(RulesDictionary rules, DependencyProvider servicesProvider, DependencyProvider rulesProvider, IConfiguration configuration)
+        internal static void InjectDependencies(RulesDictionary rules, DependencyProvider servicesProvider, DependencyProvider rulesProvider)
         {
             foreach (KeyValuePair<Type, GameRule> ruleInfo in rules)
             {
@@ -35,35 +35,23 @@ namespace GameEngine.PJR.Rules.Dependencies
                 {
                     DependencyConsumerAttribute consumerAtt = field.GetCustomAttribute<DependencyConsumerAttribute>();
 
+                    DependencyProvider provider;
                     switch (consumerAtt.Type)
                     {
                         case DependencyType.Service:
-                            if (servicesProvider != null && servicesProvider.TryGet(field.FieldType, out object service))
-                            {
-                                field.SetValue(ruleInfo.Value, service);
-                                continue;
-                            }
+                            provider = servicesProvider;
                             break;
                         case DependencyType.Rule:
-                            if (rulesProvider != null && rulesProvider.TryGet(field.FieldType, out object rule))
-                            {
-                                field.SetValue(ruleInfo.Value, rule);
-                                continue;
-                            }
-                            break;
-                        case DependencyType.Config:
-                            if (!typeof(IConfiguration).IsAssignableFrom(field.FieldType))
-                                throw new InvalidCastException($"Cannot use config dependency with a field of type {field.FieldType}. The type should be IConfiguration");
-
-                            if (configuration != null)
-                            {
-                                field.SetValue(ruleInfo.Value, configuration);
-                                continue;
-                            }
+                        default:
+                            provider = rulesProvider;
                             break;
                     }
 
-                    if (consumerAtt.Required)
+                    if (provider != null && provider.TryGet(field.FieldType, out object dependency))
+                    {
+                        field.SetValue(ruleInfo.Value, dependency);
+                    }
+                    else if (consumerAtt.Required)
                     {
                         throw new DependencyException(DependencyType.Service, ruleInfo.Key, field.FieldType);
                     }

@@ -20,7 +20,7 @@ namespace GameEngine.PJR.Rules
         {
             Type ruleType = rule.GetType();
             if (this.ContainsKey(ruleType))
-                throw new ArgumentException($"Rules dictionary already contains a rule of type {ruleType}");
+                throw new ArgumentException($"Rules dictionary already contains a rule of type {ruleType.Name}");
 
             this.Add(ruleType, rule);
         }

@@ -1,5 +1,7 @@
 ﻿using GameEngine.PJR.Process;
 using GameEngine.PJR.Rules;
+using GameEngine.PJR.Rules.Dependencies;
+using GameEngine.PJR.Rules.Dependencies.Attributes;
 using System;
 
 namespace GameEnginesTest.Tools.Dummy
@@ -67,11 +69,22 @@ namespace GameEnginesTest.Tools.Dummy
         }
     }
 
-    public class DummyGameRuleBis : DummyGameRule
+    public interface IDummyGameRuleBis
+    {
+
+    }
+
+    [DependencyProvider(typeof(IDummyGameRuleBis))]
+    public class DummyGameRuleBis : DummyGameRule, IDummyGameRuleBis
     {
     }
 
     public class DummyGameRuleTer : DummyGameRule
     {
+        [DependencyConsumer(DependencyType.Service, true)]
+        public IDummyGameService DummyServiceReference;
+
+        [DependencyConsumer(DependencyType.Rule, false)]
+        public IDummyGameRuleBis DummyRuleBisReference;
     }
 }

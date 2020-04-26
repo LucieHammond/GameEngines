@@ -2,9 +2,9 @@
 using GameEngine.PJR.Process.Modes;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules.Dependencies;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using Configuration = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Process
 {
@@ -42,7 +42,7 @@ namespace GameEngine.PJR.Process
 
         private IServiceSetup m_ServiceSetup;
         private IGameModeSetup m_NextGameModeSetup;
-        private IConfiguration m_NextGameModeConfig;
+        private Configuration m_NextGameModeConfig;
         private Queue<IGameModeSetup> m_GameModesToCome;
         private bool m_IsPaused;
         private bool m_IsStopping;
@@ -176,7 +176,7 @@ namespace GameEngine.PJR.Process
         /// </summary>
         /// <param name="setup">setup of the new GameMode to load</param>
         /// <param name="configuration">initial configuration of the GameMode, used to transmit information between GameModes at runtime</param>
-        public void SwitchToGameMode(IGameModeSetup setup, IConfiguration configuration = null)
+        public void SwitchToGameMode(IGameModeSetup setup, Configuration configuration = null)
         {
             if (!m_IsStopping)
             {
@@ -193,7 +193,7 @@ namespace GameEngine.PJR.Process
         /// </summary>
         /// <param name="configuration">initial configuration of the GameMode, used to transmit information between GameModes at runtime</param>
         /// <returns>If there was a next GameMode to switch to</returns>
-        public bool SwitchToNextGameMode(IConfiguration configuration = null)
+        public bool SwitchToNextGameMode(Configuration configuration = null)
         {
             if (m_GameModesToCome.TryDequeue(out IGameModeSetup setup))
             {

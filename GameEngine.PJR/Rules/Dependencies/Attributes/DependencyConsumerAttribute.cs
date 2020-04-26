@@ -22,7 +22,7 @@ namespace GameEngine.PJR.Rules.Dependencies.Attributes
         }
 
         /// <summary>
-        /// Type of the dependency, specifying where to find the provider (among Services, Rules or Config)
+        /// Type of the dependency, specifying where to find the provider (among Services or Rules)
         /// </summary>
         public DependencyType Type;
 

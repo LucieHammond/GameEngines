@@ -8,7 +8,7 @@ namespace GameEngine.PJR.Rules.Dependencies
     public class DependencyException : ApplicationException
     {
         /// <summary>
-        /// The type of the dependency (Rule, Service or Config)
+        /// The type of the dependency (Rule or Service)
         /// </summary>
         public DependencyType DependencyType;
 
@@ -29,7 +29,7 @@ namespace GameEngine.PJR.Rules.Dependencies
         /// <param name="dependentRule">Type of the GameRule that requires the dependency</param>
         /// <param name="missingInterface">Type of the interface defining the dependency contract</param>
         public DependencyException(DependencyType dependencyType, Type dependentRule, Type missingInterface) :
-            base($"Dependency injection failed for rule {dependentRule}. Cannot find required interface {missingInterface} in {dependencyType} providers")
+            base($"Dependency injection failed for rule {dependentRule.Name}. Cannot find required interface {missingInterface.Name} in {dependencyType} providers")
         {
             DependencyType = dependencyType;
             DependentRule = dependentRule;

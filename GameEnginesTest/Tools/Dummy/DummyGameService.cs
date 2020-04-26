@@ -1,8 +1,10 @@
 ﻿using GameEngine.PJR.Process.Services;
+using GameEngine.PJR.Rules.Dependencies.Attributes;
 
 namespace GameEnginesTest.Tools.Dummy
 {
-    public class DummyGameService : GameService
+    [DependencyProvider(typeof(IDummyGameService))]
+    public class DummyGameService : GameService, IDummyGameService
     {
         protected override void Initialize()
         {
@@ -18,5 +20,10 @@ namespace GameEnginesTest.Tools.Dummy
         {
             MarkUnloaded();
         }
+    }
+
+    public interface IDummyGameService
+    {
+
     }
 }

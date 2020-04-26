@@ -6,9 +6,9 @@ using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules;
 using GameEngine.PJR.Rules.Scheduling;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using Configuration = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Jobs
 {
@@ -52,8 +52,12 @@ namespace GameEngine.PJR.Jobs
         /// </summary>
         public float LoadingProgress { get; internal set; }
 
+        /// <summary>
+        /// The configuration of the GameJob, setup at construction, used to pass runtime information
+        /// </summary>
+        public Configuration Configuration { get; private set; }
+
         internal bool IsServiceJob;
-        internal IConfiguration InitialConfiguration;
         internal GameProcess ParentProcess;
 
         internal RulesDictionary Rules;
@@ -66,11 +70,11 @@ namespace GameEngine.PJR.Jobs
         private QueueFSM<GameJobState> m_StateMachine;
         private bool m_IsPaused;
 
-        internal GameJob(IGameJobSetup setup, IConfiguration initialConfiguration, GameProcess parentProcess)
+        internal GameJob(IGameJobSetup setup, Configuration configuration, GameProcess parentProcess)
         {
             Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Services" : "Mode");
             IsServiceJob = setup is IServiceSetup;
-            InitialConfiguration = initialConfiguration;
+            Configuration = configuration;
             ParentProcess = parentProcess;
             Rules = new RulesDictionary();
             m_IsPaused = false;

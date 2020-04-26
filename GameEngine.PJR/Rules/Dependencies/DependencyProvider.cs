@@ -18,13 +18,13 @@ namespace GameEngine.PJR.Rules.Dependencies
         internal void Add(Type interfaceType, object dependency)
         {
             if (!interfaceType.IsInterface)
-                throw new ArgumentException($"Cannot add {interfaceType} as dependency because {interfaceType} is not an interface");
+                throw new ArgumentException($"Cannot add {interfaceType.Name} as dependency because {interfaceType.Name} is not an interface");
 
             if (!interfaceType.IsAssignableFrom(dependency.GetType()))
-                throw new ArgumentException($"The class {dependency.GetType()} does not implement the interface {interfaceType} that it is supposed to provide");
+                throw new ArgumentException($"The class {dependency.GetType().Name} does not implement the interface {interfaceType.Name} that it is supposed to provide");
 
             if (m_Dependencies.ContainsKey(interfaceType))
-                throw new InvalidOperationException($"Dependency provider already contains a reference for interface {interfaceType}");
+                throw new InvalidOperationException($"Dependency provider already contains a reference for interface {interfaceType.Name}");
 
             m_Dependencies.Add(interfaceType, dependency);
         }
@@ -32,7 +32,7 @@ namespace GameEngine.PJR.Rules.Dependencies
         internal bool TryGet(Type interfaceType, out object dependency)
         {
             if (!interfaceType.IsInterface)
-                throw new ArgumentException($"Cannot inject dependency for type {interfaceType} because {interfaceType} is not an interface");
+                throw new ArgumentException($"Cannot inject dependency for type {interfaceType.Name} because {interfaceType.Name} is not an interface");
 
             return m_Dependencies.TryGetValue(interfaceType, out dependency);
         }

@@ -124,7 +124,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             serviceProvider.Add(typeof(IProcessAccessor), new ProcessService(process));
             RulesDictionary rulesToInject = new RulesDictionary();
             rulesToInject.AddRule(rule);
-            DependencyUtils.InjectDependencies(rulesToInject, serviceProvider, null, null);
+            DependencyUtils.InjectDependencies(rulesToInject, serviceProvider, null);
 
             // Trying to access process after dependency injection -> process is correctly returned
             Assert.AreEqual(process, rule.Process);

@@ -13,11 +13,6 @@
         /// <summary>
         /// The dependency provider is a GameService that is part of the ServiceMode executed by the parent GameProcess
         /// </summary>
-        Service,
-
-        /// <summary>
-        /// The injected value is a IConfiguration object containing context information passed to the current GameMode at creation
-        /// </summary>
-        Config
+        Service
     }
 }

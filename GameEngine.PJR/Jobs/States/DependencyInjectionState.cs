@@ -50,7 +50,7 @@ namespace GameEngine.PJR.Jobs.States
 
                 DependencyProvider serviceProvider = m_GameJob.ParentProcess.ServiceProvider;
                 DependencyProvider ruleProvider = m_GameJob.IsServiceJob ? null : m_InternalProvider;
-                DependencyUtils.InjectDependencies(m_GameJob.Rules, serviceProvider, ruleProvider, m_GameJob.InitialConfiguration);
+                DependencyUtils.InjectDependencies(m_GameJob.Rules, serviceProvider, ruleProvider);
 
                 m_GameJob.GoToNextState();
             }

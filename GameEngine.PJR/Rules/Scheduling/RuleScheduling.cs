@@ -36,7 +36,7 @@ namespace GameEngine.PJR.Rules.Scheduling
         public RuleScheduling(Type ruleType, SchedulePattern pattern)
         {
             if (!ruleType.IsSubclassOf(typeof(GameRule)))
-                throw new ArgumentException($"{ruleType} is not a type of GameRule", "ruleType");
+                throw new ArgumentException($"{ruleType.Name} is not a type of GameRule", "ruleType");
 
             RuleType = ruleType;
             Pattern = pattern;
