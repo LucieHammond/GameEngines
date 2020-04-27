@@ -103,7 +103,19 @@ namespace GameEnginesTest.ComponentTests.FSM
             queueFsm.DequeueState(true);
             Assert.AreEqual(StatesEnumTest.SecondState, queueFsm.CurrentStateId);
 
-            // Check queue is still empty and stop fsm
+            // Enqueue new states and clear queue to redefine the states to visit
+            queueFsm.EnqueueState(StatesEnumTest.FirstState);
+            queueFsm.EnqueueState(StatesEnumTest.SecondState);
+            queueFsm.EnqueueState(StatesEnumTest.ThirdState);
+            queueFsm.DequeueState(true);
+            Assert.AreEqual(StatesEnumTest.FirstState, queueFsm.CurrentStateId);
+
+            queueFsm.ClearStateQueue();
+            queueFsm.EnqueueState(StatesEnumTest.FourthState);
+            queueFsm.DequeueState(true);
+            Assert.AreEqual(StatesEnumTest.FourthState, queueFsm.CurrentStateId);
+
+            // Check queue is empty and stop fsm
             Assert.IsFalse(queueFsm.TryDequeueState(out StatesEnumTest _));
             queueFsm.Stop();
         }

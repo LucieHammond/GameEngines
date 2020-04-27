@@ -53,7 +53,7 @@ namespace GameEnginesTest.ComponentTests.FSM
         [TestMethod]
         public void ManageHorizontalStateTransitions()
         {
-            // Example : (1) -> 1|(2) -> 1 -> 1|(3) -> 1 -> 1|(4) -> 1
+            // Example : (1) -> 1|(2) -> 1 -> 1|(3) -> 1 -> 1|(4) -> (clear) (4)
 
             // Create and start stack FSM with FirstState as initial state
             List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
@@ -74,10 +74,10 @@ namespace GameEnginesTest.ComponentTests.FSM
 
             stackFsm.PushState(StatesEnumTest.FourthState, true);
             Assert.AreEqual(StatesEnumTest.FourthState, stackFsm.CurrentStateId);
-            stackFsm.PopState(true);
-            Assert.AreEqual(StatesEnumTest.FirstState, stackFsm.CurrentStateId);
 
-            // Check the stack is still empty (cannot pop more)
+            // Clear stack and check the stack is empty (cannot pop more)
+            stackFsm.ClearStateStack();
+            Assert.AreEqual(StatesEnumTest.FourthState, stackFsm.CurrentStateId);
             Assert.IsFalse(stackFsm.TryPopState(out StatesEnumTest _));
 
             // Stop FSM

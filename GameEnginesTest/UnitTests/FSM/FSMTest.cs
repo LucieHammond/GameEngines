@@ -207,14 +207,14 @@ namespace GameEnginesTest.UnitTests.FSM
             fsm.SetState(StatesEnumTest.SecondState);
             fsm.Update();
             Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(1, secondState.UpdateCallCount);
+            Assert.AreEqual(0, secondState.UpdateCallCount);
             Assert.AreEqual(1, secondState.ExitCallCount);
 
             // IgnoreIfCurrentState = true -> nothing happens when trying to set same state
             fsm.SetState(StatesEnumTest.SecondState, false, true);
             fsm.Update();
             Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(2, secondState.UpdateCallCount);
+            Assert.AreEqual(1, secondState.UpdateCallCount);
             Assert.AreEqual(1, secondState.ExitCallCount);
 
             // Simultaneous change with same priority (default) -> throws InvalidOperationException
@@ -230,24 +230,29 @@ namespace GameEnginesTest.UnitTests.FSM
             // Invalid state -> Throws exception
             Assert.ThrowsException<ArgumentException>(() => fsm.SetState(StatesEnumTest.FifthState));
 
-            // SetState can be called from the update of FSM states
-            thirdState.OnUpdate += () => fsm.SetState(StatesEnumTest.FirstState);
+            // SetState can be called from the Enter, Update or Exit of FSM states
+            thirdState.OnUpdate += () => fsm.SetState(StatesEnumTest.SecondState);
+            thirdState.OnExit += () => fsm.SetState(StatesEnumTest.ThirdState, priority: 20);
+            thirdState.OnEnter += () => fsm.SetState(StatesEnumTest.FirstState);
+            fsm.Update();
+            Assert.AreEqual(thirdState, fsm.CurrentState);
+            thirdState.OnExit = null;
             fsm.Update();
             Assert.AreEqual(firstState, fsm.CurrentState);
 
             // Check Enter, Update and Exit methods have been called the right number of times
-            // First -> Third -> Second -> Second -> Third -> First
+            // First -> Third -> Second -> Second -> Third -> Tird -> First
             Assert.AreEqual(2, firstState.EnterCallCount);
-            Assert.AreEqual(1, firstState.UpdateCallCount);
+            Assert.AreEqual(0, firstState.UpdateCallCount);
             Assert.AreEqual(1, firstState.ExitCallCount);
 
             Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(3, secondState.UpdateCallCount);
+            Assert.AreEqual(1, secondState.UpdateCallCount);
             Assert.AreEqual(2, secondState.ExitCallCount);
 
-            Assert.AreEqual(2, thirdState.EnterCallCount);
+            Assert.AreEqual(3, thirdState.EnterCallCount);
             Assert.AreEqual(1, thirdState.UpdateCallCount);
-            Assert.AreEqual(2, thirdState.ExitCallCount);
+            Assert.AreEqual(3, thirdState.ExitCallCount);
         }
 
         [TestMethod]
