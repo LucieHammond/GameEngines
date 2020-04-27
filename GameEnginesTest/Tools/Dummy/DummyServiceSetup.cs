@@ -11,13 +11,30 @@ namespace GameEnginesTest.Tools.Dummy
     {
         public string Name => "Test";
 
+        public List<GameService> CustomServices;
+        public List<Type> CustomInitUnloadOrder;
+        public List<RuleScheduling> CustomUpdateScheduler;
+        public ErrorPolicy CustomErrorPolicy;
+        public PerformancePolicy CustomPerformancePolicy;
+
         public void SetRules(ref RulesDictionary rules)
         {
-            rules.AddRule(new DummyGameService());
+            if (CustomServices != null)
+            {
+                foreach (GameService service in CustomServices)
+                    rules.AddRule(service);
+            }
+            else
+            {
+                rules.AddRule(new DummyGameService());
+            }
         }
 
         public List<Type> GetInitUnloadOrder()
         {
+            if (CustomInitUnloadOrder != null)
+                return CustomInitUnloadOrder;
+
             return new List<Type>()
             {
                 typeof(DummyGameService)
@@ -26,6 +43,9 @@ namespace GameEnginesTest.Tools.Dummy
 
         public List<RuleScheduling> GetUpdateScheduler()
         {
+            if (CustomUpdateScheduler != null)
+                return CustomUpdateScheduler;
+
             return new List<RuleScheduling>()
             {
                 new RuleScheduling(typeof(DummyGameService), SchedulePattern.Default)
@@ -34,10 +54,13 @@ namespace GameEnginesTest.Tools.Dummy
 
         public ErrorPolicy GetErrorPolicy()
         {
+            if (CustomErrorPolicy != null)
+                return CustomErrorPolicy;
+
             return new ErrorPolicy()
             {
                 IgnoreExceptions = false,
-                ReactionOnError = OnErrorBehaviour.PauseAll,
+                ReactionOnError = OnErrorBehaviour.PauseJob,
                 SkipUnloadIfError = true,
                 FallbackMode = null
             };
@@ -45,6 +68,9 @@ namespace GameEnginesTest.Tools.Dummy
 
         public PerformancePolicy GetPerformancePolicy()
         {
+            if (CustomPerformancePolicy != null)
+                return CustomPerformancePolicy;
+
             return new PerformancePolicy()
             {
                 MaxFrameDuration = 16,

@@ -223,7 +223,7 @@ namespace GameEngine.PJR.Process
 
         private void CheckGameModeValidity(IGameModeSetup setup)
         {
-            if (setup.RequiredServiceSetup != m_ServiceSetup.GetType())
+            if (setup != null && setup.RequiredServiceSetup != m_ServiceSetup.GetType())
                 throw new ArgumentException($"Cannot load GameMode {setup.Name} because it requires a service setup {setup.RequiredServiceSetup} " +
                     $"that is different from the current one ({m_ServiceSetup.GetType()})", "setup.RequiredServiceSetup");
         }

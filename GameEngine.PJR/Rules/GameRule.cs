@@ -76,7 +76,8 @@ namespace GameEngine.PJR.Rules
         /// </summary>
         protected virtual void OnQuit()
         {
-            Unload();
+            if (State == GameRuleState.Initialized)
+                Unload();
         }
 
         /// <summary>

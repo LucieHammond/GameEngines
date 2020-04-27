@@ -72,11 +72,13 @@ namespace GameEngine.PJR.Jobs
 
         internal GameJob(IGameJobSetup setup, Configuration configuration, GameProcess parentProcess)
         {
-            Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Services" : "Mode");
             IsServiceJob = setup is IServiceSetup;
+            Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Services" : "Mode");
             Configuration = configuration;
             ParentProcess = parentProcess;
             Rules = new RulesDictionary();
+            if (IsServiceJob)
+                Rules.AddRule(new ProcessService(parentProcess));
             m_IsPaused = false;
 
             m_StateMachine = new QueueFSM<GameJobState>($"{Name}FSM", new List<FSMState<GameJobState>>()
@@ -128,10 +130,11 @@ namespace GameEngine.PJR.Jobs
             if (State == GameJobState.UnloadRules || State == GameJobState.End)
                 return;
 
-            while (m_StateMachine.TryDequeueState(out GameJobState state, immediate: true) && state != GameJobState.UnloadRules) ;
+            byte priority = 100;
+            while (m_StateMachine.TryDequeueState(out GameJobState state, priority: priority++) && state != GameJobState.UnloadRules);
 
             if (State == GameJobState.Setup || State == GameJobState.DependencyInjection)
-                m_StateMachine.DequeueState(immediate: true);
+                m_StateMachine.DequeueState(priority: priority++);
         }
 
         internal void Stop()
@@ -149,6 +152,7 @@ namespace GameEngine.PJR.Jobs
             {
                 ruleInfo.Value.BaseQuit();
             }
+            m_StateMachine.Stop();
         }
 
         internal void GoToNextState()
