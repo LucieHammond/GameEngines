@@ -109,7 +109,7 @@ namespace GameEngine.PJR.Rules
         /// </summary>
         protected void MarkError()
         {
-            if (State == GameRuleState.Initializing || State == GameRuleState.Unloading)
+            if (State != GameRuleState.Initialized)
                 State = GameRuleState.Unloaded;
             ErrorDetected = true;
         }

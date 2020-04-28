@@ -45,26 +45,26 @@ namespace GameEnginesTest.Tools.Dummy
 
         protected override void Initialize()
         {
-            OnInitialize?.Invoke();
             InitializeCallCount++;
+            OnInitialize?.Invoke();
         }
 
         protected override void Update()
         {
-            OnUpdate?.Invoke();
             UpdateCallCount++;
+            OnUpdate?.Invoke();
         }
 
         protected override void Unload()
         {
-            OnUnload?.Invoke();
             UnloadCallCount++;
+            OnUnload?.Invoke();
         }
 
         protected override void OnQuit()
         {
-            OnOnQuit?.Invoke();
             OnQuitCallCount++;
+            OnOnQuit?.Invoke();
             base.OnQuit();
         }
     }

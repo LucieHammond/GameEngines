@@ -56,10 +56,7 @@ namespace GameEngine.PJR.Jobs.States
             }
             catch (Exception)
             {
-                if (!m_GameJob.ErrorPolicy.IgnoreExceptions)
-                {
-                    m_GameJob.OnError();
-                }
+                m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad);
             }
 
             m_UpdateTime.Stop();

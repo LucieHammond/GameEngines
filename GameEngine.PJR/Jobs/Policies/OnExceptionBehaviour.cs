@@ -3,7 +3,7 @@
     /// <summary>
     /// All possible kind of actions that can be taken when an error is detected
     /// </summary>
-    public enum OnErrorBehaviour
+    public enum OnExceptionBehaviour
     {
         /// <summary>
         /// Nothing is done, the process continues as if nothing ever happened

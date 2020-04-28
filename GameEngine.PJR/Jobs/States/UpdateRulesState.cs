@@ -35,7 +35,6 @@ namespace GameEngine.PJR.Jobs.States
         {
             foreach (GameRule rule in m_GameJob.Rules.GetRulesInOrderForFrame(m_GameJob.UpdateScheduler, m_Time.FrameCount))
             {
-                bool blockingException = false;
                 try
                 {
                     m_RuleUpdateTime.Restart();
@@ -44,19 +43,19 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 catch (Exception)
                 {
-                    if (!m_GameJob.ErrorPolicy.IgnoreExceptions)
-                        blockingException = true;
+                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUpdate))
+                        break;
                 }
 
-                if (m_Performance.CheckStallingRules && m_RuleUpdateTime.ElapsedMilliseconds >= m_Performance.UpdateStallingTimeout)
+                if (rule.ErrorDetected)
+                {
+                    m_GameJob.AskUnload();
+                    break;
+                }
+                else if (m_Performance.CheckStallingRules && m_RuleUpdateTime.ElapsedMilliseconds >= m_Performance.UpdateStallingTimeout)
                 {
                     Exception e = new TimeoutException($"The update of rule {rule.Name} has taken more more than {m_Performance.UpdateStallingTimeout}ms to execute");
-                    blockingException = true;
-                }
-
-                if (blockingException || rule.ErrorDetected)
-                {
-                    if (m_GameJob.OnError())
+                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUpdate))
                         break;
                 }
             }

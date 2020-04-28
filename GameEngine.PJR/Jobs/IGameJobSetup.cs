@@ -36,10 +36,10 @@ namespace GameEngine.PJR.Jobs
         List<RuleScheduling> GetUpdateScheduler();
 
         /// <summary>
-        /// Define a set of configurations concerning error handling in the GameJob
+        /// Define a set of configurations concerning exception handling in the GameJob
         /// </summary>
-        /// <returns>An ErrorPolicy object</returns>
-        ErrorPolicy GetErrorPolicy();
+        /// <returns>An ExceptionPolicy object</returns>
+        ExceptionPolicy GetExceptionPolicy();
 
         /// <summary>
         /// Define a set of configurations concerning performance management in the GameJob

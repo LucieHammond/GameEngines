@@ -46,7 +46,6 @@ namespace GameEngine.PJR.Jobs.States
             m_UpdateTime.Restart();
             do
             {
-                bool blockingException = false;
                 if (m_RulesToInitEnumerator.Current.State == GameRuleState.Unused)
                 {
                     try
@@ -56,12 +55,17 @@ namespace GameEngine.PJR.Jobs.States
                     }
                     catch (Exception)
                     {
-                        if (!m_GameJob.ErrorPolicy.IgnoreExceptions)
-                            blockingException = true;
+                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
+                            break;
                     }
                 }
 
-                if (m_RulesToInitEnumerator.Current.State == GameRuleState.Initialized)
+                if (m_RulesToInitEnumerator.Current.ErrorDetected)
+                {
+                    m_GameJob.AskUnload();
+                    break;
+                }
+                else if (m_RulesToInitEnumerator.Current.State == GameRuleState.Initialized)
                 {
                     m_RuleInitTime.Stop();
                     m_NbRulesInitialized++;
@@ -76,14 +80,11 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleInitTime.ElapsedMilliseconds >= m_Performance.InitStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"The initialization of rule {m_RulesToInitEnumerator.Current.Name} has been stalling for more than {m_Performance.InitStallingTimeout}ms");
-                    blockingException = true;
+                    Exception e = new TimeoutException($"The initialization of rule {m_RulesToInitEnumerator.Current.Name} " +
+                        $"has been stalling for more than {m_Performance.InitStallingTimeout}ms");
                     m_RuleInitTime.Restart();
-                }
-
-                if (blockingException || m_RulesToInitEnumerator.Current.ErrorDetected)
-                {
-                    if (m_GameJob.OnError())
+                    
+                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
                         break;
                 }
             }

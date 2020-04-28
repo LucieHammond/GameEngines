@@ -1,4 +1,5 @@
 ﻿using GameEngine.FSM;
+using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process.Services;
 using System;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace GameEngine.PJR.Jobs.States
         {
             try
             {
-                m_GameJob.ErrorPolicy = m_Setup.GetErrorPolicy();
+                m_GameJob.ExceptionPolicy = m_Setup.GetExceptionPolicy();
                 m_GameJob.PerformancePolicy = m_Setup.GetPerformancePolicy();
 
                 m_Setup.SetRules(ref m_GameJob.Rules);
@@ -54,10 +55,10 @@ namespace GameEngine.PJR.Jobs.States
             }
             catch (Exception)
             {
-                if (m_GameJob.ErrorPolicy == null || !m_GameJob.ErrorPolicy.IgnoreExceptions)
-                {
-                    m_GameJob.OnError();
-                }
+                if (m_GameJob.ExceptionPolicy == null)
+                    m_GameJob.OnException(OnExceptionBehaviour.UnloadJob);
+                else
+                    m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad);
             }
         }
 

@@ -64,7 +64,7 @@ namespace GameEngine.PJR.Jobs
         internal List<Type> InitUnloadOrder;
         internal List<RuleScheduling> UpdateScheduler;
 
-        internal ErrorPolicy ErrorPolicy;
+        internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
 
         private QueueFSM<GameJobState> m_StateMachine;
@@ -150,7 +150,14 @@ namespace GameEngine.PJR.Jobs
         {
             foreach (KeyValuePair<Type, GameRule> ruleInfo in Rules)
             {
-                ruleInfo.Value.BaseQuit();
+                try
+                {
+                    ruleInfo.Value.BaseQuit();
+                }
+                catch(Exception)
+                {
+
+                }
             }
             m_StateMachine.Stop();
         }
@@ -160,36 +167,41 @@ namespace GameEngine.PJR.Jobs
             m_StateMachine.DequeueState();
         }
 
-        internal bool OnError()
+        internal void AskUnload()
         {
-            switch (ErrorPolicy.ReactionOnError)
+            if (IsServiceJob)
+                ParentProcess.Stop();
+            else
             {
-                case OnErrorBehaviour.Continue:
+                try
+                {
+                    ParentProcess.SwitchToGameMode(ExceptionPolicy.FallbackMode);
+                }
+                catch (Exception)
+                {
+                    ParentProcess.SwitchToGameMode(null);
+                }
+            }
+        }
+
+        internal bool OnException(OnExceptionBehaviour behaviour)
+        {
+            switch (behaviour)
+            {
+                case OnExceptionBehaviour.Continue:
                     return false;
-                case OnErrorBehaviour.SkipFrame:
+                case OnExceptionBehaviour.SkipFrame:
                     return true;
-                case OnErrorBehaviour.PauseJob:
+                case OnExceptionBehaviour.PauseJob:
                     Pause();
                     return true;
-                case OnErrorBehaviour.UnloadJob:
-                    if (IsServiceJob)
-                        ParentProcess.Stop();
-                    else
-                    {
-                        try
-                        {
-                            ParentProcess.SwitchToGameMode(ErrorPolicy.FallbackMode);
-                        }
-                        catch (Exception)
-                        {
-                            ParentProcess.SwitchToGameMode(null);
-                        }
-                    }
+                case OnExceptionBehaviour.UnloadJob:
+                    AskUnload();
                     return true;
-                case OnErrorBehaviour.PauseAll:
+                case OnExceptionBehaviour.PauseAll:
                     ParentProcess.Pause();
                     return true;
-                case OnErrorBehaviour.StopAll:
+                case OnExceptionBehaviour.StopAll:
                     ParentProcess.Stop();
                     return true;
                 default:

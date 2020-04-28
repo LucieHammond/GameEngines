@@ -42,8 +42,6 @@ namespace GameEngine.PJR.Jobs.States
             m_UpdateTime.Restart();
             do
             {
-                bool blockingException = false;
-
                 if (m_RulesToUnloadEnumerator.Current.State == GameRuleState.Initialized)
                 {
                     try
@@ -53,8 +51,9 @@ namespace GameEngine.PJR.Jobs.States
                     }
                     catch (Exception)
                     {
-                        if (!m_GameJob.ErrorPolicy.IgnoreExceptions)
-                            blockingException = true;
+                        m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
+                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
+                            break;
                     }
                 }
 
@@ -74,18 +73,11 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} has been stalling for more than {m_Performance.UnloadStallingTimeout}ms");
-                    blockingException = true;
+                    Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} " +
+                        $"has been stalling for more than {m_Performance.UnloadStallingTimeout}ms");
                     m_RuleUnloadTime.Restart();
-                }
-
-                if (blockingException || m_RulesToUnloadEnumerator.Current.ErrorDetected)
-                {
-                    if (m_GameJob.ErrorPolicy.SkipUnloadIfError)
-                    {
-                        m_SkipCurrrentRule = true;
-                    }
-                    if (m_GameJob.OnError())
+                    m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
+                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
                         break;
                 }
             }

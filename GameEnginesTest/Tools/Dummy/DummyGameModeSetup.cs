@@ -13,10 +13,10 @@ namespace GameEnginesTest.Tools.Dummy
 
         public Type RequiredServiceSetup => typeof(DummyServiceSetup);
 
-        public List<GameRule> CustomRules;
+        public IEnumerable<GameRule> CustomRules;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
-        public ErrorPolicy CustomErrorPolicy;
+        public ExceptionPolicy CustomExceptionPolicy;
         public PerformancePolicy CustomPerformancePolicy;
 
         public void SetRules(ref RulesDictionary rules)
@@ -58,16 +58,17 @@ namespace GameEnginesTest.Tools.Dummy
             };
         }
 
-        public ErrorPolicy GetErrorPolicy()
+        public ExceptionPolicy GetExceptionPolicy()
         {
-            if (CustomErrorPolicy != null)
-                return CustomErrorPolicy;
+            if (CustomExceptionPolicy != null)
+                return CustomExceptionPolicy;
 
-            return new ErrorPolicy()
+            return new ExceptionPolicy()
             {
-                IgnoreExceptions = false,
-                ReactionOnError = OnErrorBehaviour.PauseJob,
-                SkipUnloadIfError = true,
+                ReactionDuringLoad = OnExceptionBehaviour.PauseJob,
+                ReactionDuringUpdate = OnExceptionBehaviour.SkipFrame,
+                ReactionDuringUnload = OnExceptionBehaviour.Continue,
+                SkipUnloadIfException = true,
                 FallbackMode = null
             };
         }

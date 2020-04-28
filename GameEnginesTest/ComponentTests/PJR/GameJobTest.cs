@@ -22,8 +22,7 @@ namespace GameEnginesTest.ComponentTests.PJR
         private GameProcess m_Process;
         private Dictionary<string, object> m_Configuration;
 
-        [TestInitialize]
-        public void Initialize()
+        public GameJobTest()
         {
             // Create the process and the configuration that will be used in every test
             m_Time = new MockProcessTime();
@@ -49,7 +48,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             Assert.AreNotEqual(0, modeJob.Rules.Count);
             Assert.IsNotNull(modeJob.InitUnloadOrder);
             Assert.IsNotNull(modeJob.UpdateScheduler);
-            Assert.IsNotNull(modeJob.ErrorPolicy);
+            Assert.IsNotNull(modeJob.ExceptionPolicy);
             Assert.IsNotNull(modeJob.PerformancePolicy);
 
             // A service job is created -> Name, Configuration and Parent can be retrieved immediately
@@ -65,7 +64,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             Assert.AreNotEqual(0, serviceJob.Rules.Count);
             Assert.IsNotNull(serviceJob.InitUnloadOrder);
             Assert.IsNotNull(serviceJob.UpdateScheduler);
-            Assert.IsNotNull(serviceJob.ErrorPolicy);
+            Assert.IsNotNull(serviceJob.ExceptionPolicy);
             Assert.IsNotNull(serviceJob.PerformancePolicy);
 
             // InitUnload and UpdateScheduler contains rule types that are not part of the setup -> a simplification is made
@@ -88,7 +87,7 @@ namespace GameEnginesTest.ComponentTests.PJR
         }
 
         [TestMethod]
-        public void ManageRuleDependencies()
+        public void ManageDependencies()
         {
             // Create job with DummyGameRuleTer, which has required dependency on IDummyGameService and optional dependency on IDummyGameRuleBis
             DummyGameRuleTer rule = new DummyGameRuleTer();
@@ -190,12 +189,6 @@ namespace GameEnginesTest.ComponentTests.PJR
             // The job is restarted -> operation resume without error
             job.Restart();
             Assert.IsTrue(RunJobState(job, GameJobState.Setup));
-
-            // Do it again in another state
-            job.Pause();
-            Assert.IsFalse(RunJobState(job, GameJobState.DependencyInjection));
-            job.Restart();
-            Assert.IsTrue(RunJobState(job, GameJobState.DependencyInjection));
         }
 
         [TestMethod]
@@ -258,7 +251,7 @@ namespace GameEnginesTest.ComponentTests.PJR
 
         // Simulate the execution of a given state by a job
         // Return false if the job is not currently in that state or if the execution takes more that maxFrames to execute (an error probably paused the job)
-        private bool RunJobState(GameJob job, GameJobState state, int maxFrames = 10)
+        private bool RunJobState(GameJob job, GameJobState state, int maxFrames = 7)
         {
             if (job.State != state)
                 return false;
