@@ -5,6 +5,7 @@ using GameEngine.PJR.Rules;
 using GameEngine.PJR.Rules.Dependencies;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Mocks;
+using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -256,14 +257,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             if (job.State != state)
                 return false;
 
-            for (int i = 0; i < maxFrames; i++)
-            {
-                job.Update();
-                m_Time.GoToNextFrame();
-                if (job.State != state)
-                    return true;
-            }
-            return false;
+            return job.SimulateExecutionUntil(m_Time, () => job.State != state, maxFrames);
         }
     }
 }

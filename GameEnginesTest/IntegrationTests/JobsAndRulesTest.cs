@@ -5,6 +5,7 @@ using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules.Dependencies;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Mocks;
+using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -60,7 +61,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[1].OnInitialize += () => { rulesInitialized.Add(1); m_Rules[1].CallMarkInitialized(); };
             m_Rules[2].OnInitialize += () => { rulesInitialized.Add(2); m_Rules[2].CallMarkInitialized(); };
 
-            Assert.IsTrue(SimulateJobExecutionUntil(() => rulesInitialized.Count == 3));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => rulesInitialized.Count == 3));
             Assert.AreEqual(0, rulesInitialized[0]);
             Assert.AreEqual(1, rulesInitialized[1]);
             Assert.AreEqual(2, rulesInitialized[2]);
@@ -70,14 +71,14 @@ namespace GameEnginesTest.IntegrationTests
         public void RulesAreMarkedInitialized_JobIsOperational()
         {
             m_Job.Start();
-            SimulateJobExecutionUntil(() => m_Job.State == GameJobState.InitializeRules);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.State == GameJobState.InitializeRules);
             
             // Rules will all declare themselves initialized when Initialize() is called
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
 
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsOperational));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational));
             Assert.AreEqual(1, m_Job.LoadingProgress);
         }
 
@@ -88,7 +89,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational && m_Time.FrameCount % 2 == 0);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational && m_Time.FrameCount % 2 == 0);
 
             // Rules are updated according to the UpdateSchedule
             List<int> rulesUpdated = new List<int>();
@@ -119,7 +120,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational);
 
             // The rules's Unload methods are called following an order contrary to the InitUnloadOrder
             List<int> rulesUnloaded = new List<int>();
@@ -128,7 +129,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[2].OnUnload += () => { rulesUnloaded.Add(2); m_Rules[2].CallMarkUnloaded(); };
 
             m_Job.Unload(); 
-            Assert.IsTrue(SimulateJobExecutionUntil(() => rulesUnloaded.Count == 3));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => rulesUnloaded.Count == 3));
             Assert.AreEqual(2, rulesUnloaded[0]);
             Assert.AreEqual(1, rulesUnloaded[1]);
             Assert.AreEqual(0, rulesUnloaded[2]);
@@ -141,7 +142,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational);
 
             // Rules will all declare themselves unloaded when Unload() is called
             m_Rules[0].OnUnload += () => m_Rules[0].CallMarkUnloaded();
@@ -149,7 +150,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[2].OnUnload += () => m_Rules[2].CallMarkUnloaded();
 
             m_Job.Unload();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             m_Job.Stop();
         }
 
@@ -160,7 +161,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational);
 
             m_Job.OnQuit();
             Assert.AreEqual(1, m_Rules[0].OnQuitCallCount);
@@ -174,10 +175,10 @@ namespace GameEnginesTest.IntegrationTests
             // The error is reported before initialization
             m_Job.Start();
             m_Rules[0].CallMarkError();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => !m_Job.IsLoading));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => !m_Job.IsLoading));
             Assert.IsTrue(m_Job.IsUnloading);
             Assert.AreEqual(0, m_Rules[0].InitializeCallCount);
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             Assert.AreEqual(0, m_Rules[0].UnloadCallCount);
 
             // The error is reported during initialization
@@ -185,12 +186,12 @@ namespace GameEnginesTest.IntegrationTests
             SetMarkCallbacks();
             m_Job.Start();
             m_Rules[1].OnInitialize = () => m_Rules[1].CallMarkError();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => !m_Job.IsLoading));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => !m_Job.IsLoading));
             Assert.IsTrue(m_Job.IsUnloading);
             Assert.AreEqual(1, m_Rules[0].InitializeCallCount);
             Assert.AreEqual(1, m_Rules[1].InitializeCallCount);
             Assert.AreEqual(0, m_Rules[2].InitializeCallCount);
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             Assert.AreEqual(1, m_Rules[0].UnloadCallCount);
             Assert.AreEqual(0, m_Rules[1].UnloadCallCount);
             Assert.AreEqual(0, m_Rules[2].UnloadCallCount);
@@ -199,13 +200,13 @@ namespace GameEnginesTest.IntegrationTests
             Initialize();
             SetMarkCallbacks();
             m_Job.Start();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational);
             m_Rules[0].OnUpdate += () => m_Rules[0].CallMarkError();
             m_Job.Update();
             m_Time.GoToNextFrame();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => !m_Job.IsOperational));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => !m_Job.IsOperational));
             Assert.IsTrue(m_Job.IsUnloading);
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             Assert.AreEqual(1, m_Rules[0].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[1].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[2].UnloadCallCount);
@@ -214,10 +215,10 @@ namespace GameEnginesTest.IntegrationTests
             Initialize();
             SetMarkCallbacks();
             m_Job.Start();
-            SimulateJobExecutionUntil(() => m_Job.IsOperational);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational);
             m_Job.Unload();
             m_Rules[0].OnUnload = () => m_Rules[0].CallMarkError();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             Assert.AreEqual(1, m_Rules[0].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[1].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[2].UnloadCallCount);
@@ -230,13 +231,13 @@ namespace GameEnginesTest.IntegrationTests
             m_Job.Start();
             SetMarkCallbacks();
             m_Rules[1].OnInitialize += () => throw new Exception();
-            Assert.IsFalse(SimulateJobExecutionUntil(() => m_Job.IsOperational, 5));
+            Assert.IsFalse(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational, 5));
             Assert.AreEqual(1, m_Rules[0].InitializeCallCount);
             Assert.AreEqual(1, m_Rules[1].InitializeCallCount);
             Assert.AreEqual(0, m_Rules[2].InitializeCallCount);
 
             m_Job.Restart();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
 
             // During update, OnExceptionBehaviour = SkipFrame
             m_Rules[1].OnUpdate += () => throw new Exception();
@@ -248,7 +249,7 @@ namespace GameEnginesTest.IntegrationTests
             // During unload, OnExceptionBehaviour = Continue and SkipUnloadIfError = true
             m_Job.Unload();
             m_Rules[1].OnUnload = () => throw new Exception();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsFinished));
             Assert.AreEqual(1, m_Rules[0].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[1].UnloadCallCount);
             Assert.AreEqual(1, m_Rules[2].UnloadCallCount);
@@ -260,7 +261,7 @@ namespace GameEnginesTest.IntegrationTests
             // Set custom performance policy
             m_Job.Start();
             SetMarkCallbacks();
-            SimulateJobExecutionUntil(() => m_Job.State == GameJobState.DependencyInjection);
+            m_Job.SimulateExecutionUntil(m_Time, () => m_Job.State == GameJobState.DependencyInjection);
             int stallingTimeout = 1;
             m_Job.PerformancePolicy = new PerformancePolicy()
             {
@@ -279,7 +280,7 @@ namespace GameEnginesTest.IntegrationTests
                 lock (objLock)
                     Monitor.Pulse(objLock);
             });
-            Assert.IsFalse(SimulateJobExecutionUntil(() => m_Job.IsOperational, 5));
+            Assert.IsFalse(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational, 5));
             Assert.AreEqual(1, m_Rules[0].InitializeCallCount);
             Assert.AreEqual(1, m_Rules[1].InitializeCallCount);
             Assert.AreEqual(0, m_Rules[2].InitializeCallCount);
@@ -287,7 +288,7 @@ namespace GameEnginesTest.IntegrationTests
             lock (objLock)
                 Monitor.Wait(objLock);
             m_Job.Restart();
-            Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
+            Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
 
             // Timeout exception is called during update, and provokes skipFrame (OnExceptionBehaviour)
             m_Rules[1].OnUpdate += () => Thread.Sleep(stallingTimeout);
@@ -306,19 +307,6 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[0].OnUnload += () => m_Rules[0].CallMarkUnloaded();
             m_Rules[1].OnUnload += () => m_Rules[1].CallMarkUnloaded();
             m_Rules[2].OnUnload += () => m_Rules[2].CallMarkUnloaded();
-        }
-
-        private bool SimulateJobExecutionUntil(Func<bool> condition, int maxFrames = 10)
-        {
-            int i = 0;
-            while (!condition() && i < maxFrames)
-            {
-                m_Job.Update();
-                m_Time.GoToNextFrame();
-                i++;
-            }
-
-            return condition();
         }
     }
 }
