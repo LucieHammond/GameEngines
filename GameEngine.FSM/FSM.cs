@@ -99,8 +99,10 @@ namespace GameEngine.FSM
             if (!m_Running)
                 throw new InvalidOperationException($"The state machine should be started before Update");
 #endif
-
-            CurrentState.Update();
+            if (!m_StateChangeRequested)
+            {
+                CurrentState.Update();
+            }
 
             if (m_StateChangeRequested)
             {

@@ -74,5 +74,13 @@ namespace GameEngine.FSM.CustomFSM
 
             return false;
         }
+
+        /// <summary>
+        /// Clear the stack of states
+        /// </summary>
+        public void ClearStateStack()
+        {
+            m_StatesStack.Clear();
+        }
     }
 }

@@ -85,5 +85,13 @@ namespace GameEngine.FSM.CustomFSM
 
             return false;
         }
+
+        /// <summary>
+        /// Clear the queue of states
+        /// </summary>
+        public void ClearStateQueue()
+        {
+            m_StateQueue.Clear();
+        }
     }
 }
