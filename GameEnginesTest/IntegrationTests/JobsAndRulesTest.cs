@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace GameEnginesTest.IntegrationTests
 {
+    /// <summary>
+    /// Integration tests focusing on the interactions between GameJobs and GameRules
+    /// </summary>
     [TestClass]
     public class JobsAndRulesTest
     {
@@ -223,7 +226,7 @@ namespace GameEnginesTest.IntegrationTests
         [TestMethod]
         public void RuleThrowException_JobHandleException()
         {
-            // During load, OnErrorBehaviour = PauseJob
+            // During load, OnExceptionBehaviour = PauseJob
             m_Job.Start();
             SetMarkCallbacks();
             m_Rules[1].OnInitialize += () => throw new Exception();
@@ -235,14 +238,14 @@ namespace GameEnginesTest.IntegrationTests
             m_Job.Restart();
             Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
 
-            // During update, OnErrorBehaviour = SkipFrame
+            // During update, OnExceptionBehaviour = SkipFrame
             m_Rules[1].OnUpdate += () => throw new Exception();
             m_Job.Update();
             m_Time.GoToNextFrame();
             Assert.AreEqual(0, m_Rules[0].UpdateCallCount); // skipped
             Assert.AreEqual(1, m_Rules[1].UpdateCallCount);
 
-            // During unload, OnErrorBehaviour = Continue and SkipUnloadIfError = true
+            // During unload, OnExceptionBehaviour = Continue and SkipUnloadIfError = true
             m_Job.Unload();
             m_Rules[1].OnUnload = () => throw new Exception();
             Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsFinished));
@@ -267,7 +270,7 @@ namespace GameEnginesTest.IntegrationTests
                 UnloadStallingTimeout = stallingTimeout
             };
 
-            // During load, OnErrorBehaviour = PauseJob
+            // Timeout exception is called during load, and provokes pause (OnExceptionBehaviour)
             object objLock = new object();
             m_Rules[1].OnInitialize = () => Task.Run(() => 
             {
@@ -286,7 +289,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Job.Restart();
             Assert.IsTrue(SimulateJobExecutionUntil(() => m_Job.IsOperational && m_Time.FrameCount % 2 == 0));
 
-            // During update, OnErrorBehaviour = SkipFrame
+            // Timeout exception is called during update, and provokes skipFrame (OnExceptionBehaviour)
             m_Rules[1].OnUpdate += () => Thread.Sleep(stallingTimeout);
             m_Job.Update();
             m_Time.GoToNextFrame();
@@ -300,7 +303,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
             m_Rules[2].OnInitialize += () => m_Rules[2].CallMarkInitialized();
 
-            m_Rules[0].OnUnload += () => m_Rules[0].CallMarkError();
+            m_Rules[0].OnUnload += () => m_Rules[0].CallMarkUnloaded();
             m_Rules[1].OnUnload += () => m_Rules[1].CallMarkUnloaded();
             m_Rules[2].OnUnload += () => m_Rules[2].CallMarkUnloaded();
         }

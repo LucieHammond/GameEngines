@@ -9,8 +9,9 @@ namespace GameEnginesTest.Tools.Dummy
 {
     public class DummyServiceSetup : IServiceSetup
     {
-        public string Name => "Test";
+        public string Name => CustomName ?? "Test";
 
+        public string CustomName;
         public IEnumerable<GameService> CustomServices;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;

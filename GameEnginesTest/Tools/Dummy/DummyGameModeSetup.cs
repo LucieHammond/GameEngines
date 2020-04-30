@@ -9,10 +9,11 @@ namespace GameEnginesTest.Tools.Dummy
 {
     public class DummyGameModeSetup : IGameModeSetup
     {
-        public string Name => "Test";
+        public string Name => CustomName ?? "Test";
 
         public Type RequiredServiceSetup => typeof(DummyServiceSetup);
 
+        public string CustomName;
         public IEnumerable<GameRule> CustomRules;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
