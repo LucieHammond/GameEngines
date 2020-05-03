@@ -1,11 +1,10 @@
-﻿namespace GameEngine.Core.Logs
+﻿namespace GameEngine.Core.Logger
 {
     public enum LogLevel
     {
         Debug,
         Info,
         Warning,
-        Error,
-        Fatal
+        Error
     }
 }

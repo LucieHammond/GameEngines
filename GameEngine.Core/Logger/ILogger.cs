@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace GameEngine.Core.Logs
+namespace GameEngine.Core.Logger
 {
     public interface ILogger
     {
