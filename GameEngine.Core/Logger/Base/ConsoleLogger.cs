@@ -1,34 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace GameEngine.Core.Logger.Base
 {
-    public class ConsoleLogger : BaseLogger
+    /// <summary>
+    /// A predefined logger that logs messages in the console
+    /// </summary>
+    public class ConsoleLogger : ILogger
     {
-        public override void LogDebug(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogDebug(string, string)"/>
+        /// </summary>
+        public void LogDebug(string tag, string message)
         {
             PrintMessage(tag, LogLevel.Debug, message);
         }
 
-        public override void LogInfo(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogInfo(string, string)"/>
+        /// </summary>
+        public void LogInfo(string tag, string message)
         {
             PrintMessage(tag, LogLevel.Info, message);
         }
 
-        public override void LogWarning(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogWarning(string, string)"/>
+        /// </summary>
+        public void LogWarning(string tag, string message)
         {
             PrintMessage(tag, LogLevel.Warning, message);
         }
 
-        public override void LogError(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogError(string, string)"/>
+        /// </summary>
+        public void LogError(string tag, string message)
         {
             PrintMessage(tag, LogLevel.Error, message);
+        }
+
+        /// <summary>
+        /// <see cref="ILogger.LogException(string, Exception)"/>
+        /// </summary>
+        public void LogException(string tag, Exception e)
+        {
+            string message = LogUtils.FormatException(e);
+            LogError(tag, message);
         }
 
         private void PrintMessage(string tag, LogLevel level, string message)
         {
             // Print time
-            Console.Write("{0}\t", GetCurrentTime());
+            Console.Write("{0}\t", LogUtils.GetLogTime());
 
             // Print log level
             Console.ForegroundColor = GetLevelColor(level);

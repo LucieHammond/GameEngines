@@ -1,27 +1,52 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace GameEngine.Core.Logger.Base
 {
-    public class DebugLogger : BaseLogger
+    /// <summary>
+    /// A predefined logger that logs messages to the trace listeners of the System.Diagnostics.Debug.Listeners collection
+    /// </summary>
+    public class DebugLogger : ILogger
     {
-        public override void LogDebug(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogDebug(string, string)"/>
+        /// </summary>
+        public void LogDebug(string tag, string message)
         {
             Debug.WriteLine(FormatMessage(tag, message), "DEBUG");
         }
 
-        public override void LogInfo(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogInfo(string, string)"/>
+        /// </summary>
+        public void LogInfo(string tag, string message)
         {
             Debug.WriteLine(FormatMessage(tag, message), "INFO");
         }
 
-        public override void LogWarning(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogWarning(string, string)"/>
+        /// </summary>
+        public void LogWarning(string tag, string message)
         {
             Debug.WriteLine(FormatMessage(tag, message), "WARNING");
         }
 
-        public override void LogError(string tag, string message)
+        /// <summary>
+        /// <see cref="ILogger.LogError(string, string)"/>
+        /// </summary>
+        public void LogError(string tag, string message)
         {
             Debug.WriteLine(FormatMessage(tag, message), "ERROR");
+        }
+
+        /// <summary>
+        /// <see cref="ILogger.LogException(string, Exception)"/>
+        /// </summary>
+        public void LogException(string tag, Exception e)
+        {
+            string message = LogUtils.FormatException(e);
+            LogError(tag, message);
         }
 
         private string FormatMessage(string tag, string message)
