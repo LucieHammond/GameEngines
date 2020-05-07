@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Config = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Rules.Dependencies
 {

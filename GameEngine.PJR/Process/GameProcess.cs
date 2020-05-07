@@ -1,11 +1,11 @@
 ﻿using GameEngine.Core.Logger;
+using GameEngine.Core.Model;
 using GameEngine.PJR.Jobs;
 using GameEngine.PJR.Process.Modes;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules.Dependencies;
 using System;
 using System.Collections.Generic;
-using Configuration = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Process
 {

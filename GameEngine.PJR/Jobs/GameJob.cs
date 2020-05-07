@@ -1,4 +1,5 @@
 ﻿using GameEngine.Core.Logger;
+using GameEngine.Core.Model;
 using GameEngine.FSM;
 using GameEngine.FSM.CustomFSM;
 using GameEngine.PJR.Jobs.Policies;
@@ -9,7 +10,6 @@ using GameEngine.PJR.Rules;
 using GameEngine.PJR.Rules.Scheduling;
 using System;
 using System.Collections.Generic;
-using Configuration = System.Collections.Generic.Dictionary<string, object>;
 
 namespace GameEngine.PJR.Jobs
 {

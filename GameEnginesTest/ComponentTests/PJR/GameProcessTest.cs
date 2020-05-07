@@ -1,4 +1,5 @@
-﻿using GameEngine.PJR.Process;
+﻿using GameEngine.Core.Model;
+using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Modes;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules;
@@ -79,7 +80,7 @@ namespace GameEnginesTest.ComponentTests.PJR
 
             // Switch to new GameMode Test2
             DummyGameModeSetup modeSetup = CreateEmptyGameModeSetup("TestBis");
-            Dictionary<string, object> config = new Dictionary<string, object>();
+            Configuration config = new Configuration();
             m_Process.SwitchToGameMode(modeSetup, config);
             RunNextFrame();
             Assert.IsTrue(m_Process.CurrentGameMode.IsUnloading);
@@ -111,7 +112,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             m_Process.PrepareIncomingGameModes(new List<IGameModeSetup>() { firstMode, secondMode, thirdMode }, false);
 
             // Switch between modes
-            Dictionary<string, object> config = new Dictionary<string, object>();
+            Configuration config = new Configuration();
             Assert.IsTrue(m_Process.SwitchToNextGameMode(config));
             RunNextFrame();
             Assert.IsTrue(m_Process.SimulateExecutionUntil(() => m_Process.CurrentGameMode != null && m_Process.CurrentGameMode.IsOperational));

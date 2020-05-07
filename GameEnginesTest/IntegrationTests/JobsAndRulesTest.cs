@@ -1,4 +1,5 @@
-﻿using GameEngine.PJR.Jobs;
+﻿using GameEngine.Core.Model;
+using GameEngine.PJR.Jobs;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Services;
@@ -44,7 +45,7 @@ namespace GameEnginesTest.IntegrationTests
             process.ServiceProvider = new DependencyProvider();
             process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessService(process));
             process.ServiceProvider.Add(typeof(IDummyGameService), new DummyGameService());
-            Dictionary<string, object> configuration = new Dictionary<string, object>();
+            Configuration configuration = new Configuration();
 
             m_Job = new GameJob(setup, configuration, process);
             process.CurrentGameMode = m_Job;

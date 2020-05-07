@@ -1,4 +1,5 @@
-﻿using GameEngine.PJR.Jobs;
+﻿using GameEngine.Core.Model;
+using GameEngine.PJR.Jobs;
 using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules;
@@ -21,7 +22,7 @@ namespace GameEnginesTest.ComponentTests.PJR
     {
         private MockProcessTime m_Time;
         private GameProcess m_Process;
-        private Dictionary<string, object> m_Configuration;
+        private Configuration m_Configuration;
 
         public GameJobTest()
         {
@@ -30,7 +31,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             m_Process = new GameProcess(new DummyGameProcessSetup(), m_Time);
             m_Process.ServiceProvider = new DependencyProvider();
             m_Process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessService(m_Process));
-            m_Configuration = new Dictionary<string, object>();
+            m_Configuration = new Configuration();
         }
 
         [TestMethod]
