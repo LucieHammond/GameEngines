@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Rules;
 using System;
@@ -30,6 +31,8 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Enter()
         {
+            Log.Info(m_GameJob.Name, "Initialize {0}", m_GameJob.IsServiceJob ? "services" : "rules");
+
             m_GameJob.LoadingProgress = 0;
             m_RulesToInitEnumerator = m_GameJob.Rules.GetRulesInOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameJob.PerformancePolicy;
@@ -53,8 +56,9 @@ namespace GameEngine.PJR.Jobs.States
                         m_RuleInitTime.Restart();
                         m_RulesToInitEnumerator.Current.BaseInitialize();
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
                         if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
                             break;
                     }
@@ -80,10 +84,10 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleInitTime.ElapsedMilliseconds >= m_Performance.InitStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"The initialization of rule {m_RulesToInitEnumerator.Current.Name} " +
-                        $"has been stalling for more than {m_Performance.InitStallingTimeout}ms");
-                    m_RuleInitTime.Restart();
+                    Exception e = new TimeoutException($"Rule initialization has been stalling for more than {m_Performance.InitStallingTimeout}ms");
+                    Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
                     
+                    m_RuleInitTime.Restart();
                     if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
                         break;
                 }
@@ -95,6 +99,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Exit()
         {
+            Log.Info(m_GameJob.Name, $"Initialization completed");
             m_RuleInitTime.Reset();
             m_UpdateTime.Reset();
         }

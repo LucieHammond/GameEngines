@@ -1,4 +1,5 @@
-﻿using GameEngine.PJR.Process;
+﻿using GameEngine.Core.Logger;
+using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules.Dependencies;
 using GameEngine.PJR.Rules.Dependencies.Attributes;
@@ -89,6 +90,7 @@ namespace GameEngine.PJR.Rules
             if (State != GameRuleState.Initializing)
                 throw new InvalidOperationException($"MarkInitialized() should be called when rule {Name} is in state Initializing, not {State}");
 #endif
+            Log.Info(Name, "Rule is initialized");
             State = GameRuleState.Initialized;
         }
 
@@ -101,6 +103,7 @@ namespace GameEngine.PJR.Rules
             if (State != GameRuleState.Unloading)
                 throw new InvalidOperationException($"MarkUnloaded() should be called when rule {Name} is in state Unloading, not {State}");
 #endif
+            Log.Info(Name, "Rule is unloaded");
             State = GameRuleState.Unloaded;
         }
 
@@ -109,6 +112,7 @@ namespace GameEngine.PJR.Rules
         /// </summary>
         protected void MarkError()
         {
+            Log.Info(Name, "Rule is blocked due to an error");
             if (State != GameRuleState.Initialized)
                 State = GameRuleState.Unloaded;
             ErrorDetected = true;
@@ -120,6 +124,7 @@ namespace GameEngine.PJR.Rules
             if (State != GameRuleState.Unused)
                 throw new InvalidOperationException($"Initialize() should be called when rule {Name} is in state Unused, not {State}");
 #endif
+            Log.Info(Name, "Rule starts initializing");
             State = GameRuleState.Initializing;
             Initialize();
         }
@@ -139,12 +144,14 @@ namespace GameEngine.PJR.Rules
             if (State != GameRuleState.Initialized)
                 throw new InvalidOperationException($"Unload() should be called when rule {Name} is in state Initialized, not {State}");
 #endif
+            Log.Info(Name, "Rule starts unloading");
             State = GameRuleState.Unloading;
             Unload();
         }
 
         internal void BaseQuit()
         {
+            Log.Info(Name, "Rule quits");
             OnQuit();
         }
     }
