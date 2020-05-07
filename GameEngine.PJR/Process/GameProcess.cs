@@ -1,4 +1,5 @@
-﻿using GameEngine.PJR.Jobs;
+﻿using GameEngine.Core.Logger;
+using GameEngine.PJR.Jobs;
 using GameEngine.PJR.Process.Modes;
 using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules.Dependencies;
@@ -72,6 +73,7 @@ namespace GameEngine.PJR.Process
             if (IsRunning)
                 throw new InvalidOperationException($"Start() should be called when process {Name} is not already running");
 #endif
+            Log.Info(Name, "** Start process **");
             ServiceHandler = new GameJob(m_ServiceSetup, null, this);
             ServiceHandler.Start();
         }
@@ -126,6 +128,7 @@ namespace GameEngine.PJR.Process
         /// </summary>
         public void Pause()
         {
+            Log.Info(Name, "** Pause process **");
             m_IsPaused = true;
         }
 
@@ -134,6 +137,7 @@ namespace GameEngine.PJR.Process
         /// </summary>
         public void Restart()
         {
+            Log.Info(Name, "** Restart process **");
             m_IsPaused = false;
         }
 
@@ -150,6 +154,8 @@ namespace GameEngine.PJR.Process
 #endif
             if (!m_IsStopping)
             {
+                Log.Info(Name, "** Stop process **");
+
                 m_IsStopping = true;
                 m_NextGameModeSetup = null;
                 m_NextGameModeConfig = null;
@@ -167,6 +173,7 @@ namespace GameEngine.PJR.Process
         /// </summary>
         public void OnQuit()
         {
+            Log.Info(Name, "** Quit process **");
             CurrentGameMode?.OnQuit();
             ServiceHandler?.OnQuit();
         }

@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Rules;
 using System;
@@ -30,6 +31,8 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Enter()
         {
+            Log.Info(m_GameJob.Name, "Unload {0}", m_GameJob.IsServiceJob ? "services" : "rules");
+
             m_RulesToUnloadEnumerator = m_GameJob.Rules.GetRulesInReverseOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameJob.PerformancePolicy;
             m_SkipCurrrentRule = false;
@@ -49,8 +52,9 @@ namespace GameEngine.PJR.Jobs.States
                         m_RuleUnloadTime.Restart();
                         m_RulesToUnloadEnumerator.Current.BaseUnload();
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
                         m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
                         if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
                             break;
@@ -73,8 +77,9 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} " +
-                        $"has been stalling for more than {m_Performance.UnloadStallingTimeout}ms");
+                    Exception e = new TimeoutException($"Rule unloading has been stalling for more than {m_Performance.UnloadStallingTimeout}ms");
+                    Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
+
                     m_RuleUnloadTime.Restart();
                     m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
                     if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
@@ -88,6 +93,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Exit()
         {
+            Log.Info(m_GameJob.Name, $"Unloading completed");
             m_RuleUnloadTime.Reset();
             m_UpdateTime.Reset();
         }

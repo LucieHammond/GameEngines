@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process;
 using GameEngine.PJR.Rules;
@@ -27,6 +28,8 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Enter()
         {
+            Log.Info(m_GameJob.ParentProcess.Name, "<< {0} ready >>", m_GameJob.IsServiceJob ? "Services are" : "Game mode is");
+
             m_Performance = m_GameJob.PerformancePolicy;
             m_Time = m_GameJob.ParentProcess.Time;
         }
@@ -41,8 +44,9 @@ namespace GameEngine.PJR.Jobs.States
                     rule.BaseUpdate();
                     m_RuleUpdateTime.Stop();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Log.Exception(rule.Name, e);
                     if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUpdate))
                         break;
                 }
@@ -54,7 +58,8 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUpdateTime.ElapsedMilliseconds >= m_Performance.UpdateStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"The update of rule {rule.Name} has taken more more than {m_Performance.UpdateStallingTimeout}ms to execute");
+                    Exception e = new TimeoutException($"Rule update has taken more than {m_Performance.UpdateStallingTimeout}ms to execute");
+                    Log.Exception(rule.Name, e);
                     if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUpdate))
                         break;
                 }

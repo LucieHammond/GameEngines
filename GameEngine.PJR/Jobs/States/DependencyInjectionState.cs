@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Rules.Dependencies;
 using System;
@@ -26,6 +27,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Enter()
         {
+            Log.Info(m_GameJob.Name, $"Inject dependencies");
             m_Performance = m_GameJob.PerformancePolicy;
         }
 
@@ -54,8 +56,9 @@ namespace GameEngine.PJR.Jobs.States
 
                 m_GameJob.GoToNextState();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Exception(m_GameJob.Name, e);
                 m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad);
             }
 
@@ -64,6 +67,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Exit()
         {
+            Log.Info(m_GameJob.Name, $"Dependency injection completed");
             m_UpdateTime.Reset();
         }
     }

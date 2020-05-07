@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process.Services;
 using System;
@@ -24,7 +25,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Enter()
         {
-
+            Log.Info(m_GameJob.Name, "Setup {0}", m_GameJob.IsServiceJob ? "service handler" : "game mode");
         }
 
         public override void Update()
@@ -53,8 +54,9 @@ namespace GameEngine.PJR.Jobs.States
 
                 m_GameJob.GoToNextState();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Exception(m_GameJob.Name, e);
                 if (m_GameJob.ExceptionPolicy == null)
                     m_GameJob.OnException(OnExceptionBehaviour.UnloadJob);
                 else
@@ -64,7 +66,7 @@ namespace GameEngine.PJR.Jobs.States
 
         public override void Exit()
         {
-
+            Log.Info(m_GameJob.Name, $"Setup completed");
         }
     }
 

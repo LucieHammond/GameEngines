@@ -1,4 +1,5 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.Logger;
+using GameEngine.FSM;
 using GameEngine.FSM.CustomFSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Jobs.States;
@@ -97,6 +98,7 @@ namespace GameEngine.PJR.Jobs
         /// </summary>
         public void Pause()
         {
+            Log.Info(ParentProcess.Name, $"<< Pause {Name} >>");
             m_IsPaused = true;
         }
 
@@ -105,6 +107,7 @@ namespace GameEngine.PJR.Jobs
         /// </summary>
         public void Restart()
         {
+            Log.Info(ParentProcess.Name, $"<< Restart {Name} >>");
             m_IsPaused = false;
         }
 
@@ -114,6 +117,7 @@ namespace GameEngine.PJR.Jobs
             if (State != GameJobState.Setup)
                 throw new InvalidOperationException($"Start() should be called when job {Name} is in state Setup, not {State}");
 #endif
+            Log.Info(ParentProcess.Name, $"<< Load {Name} >>");
             m_StateMachine.Start();
         }
 
@@ -130,6 +134,8 @@ namespace GameEngine.PJR.Jobs
             if (State == GameJobState.UnloadRules || State == GameJobState.End)
                 return;
 
+            Log.Info(ParentProcess.Name, $"<< Unload {Name} >>");
+
             byte priority = 100;
             while (m_StateMachine.TryDequeueState(out GameJobState state, priority: priority++) && state != GameJobState.UnloadRules);
 
@@ -143,20 +149,23 @@ namespace GameEngine.PJR.Jobs
             if (State != GameJobState.End)
                 throw new InvalidOperationException($"Stop() should be called when job {Name} is in state End, not {State}");
 #endif
+            Log.Info(ParentProcess.Name, $"<< End {Name} >>");
             m_StateMachine.Stop();
         }
 
         internal void OnQuit()
         {
+            Log.Info(ParentProcess.Name, $"<< Quit {Name} >>");
+
             foreach (KeyValuePair<Type, GameRule> ruleInfo in Rules)
             {
                 try
                 {
                     ruleInfo.Value.BaseQuit();
                 }
-                catch(Exception)
+                catch(Exception e)
                 {
-
+                    Log.Exception(ruleInfo.Value.Name, e);
                 }
             }
             m_StateMachine.Stop();
@@ -177,8 +186,9 @@ namespace GameEngine.PJR.Jobs
                 {
                     ParentProcess.SwitchToGameMode(ExceptionPolicy.FallbackMode);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Log.Exception(Name, e);
                     ParentProcess.SwitchToGameMode(null);
                 }
             }
