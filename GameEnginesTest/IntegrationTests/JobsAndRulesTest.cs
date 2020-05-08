@@ -267,6 +267,7 @@ namespace GameEnginesTest.IntegrationTests
             m_Job.PerformancePolicy = new PerformancePolicy()
             {
                 CheckStallingRules = true,
+                NbWarningsBeforeException = 0,
                 InitStallingTimeout = stallingTimeout,
                 UpdateStallingTimeout = stallingTimeout,
                 UnloadStallingTimeout = stallingTimeout
