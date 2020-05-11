@@ -43,12 +43,12 @@ namespace GameEngine.Core.Logger.Base
             SendJsonMessage(FormatJsonMessage(LogLevel.Error, tag, message));
         }
 
-        public void SendJsonMessage(string jsonMessage)
+        public async void SendJsonMessage(string jsonMessage)
         {
             using (var client = new HttpClient())
             {
-                client.PostAsync(m_LogUrl,
-                    new StringContent(jsonMessage, Encoding.UTF8, "application/json")).Wait();
+                await client.PostAsync(m_LogUrl,
+                    new StringContent(jsonMessage, Encoding.UTF8, "application/json"));
             }
         }
 

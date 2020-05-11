@@ -17,7 +17,7 @@ namespace GameEngine.Core.Logger
         /// <summary>
         /// The minimal level of logs to display. All logs with an inferior level of importance will be ignored
         /// </summary>
-        public static LogLevel MinLevel = LogLevel.Info;
+        public static LogLevel MinLevel = LogLevel.Debug;
 
         /// <summary>
         /// The tags on which to filter the logs. If null, all logs are displayed. Otherwise, only the logs having the right tags are displayed
