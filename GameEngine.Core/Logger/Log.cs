@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define ENABLE_LOGS
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -150,8 +151,11 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (TagsFilter == null || TagsFilter.Contains(tag))
-                Logger?.LogException(tag, e);
+            if (MinLevel <= LogLevel.Error)
+            {
+                if (TagsFilter == null || TagsFilter.Contains(tag))
+                    Logger?.LogException(tag, e);
+            }
         }
 
         /// <summary>

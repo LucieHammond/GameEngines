@@ -7,7 +7,7 @@ namespace GameEngine.Core.Logger.Base
     /// </summary>
     public class ConsoleLogger : ILogger
     {
-        private readonly object consoleLock = new object();
+        private readonly object m_ConsoleLock = new object();
 
         /// <summary>
         /// <see cref="ILogger.LogDebug(string, string)"/>
@@ -52,7 +52,7 @@ namespace GameEngine.Core.Logger.Base
 
         private void PrintMessage(string tag, LogLevel level, string message)
         {
-            lock(consoleLock)
+            lock(m_ConsoleLock)
             {
                 // Print time
                 Console.Write("{0}\t", LogUtils.GetLogTime());
