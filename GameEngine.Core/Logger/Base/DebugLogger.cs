@@ -51,7 +51,7 @@ namespace GameEngine.Core.Logger.Base
 
         private string FormatMessage(string tag, string message)
         {
-            return $"[{tag}] {message}";
+            return $"{LogUtils.GetTime()} [{tag}] {message}";
         }
     }
 }

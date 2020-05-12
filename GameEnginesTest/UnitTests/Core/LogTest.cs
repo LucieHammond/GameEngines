@@ -202,7 +202,7 @@ namespace GameEnginesTest.UnitTests.Core
         public void ExceptionTest()
         {
             string tag = "Test";
-            Exception exception = new InvalidOperationException("exception message", new ArgumentException("inner exception message"));
+            Exception exception = new Exception("exception message");
             int totalCalls = 0;
 
             lock (m_LogLock)

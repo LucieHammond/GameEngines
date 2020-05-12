@@ -55,7 +55,7 @@ namespace GameEngine.Core.Logger.Base
             lock(m_ConsoleLock)
             {
                 // Print time
-                Console.Write("{0}\t", LogUtils.GetLogTime());
+                Console.Write("{0}\t", LogUtils.GetTime());
 
                 // Print log level
                 Console.ForegroundColor = GetLevelColor(level);

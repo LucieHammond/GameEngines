@@ -38,7 +38,7 @@ namespace GameEngine.Core.Logger
         /// Get the current time formatted like dd/MM/yyyy HH:mm:ss.ff (ready to be logged)
         /// </summary>
         /// <returns>The formatted current time</returns>
-        public static string GetLogTime()
+        public static string GetTime()
         {
             return DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss.ff");
         }
