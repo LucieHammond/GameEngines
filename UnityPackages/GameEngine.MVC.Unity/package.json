@@ -1,0 +1,19 @@
+{
+  "name": "org.gameengine.mvc.unity",
+  "version": "1.0.0",
+  "displayName": "GameEngine MVC",
+  "description": "Framework implementing the Model-View-Controller pattern",
+  "unity": "2019.2",
+  "unityRelease": "0f1",
+  "keywords": [
+    "model",
+    "view",
+    "controller",
+    "events"
+  ],
+  "author": {
+    "name": "Lucie Hammond",
+    "email": "lucie_hammond@hotmail.fr",
+    "url": "https://github.com/LucieHammond/GameEngines"
+  }
+}

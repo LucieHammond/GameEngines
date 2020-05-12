@@ -1,0 +1,19 @@
+{
+  "name": "org.gameengine.core.unity",
+  "version": "1.0.0",
+  "displayName": "GameEngine Core",
+  "description": "Common tools for game development",
+  "unity": "2019.2",
+  "unityRelease": "0f1",
+  "keywords": [
+    "logger",
+    "fsm",
+    "utils",
+    "debug"
+  ],
+  "author": {
+    "name": "Lucie Hammond",
+    "email": "lucie_hammond@hotmail.fr",
+    "url": "https://github.com/LucieHammond/GameEngines"
+  }
+}

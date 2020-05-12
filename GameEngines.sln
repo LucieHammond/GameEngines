@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.PJR", "GameEngin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.ECS", "GameEngine.ECS\GameEngine.ECS.csproj", "{2C226FA2-37F2-48E7-9C0C-55A5608142A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEnginesTest", "GameEnginesTest\GameEnginesTest.csproj", "{580C667D-6DDE-4CEB-B469-AD8252453D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEnginesTest", "Tests\GameEnginesTest.csproj", "{580C667D-6DDE-4CEB-B469-AD8252453D53}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.MVC", "GameEngine.MVC\GameEngine.MVC.csproj", "{85710E5E-5C62-465F-9FFB-8363E383C1AE}"
 EndProject
