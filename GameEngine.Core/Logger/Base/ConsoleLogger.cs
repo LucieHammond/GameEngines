@@ -7,6 +7,8 @@ namespace GameEngine.Core.Logger.Base
     /// </summary>
     public class ConsoleLogger : ILogger
     {
+        private readonly object m_ConsoleLock = new object();
+
         /// <summary>
         /// <see cref="ILogger.LogDebug(string, string)"/>
         /// </summary>
@@ -50,23 +52,26 @@ namespace GameEngine.Core.Logger.Base
 
         private void PrintMessage(string tag, LogLevel level, string message)
         {
-            // Print time
-            Console.Write("{0}\t", LogUtils.GetLogTime());
+            lock(m_ConsoleLock)
+            {
+                // Print time
+                Console.Write("{0}\t", LogUtils.GetTime());
 
-            // Print log level
-            Console.ForegroundColor = GetLevelColor(level);
-            Console.Write("{0}\t ", level.ToString().ToUpper());
-            Console.ResetColor();
+                // Print log level
+                Console.ForegroundColor = GetLevelColor(level);
+                Console.Write("{0}\t ", level.ToString().ToUpper());
+                Console.ResetColor();
 
-            // Print tag
-            Console.Write("[");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"{tag}");
-            Console.ResetColor();
-            Console.Write("] ");
+                // Print tag
+                Console.Write("[");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write($"{tag}");
+                Console.ResetColor();
+                Console.Write("] ");
 
-            // Print message
-            Console.Write("{0}\n", message);
+                // Print message
+                Console.Write("{0}\n", message);
+            }
         }
 
         private ConsoleColor GetLevelColor(LogLevel level)

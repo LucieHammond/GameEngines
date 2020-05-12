@@ -21,6 +21,7 @@ namespace GameEngine.PJR.Jobs.States
         private Stopwatch m_RuleUnloadTime;
         private PerformancePolicy m_Performance;
         private bool m_SkipCurrrentRule;
+        private int m_NbStallingWarnings;
 
         public UnloadRulesState(GameJob gameMode)
         {
@@ -36,6 +37,7 @@ namespace GameEngine.PJR.Jobs.States
             m_RulesToUnloadEnumerator = m_GameJob.Rules.GetRulesInReverseOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameJob.PerformancePolicy;
             m_SkipCurrrentRule = false;
+            m_NbStallingWarnings = 0;
             if (!m_RulesToUnloadEnumerator.MoveNext())
                 m_GameJob.GoToNextState();
         }
@@ -77,13 +79,22 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"Rule unloading has been stalling for more than {m_Performance.UnloadStallingTimeout}ms");
-                    Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
-
                     m_RuleUnloadTime.Restart();
-                    m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
-                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
-                        break;
+
+                    if (m_NbStallingWarnings >= m_Performance.NbWarningsBeforeException)
+                    {
+                        int TotalTimeMs = m_Performance.UnloadStallingTimeout * (m_NbStallingWarnings + 1);
+                        Exception e = new TimeoutException($"Rule unloading has been stalling for more than {TotalTimeMs}ms");
+                        Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
+                        m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
+                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
+                            break;
+                    }
+                    else
+                    {
+                        Log.Warning(m_RulesToUnloadEnumerator.Current.Name, $"Rule is pending for over {m_Performance.UnloadStallingTimeout} ms");
+                        m_NbStallingWarnings++;
+                    }
                 }
             }
             while (m_UpdateTime.ElapsedMilliseconds < m_Performance.MaxFrameDuration);

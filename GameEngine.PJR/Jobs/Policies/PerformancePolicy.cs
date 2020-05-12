@@ -11,22 +11,27 @@
         public int MaxFrameDuration;
 
         /// <summary>
-        /// If the process should check for stalling rules and throw a TimeoutException when a threshold is exceeded
+        /// If the process should check for stalling rules and record a timeout when a threshold is exceeded
         /// </summary>
         public bool CheckStallingRules;
 
         /// <summary>
-        /// The maximum time in ms a single rule can take to initialize before throwing a TimeoutException
+        /// Nb of times the init and unload process should send a stalling warning before throwing a TimeoutException
+        /// </summary>
+        public int NbWarningsBeforeException;
+
+        /// <summary>
+        /// The maximum time in ms a single rule can take to initialize before recording a timeout
         /// </summary>
         public int InitStallingTimeout;
 
         /// <summary>
-        /// The maximum time in ms a single rule can take to update before throwing a TimeoutException
+        /// The maximum time in ms a single rule can take to update before recording a timeout
         /// </summary>
         public int UpdateStallingTimeout;
 
         /// <summary>
-        /// The maximum time in ms a single rule can take to unload before throwing a TimeoutException
+        /// The maximum time in ms a single rule can take to unload before recording a timeout
         /// </summary>
         public int UnloadStallingTimeout;
     }

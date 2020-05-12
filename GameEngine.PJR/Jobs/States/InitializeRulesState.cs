@@ -21,6 +21,7 @@ namespace GameEngine.PJR.Jobs.States
         private Stopwatch m_RuleInitTime;
         private PerformancePolicy m_Performance;
         private int m_NbRulesInitialized;
+        private int m_NbStallingWarnings;
 
         public InitializeRulesState(GameJob gameMode)
         {
@@ -37,6 +38,7 @@ namespace GameEngine.PJR.Jobs.States
             m_RulesToInitEnumerator = m_GameJob.Rules.GetRulesInOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameJob.PerformancePolicy;
             m_NbRulesInitialized = 0;
+            m_NbStallingWarnings = 0;
             if (!m_RulesToInitEnumerator.MoveNext())
             {
                 m_GameJob.LoadingProgress = 1;
@@ -84,12 +86,21 @@ namespace GameEngine.PJR.Jobs.States
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleInitTime.ElapsedMilliseconds >= m_Performance.InitStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"Rule initialization has been stalling for more than {m_Performance.InitStallingTimeout}ms");
-                    Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
-                    
                     m_RuleInitTime.Restart();
-                    if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
-                        break;
+                    
+                    if (m_NbStallingWarnings >= m_Performance.NbWarningsBeforeException)
+                    {
+                        int TotalTimeMs = m_Performance.InitStallingTimeout * (m_NbStallingWarnings + 1);
+                        Exception e = new TimeoutException($"Rule initialization has been stalling for more than {TotalTimeMs} ms");
+                        Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
+                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
+                            break;
+                    }
+                    else
+                    {
+                        Log.Warning(m_RulesToInitEnumerator.Current.Name, $"Rule is pending for over {m_Performance.InitStallingTimeout} ms");
+                        m_NbStallingWarnings++;
+                    }
                 }
             }
             while (m_UpdateTime.ElapsedMilliseconds < m_Performance.MaxFrameDuration);

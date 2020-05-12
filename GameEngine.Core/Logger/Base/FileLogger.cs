@@ -9,6 +9,7 @@ namespace GameEngine.Core.Logger.Base
     public class FileLogger : ILogger
     {
         private readonly string m_LogFilePath;
+        private readonly object m_FileLock = new object();
 
         /// <summary>
         /// FileLogger constructor
@@ -27,8 +28,7 @@ namespace GameEngine.Core.Logger.Base
         /// </summary>
         public void LogDebug(string tag, string message)
         {
-            using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
-            logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetLogTime(), "DEBUG", tag, message);
+            WriteMessage(tag, "DEBUG", message);
         }
 
         /// <summary>
@@ -36,8 +36,7 @@ namespace GameEngine.Core.Logger.Base
         /// </summary>
         public void LogInfo(string tag, string message)
         {
-            using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
-            logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetLogTime(), "INFO", tag, message);
+            WriteMessage(tag, "INFO", message);
         }
 
         /// <summary>
@@ -45,8 +44,7 @@ namespace GameEngine.Core.Logger.Base
         /// </summary>
         public void LogWarning(string tag, string message)
         {
-            using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
-            logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetLogTime(), "WARNING", tag, message);
+            WriteMessage(tag, "WARNING", message);
         }
 
         /// <summary>
@@ -54,8 +52,7 @@ namespace GameEngine.Core.Logger.Base
         /// </summary>
         public void LogError(string tag, string message)
         {
-            using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
-            logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetLogTime(), "ERROR", tag, message);
+            WriteMessage(tag, "ERROR", message);
         }
 
         /// <summary>
@@ -65,6 +62,15 @@ namespace GameEngine.Core.Logger.Base
         {
             string message = LogUtils.FormatException(e);
             LogError(tag, message);
+        }
+
+        private void WriteMessage(string tag, string level, string message)
+        {
+            lock (m_FileLock)
+            {
+                using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
+                logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetTime(), level, tag, message);
+            }
         }
     }
 }
