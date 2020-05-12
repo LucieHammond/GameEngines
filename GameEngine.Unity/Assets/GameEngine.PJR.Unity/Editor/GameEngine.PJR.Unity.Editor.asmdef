@@ -1,0 +1,6 @@
+{
+    "name": "GameEngine.PJR.Unity.Editor",
+    "references": [
+        "GameEngine.PJR.Unity"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "name": "GameEngine.Core.Unity.Tests",
+    "references": [
+        "GameEngine.Core.Unity"
+    ]
+}
