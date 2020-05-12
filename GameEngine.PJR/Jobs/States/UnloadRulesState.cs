@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.Logger;
-using GameEngine.FSM;
+using GameEngine.Core.FSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Rules;
 using System;

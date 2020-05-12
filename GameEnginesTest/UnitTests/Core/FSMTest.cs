@@ -1,4 +1,4 @@
-using GameEngine.FSM;
+using GameEngine.Core.FSM;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace GameEnginesTest.UnitTests.FSM
+namespace GameEnginesTest.UnitTests.Core
 {
     /// <summary>
     /// Unit tests for the class FSM

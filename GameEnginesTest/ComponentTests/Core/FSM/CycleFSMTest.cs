@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameEngine.FSM.CustomFSM;
+using GameEngine.Core.FSM.CustomFSM;
 using System.Collections.Generic;
-using GameEngine.FSM;
+using GameEngine.Core.FSM;
 using System;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Utils;
 
-namespace GameEnginesTest.ComponentTests.FSM
+namespace GameEnginesTest.ComponentTests.Core
 {
     /// <summary>
     /// Component tests for the class CycleFSM

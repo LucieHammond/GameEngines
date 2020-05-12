@@ -1,4 +1,4 @@
-﻿using GameEngine.FSM;
+﻿using GameEngine.Core.FSM;
 
 namespace GameEngine.PJR.Jobs.States
 {

@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameEnginesTest.IntegrationTests
+namespace GameEnginesTest.IntegrationTests.PJR
 {
     /// <summary>
     /// Integration tests focusing on the interactions between GameJobs and GameRules

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace GameEngine.FSM
+namespace GameEngine.Core.FSM
 {
     /// <summary>
     /// A Finite State Machine associated with an enum T of possible states (see https://en.wikipedia.org/wiki/Finite-state_machine)

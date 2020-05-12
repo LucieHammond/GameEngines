@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.Model;
-using GameEngine.FSM;
-using GameEngine.FSM.CustomFSM;
+using GameEngine.Core.FSM;
+using GameEngine.Core.FSM.CustomFSM;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Jobs.States;
 using GameEngine.PJR.Process;

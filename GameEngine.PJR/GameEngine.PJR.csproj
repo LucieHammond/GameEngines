@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameEngine.Core\GameEngine.Core.csproj" />
-    <ProjectReference Include="..\GameEngine.FSM\GameEngine.FSM.csproj" />
   </ItemGroup>
 
 </Project>

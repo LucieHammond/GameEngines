@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GameEngine.FSM.CustomFSM
+namespace GameEngine.Core.FSM.CustomFSM
 {
     /// <summary>
     /// A state machine that transitions accross its states following a cycle pattern.

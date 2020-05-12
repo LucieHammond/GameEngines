@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace GameEngine.FSM.CustomFSM
+namespace GameEngine.Core.FSM.CustomFSM
 {
     /// <summary>
     /// A state machine that transitions accross its states following a queue pattern.

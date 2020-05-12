@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameEngine.FSM
+namespace GameEngine.Core.FSM
 {
     /// <summary>
     /// A FSM state associated with a specific value of the T Enum describing all FSM states.

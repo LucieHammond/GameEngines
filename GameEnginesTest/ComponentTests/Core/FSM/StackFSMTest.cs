@@ -1,11 +1,11 @@
-﻿using GameEngine.FSM.CustomFSM;
+﻿using GameEngine.Core.FSM.CustomFSM;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.ComponentTests.FSM
+namespace GameEnginesTest.ComponentTests.Core
 {
     /// <summary>
     /// Component tests for the class StackFSM

@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.IntegrationTests
+namespace GameEnginesTest.IntegrationTests.PJR
 {
     /// <summary>
     /// Integration tests focusing on the interactions between GameProcess and GameJobs
