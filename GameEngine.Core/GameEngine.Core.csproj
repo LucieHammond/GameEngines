@@ -4,4 +4,9 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(TargetPath) $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
+    <Exec Command="xcopy $(TargetDir)$(TargetName).pdb $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
+  </Target>
+
 </Project>

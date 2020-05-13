@@ -14,9 +14,6 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-# Include Packages folder (that is not for nuget packages here)
-!**/[Pp]ackages/*
-
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
@@ -75,3 +72,19 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+
+# ========================================
+#         CUSTOM
+# ========================================
+
+# Re-include Packages folder (that is not for nuget packages here)
+!**/[Pp]ackages/*
+
+# Don't version the dlls copied into Libraries folder (but include their .meta files)
+**/Libraries/*.dll
+!**/Libraries/*.dll.meta
+
+# Don't version the pdb copied into Libraries folder (but include their .meta files)
+**/Libraries/*.pdb
+!**/Libraries/*.pdb.meta

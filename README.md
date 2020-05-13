@@ -15,3 +15,7 @@ The repository also includes a Test project containing:
 - Component Tests
 - Integration Tests
 - EndToEnd Tests
+
+## Setup
+
+- Build the GameEngines.sln solution before opening the GameEngine.Unity project (so that the dlls could be generated and copied)

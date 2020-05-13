@@ -12,4 +12,9 @@
     <ProjectReference Include="..\GameEngine.Core\GameEngine.Core.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(TargetPath) $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
+    <Exec Command="xcopy $(TargetDir)$(TargetName).pdb $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
+  </Target>
+
 </Project>
