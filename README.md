@@ -16,6 +16,12 @@ The repository also includes a Test project containing:
 - Integration Tests
 - EndToEnd Tests
 
+## Requirements
+
+- Visual Studio
+- .Net Core (3.0 or higher)
+- Unity (2019.2 or higher)
+
 ## Setup
 
-- Build the GameEngines.sln solution before opening the GameEngine.Unity project (so that the dlls could be generated and copied)
+- Execute the setup.bat script (at the root of the project)
