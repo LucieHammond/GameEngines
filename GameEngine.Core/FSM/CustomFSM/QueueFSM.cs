@@ -76,12 +76,14 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <returns>If the operation succeeded (if the queue wasn't empty)</returns>
         public bool TryDequeueState(out T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
-            if (m_StateQueue.TryDequeue(out stateId))
+            if (m_StateQueue.Count > 0)
             {
+                stateId = m_StateQueue.Dequeue();
                 SetState(stateId, immediate, ignoreIfCurrentState, priority);
                 return true;
             }
 
+            stateId = default;
             return false;
         }
 

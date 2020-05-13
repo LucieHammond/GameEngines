@@ -11,15 +11,6 @@ namespace GameEngine.PJR.Process.Services
     /// </summary>
     public interface IServiceSetup : IGameJobSetup
     {
-        internal void CheckOnlyServices(RulesDictionary rules)
-        {
-            foreach (KeyValuePair<Type, GameRule> rule in rules)
-            {
-                if (!(rule.Value is GameService))
-                {
-                    throw new InvalidCastException($"Cannot setup rule {rule.Value.Name} in ServiceSetup because it doesn't inherit GameService");
-                }
-            }
-        }
+        
     }
 }

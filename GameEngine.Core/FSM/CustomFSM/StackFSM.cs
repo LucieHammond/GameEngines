@@ -66,12 +66,14 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <returns>If the operation succeeded (if the stack wasn't empty)</returns>
         public bool TryPopState(out T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
-            if (m_StatesStack.TryPop(out stateId))
+            if (m_StatesStack.Count > 0)
             {
+                stateId = m_StatesStack.Pop();
                 SetState(stateId, immediate, ignoreIfCurrentState, priority);
                 return true;
             }
 
+            stateId = default;
             return false;
         }
 

@@ -59,7 +59,8 @@ namespace GameEngine.PJR.Process
             Time = time;
             m_ServiceSetup = setup.GetServiceSetup();
             m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
-            m_GameModesToCome.TryDequeue(out m_NextGameModeSetup);
+            if (m_GameModesToCome.Count > 0)
+                m_NextGameModeSetup = m_GameModesToCome.Dequeue();
             CheckGameModeValidity(m_NextGameModeSetup);
             m_IsPaused = false;
         }
@@ -202,9 +203,9 @@ namespace GameEngine.PJR.Process
         /// <returns>If there was a next GameMode to switch to</returns>
         public bool SwitchToNextGameMode(Configuration configuration = null)
         {
-            if (m_GameModesToCome.TryDequeue(out IGameModeSetup setup))
+            if (m_GameModesToCome.Count > 0)
             {
-                SwitchToGameMode(setup, configuration);
+                SwitchToGameMode(m_GameModesToCome.Dequeue(), configuration);
                 return true;
             }
             return false;

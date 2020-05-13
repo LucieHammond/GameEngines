@@ -68,8 +68,10 @@ namespace GameEngine.Core.Logger.Base
         {
             lock (m_FileLock)
             {
-                using StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true);
-                logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetTime(), level, tag, message);
+                using (StreamWriter logFileWriter = new StreamWriter(m_LogFilePath, true))
+                {
+                    logFileWriter.WriteLine("{0}\t{1}\t [{2}] {3}", LogUtils.GetTime(), level, tag, message);
+                }
             }
         }
     }

@@ -19,7 +19,7 @@ The repository also includes a Test project containing:
 ## Requirements
 
 - Visual Studio
-- .Net Core (3.0 or higher)
+- .Net Core (2.0 or higher)
 - Unity (2019.2 or higher)
 
 ## Setup
