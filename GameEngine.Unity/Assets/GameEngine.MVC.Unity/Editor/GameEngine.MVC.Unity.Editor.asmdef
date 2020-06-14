@@ -2,5 +2,8 @@
     "name": "GameEngine.MVC.Unity.Editor",
     "references": [
         "GameEngine.MVC.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
     ]
 }
