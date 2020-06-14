@@ -63,6 +63,9 @@ namespace GameEnginesTest.UnitTests.Core
                 // Works with a formatted message
                 Log.Debug(tag, "{0} message", "debug");
                 Assert.AreEqual(3, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Debug(null, message));
             }
         }
 
@@ -107,6 +110,9 @@ namespace GameEnginesTest.UnitTests.Core
                 // Works with a formatted message
                 Log.Info(tag, "{0} message", "info");
                 Assert.AreEqual(4, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Info(null, message));
             }
         }
 
@@ -151,6 +157,9 @@ namespace GameEnginesTest.UnitTests.Core
                 // Works with a formatted message
                 Log.Warning(tag, "{0} message", "warning");
                 Assert.AreEqual(5, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Warning(null, message));
             }
         }
 
@@ -195,6 +204,9 @@ namespace GameEnginesTest.UnitTests.Core
                 // Works with a formatted message
                 Log.Error(tag, "{0} message", "error");
                 Assert.AreEqual(6, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Error(null, message));
             }
         }
 
@@ -235,6 +247,9 @@ namespace GameEnginesTest.UnitTests.Core
                 Log.TagsFilter.Add(tag);
                 Log.Exception(tag, exception);
                 Assert.AreEqual(5, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Exception(null, exception));
             }
         }
 
@@ -276,6 +291,9 @@ namespace GameEnginesTest.UnitTests.Core
                 // Works with a formatted message
                 Log.Fatal(tag, "{0} message", "fatal");
                 Assert.AreEqual(7, totalCalls);
+
+                // Tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Fatal(null, message));
             }
         }
 

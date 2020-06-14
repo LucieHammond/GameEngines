@@ -117,5 +117,22 @@ namespace GameEnginesTest.ComponentTests.Core
                 Assert.IsTrue(line.Contains(messages[i]));
             }
         }
+
+        [TestMethod]
+        public void ManageNullMessages()
+        {
+            // Messages can be null
+            m_Logger.LogDebug("Tag", null);
+            m_Logger.LogInfo("Tag", null);
+            m_Logger.LogWarning("Tag", null);
+            m_Logger.LogError("Tag", null);
+
+            string outputLogs = GetLogsAsString();
+            string[] outputLines = outputLogs.Split("\n").Where((line) => line != "").ToArray();
+            Assert.AreEqual(4, outputLines.Length);
+
+            // Exceptions can't be null -> thow NullReferenceException
+            Assert.ThrowsException<NullReferenceException>(() => m_Logger.LogException("Tag", null));
+        }
     }
 }
