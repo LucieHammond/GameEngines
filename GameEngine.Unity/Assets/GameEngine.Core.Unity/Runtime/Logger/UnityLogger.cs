@@ -7,7 +7,12 @@ namespace GameEngine.Core.Logger
 {
     public class UnityLogger : ILogger
     {
-        private Dictionary<string, Color> m_TagColors = new Dictionary<string, Color>();
+        private Dictionary<string, Color> m_TagsColors;
+
+        public UnityLogger(Dictionary<string, Color> tagsColors = null)
+        {
+            m_TagsColors = tagsColors ?? new Dictionary<string, Color>();
+        }
 
         public void LogDebug(string tag, string message)
         {
@@ -50,14 +55,10 @@ namespace GameEngine.Core.Logger
 
         private Color GetOrAddColor(string tag)
         {
-            if (!m_TagColors.TryGetValue(tag, out Color color))
+            if (!m_TagsColors.TryGetValue(tag, out Color color))
             {
-                ColorUtility.TryParseHtmlString($"#{Convert.ToString(tag.GetHashCode(), 16)}", out color);
-                color.r = Mathf.Lerp(0, 0.9f, color.r);
-                color.g = Mathf.Lerp(0, 0.9f, color.g);
-                color.b = Mathf.Lerp(0, 0.9f, color.b);
-
-                m_TagColors.Add(tag, color);
+                color = LogSettings.GetColorForTag(tag);
+                m_TagsColors.Add(tag, color);
             }
 
             return color;
