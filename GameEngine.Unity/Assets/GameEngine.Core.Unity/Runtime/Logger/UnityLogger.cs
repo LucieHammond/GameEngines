@@ -7,7 +7,7 @@ namespace GameEngine.Core.Logger
 {
     public class UnityLogger : ILogger
     {
-        private Dictionary<string, Color> m_TagsColors;
+        private readonly Dictionary<string, Color> m_TagsColors;
 
         public UnityLogger(Dictionary<string, Color> tagsColors = null)
         {

@@ -16,7 +16,7 @@ namespace GameEngine.Core.UnityEditor.Settings
         [MenuItem("GameEngine/User Preferences/LogSettings", priority = 1)]
         public static void DisplayLogSettings()
         {
-            Selection.activeObject = SettingsUtils.GetOrCreateSettingAsset<LogSettings>(ASSET_PATH, true); ;
+            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<LogSettings>(ASSET_PATH, SettingsScope.User); ;
         }
 
         public override void OnInspectorGUI()
