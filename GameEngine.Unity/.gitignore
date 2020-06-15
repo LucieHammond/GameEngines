@@ -88,3 +88,7 @@ crashlytics-build.properties
 # Don't version the pdb copied into Libraries folder (but include their .meta files)
 **/Libraries/*.pdb
 !**/Libraries/*.pdb.meta
+
+# Ignore GameEngineSettings folder
+/[Aa]ssets/[Gg]ameEngineSettings/
+/[Aa]ssets/[Gg]ameEngineSettings.meta
