@@ -28,8 +28,8 @@ namespace GameEnginesTest.IntegrationTests
             m_Time = new MockProcessTime();
 
             // Create an empty process with no services and no rules (interactions with rules are not tested here)
-            DummyServiceSetup servicesSetup = new DummyServiceSetup();
-            servicesSetup.CustomServices = new List<GameService>();
+            DummyGameServiceSetup servicesSetup = new DummyGameServiceSetup();
+            servicesSetup.CustomServices = new List<GameRule>();
 
             DummyGameModeSetup modeSetup = new DummyGameModeSetup();
             modeSetup.CustomRules = new List<GameRule>();

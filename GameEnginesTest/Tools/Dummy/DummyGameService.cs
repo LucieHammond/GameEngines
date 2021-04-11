@@ -1,10 +1,11 @@
 ﻿using GameEngine.PJR.Process.Services;
+using GameEngine.PJR.Rules;
 using GameEngine.PJR.Rules.Dependencies.Attributes;
 
 namespace GameEnginesTest.Tools.Dummy
 {
     [DependencyProvider(typeof(IDummyGameService))]
-    public class DummyGameService : GameService, IDummyGameService
+    public class DummyGameService : GameRule, IDummyGameService
     {
         protected override void Initialize()
         {

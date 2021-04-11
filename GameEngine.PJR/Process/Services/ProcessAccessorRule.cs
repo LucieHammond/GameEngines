@@ -1,16 +1,17 @@
-﻿using GameEngine.PJR.Rules.Dependencies.Attributes;
+﻿using GameEngine.PJR.Rules;
+using GameEngine.PJR.Rules.Dependencies.Attributes;
 
 namespace GameEngine.PJR.Process.Services
 {
     /// <summary>
-    /// A basic GameService implementing the IProcessAccessor interface
+    /// A basic Rule implementing the IProcessAccessor interface, for accessing the process instance.
     /// </summary>
     [DependencyProvider(typeof(IProcessAccessor))]
-    internal class ProcessService : GameService, IProcessAccessor
+    internal class ProcessAccessorRule : GameRule, IProcessAccessor
     {
         private GameProcess m_CurrentProcess;
 
-        internal ProcessService(GameProcess process)
+        internal ProcessAccessorRule(GameProcess process)
         {
             m_CurrentProcess = process;
         }

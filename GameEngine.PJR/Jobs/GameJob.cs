@@ -73,13 +73,13 @@ namespace GameEngine.PJR.Jobs
 
         internal GameJob(IGameJobSetup setup, Configuration configuration, GameProcess parentProcess)
         {
-            IsServiceJob = setup is IServiceSetup;
-            Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Services" : "Mode");
+            IsServiceJob = setup is IGameServiceSetup;
+            Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Service" : "Mode");
             Configuration = configuration;
             ParentProcess = parentProcess;
             Rules = new RulesDictionary();
             if (IsServiceJob)
-                Rules.AddRule(new ProcessService(parentProcess));
+                Rules.AddRule(new ProcessAccessorRule(parentProcess));
             m_IsPaused = false;
 
             m_StateMachine = new QueueFSM<GameJobState>($"{Name}FSM", new List<FSMState<GameJobState>>()

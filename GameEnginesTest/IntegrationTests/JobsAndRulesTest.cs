@@ -43,7 +43,7 @@ namespace GameEnginesTest.IntegrationTests
 
             GameProcess process = new GameProcess(new DummyGameProcessSetup(), m_Time);
             process.ServiceProvider = new DependencyProvider();
-            process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessService(process));
+            process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessAccessorRule(process));
             process.ServiceProvider.Add(typeof(IDummyGameService), new DummyGameService());
             Configuration configuration = new Configuration();
 

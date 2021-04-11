@@ -9,15 +9,15 @@ namespace GameEnginesTest.Tools.Dummy
     {
         public string Name => "Test";
 
-        public IServiceSetup CustomServiceSetup;
+        public IGameServiceSetup CustomServiceSetup;
         public List<IGameModeSetup> CustomGameModes;
 
-        public IServiceSetup GetServiceSetup()
+        public IGameServiceSetup GetServiceSetup()
         {
             if (CustomServiceSetup != null)
                 return CustomServiceSetup;
 
-            return new DummyServiceSetup();
+            return new DummyGameServiceSetup();
         }
 
         public List<IGameModeSetup> GetFirstGameModes()

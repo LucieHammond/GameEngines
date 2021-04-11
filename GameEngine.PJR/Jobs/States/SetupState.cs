@@ -36,8 +36,6 @@ namespace GameEngine.PJR.Jobs.States
                 m_GameJob.PerformancePolicy = m_Setup.GetPerformancePolicy();
 
                 m_Setup.SetRules(ref m_GameJob.Rules);
-                if (m_GameJob.IsServiceJob)
-                    (m_Setup as IServiceSetup).CheckOnlyServices(m_GameJob.Rules);
 
                 m_GameJob.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameJob.Rules.ContainsKey(ruleType)).ToList();
                 m_GameJob.UpdateScheduler = m_Setup.GetUpdateScheduler().Where((scheduler) => m_GameJob.Rules.ContainsKey(scheduler.RuleType)).ToList();

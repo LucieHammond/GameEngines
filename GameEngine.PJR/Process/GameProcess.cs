@@ -41,7 +41,7 @@ namespace GameEngine.PJR.Process
 
         internal DependencyProvider ServiceProvider;
 
-        private IServiceSetup m_ServiceSetup;
+        private IGameServiceSetup m_ServiceSetup;
         private IGameModeSetup m_NextGameModeSetup;
         private Configuration m_NextGameModeConfig;
         private Queue<IGameModeSetup> m_GameModesToCome;
