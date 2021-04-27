@@ -39,7 +39,7 @@ namespace GameEngine.Core.Utilities
         /// <param name="fileName">The file name of the path, filled when found</param>
         /// <param name="isFile">Whether the path represents a file (true) or a directory (false)</param>
         /// <param name="isRooted">If the path is likely to contains a root. Default is true</param>
-        public static void Decompose(string path, out string root, out List<string> folders, out string fileName, 
+        public static void Decompose(string path, out string root, out List<string> folders, out string fileName,
             bool isFile = true, bool isRooted = true)
         {
             CheckPathValidity(path);
@@ -225,7 +225,7 @@ namespace GameEngine.Core.Utilities
                     if (index == fileName.Length)
                         return string.Empty;
                     return fileName.Substring(index - 1);
-                } 
+                }
                 index--;
             }
 
@@ -386,7 +386,7 @@ namespace GameEngine.Core.Utilities
             {
                 Parse(Environment.CurrentDirectory, out string fullRoot, out List<string> fullFolders, out _, true, false);
 
-                switch(type)
+                switch (type)
                 {
                     case RootType.None:
                         root = fullRoot;
@@ -420,7 +420,7 @@ namespace GameEngine.Core.Utilities
                     folders.Insert(0, ParentFolder);
                     index++;
                 }
-            } 
+            }
         }
         #endregion
 

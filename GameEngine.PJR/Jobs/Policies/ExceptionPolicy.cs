@@ -21,7 +21,7 @@ namespace GameEngine.PJR.Jobs.Policies
         /// Kind of action to take during UnloadRules when an exception is catched
         /// </summary>
         public OnExceptionBehaviour ReactionDuringUnload;
-        
+
         /// <summary>
         /// Indicate if the unload method of a GameRule can be skipped in case an exception occurs in it
         /// </summary>

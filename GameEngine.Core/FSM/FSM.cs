@@ -212,7 +212,7 @@ namespace GameEngine.Core.FSM
 
             if (m_Running)
                 m_States[stateId].Unload();
-            
+
             m_States.Remove(stateId);
         }
 

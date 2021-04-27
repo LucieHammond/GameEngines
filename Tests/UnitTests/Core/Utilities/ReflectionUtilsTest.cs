@@ -8,6 +8,10 @@ using System.Reflection;
 
 namespace GameEnginesTest.UnitTests.Core
 {
+    /// <summary>
+    /// Unit tests for the class ReflectionUtils
+    /// <see cref="ReflectionUtils"/>
+    /// </summary>
     [TestClass]
     public class ReflectionUtilsTest
     {
@@ -27,7 +31,7 @@ namespace GameEnginesTest.UnitTests.Core
             Assert.AreEqual(typeof(System.Int32), fullResult);
 
             // For a type defined in ReflectionUtils's assembly -> type is found with limited and full search
-            string executingType = typeof(ReflectionUtils).FullName; 
+            string executingType = typeof(ReflectionUtils).FullName;
             limitedResult = ReflectionUtils.GetTypeFromName(executingType, false);
             fullResult = ReflectionUtils.GetTypeFromName(executingType, true);
             Assert.AreEqual(typeof(ReflectionUtils), limitedResult);
@@ -119,7 +123,7 @@ namespace GameEnginesTest.UnitTests.Core
             Assembly testAssembly = Assembly.GetExecutingAssembly();
             Assembly otherAssembly = Assembly.GetAssembly(typeof(ReflectionUtils));
             Assembly systemAssembly = Assembly.GetAssembly(typeof(System.String));
-            bool condition(Type type) => typeof(IDummyInterface).IsAssignableFrom(type) 
+            bool condition(Type type) => typeof(IDummyInterface).IsAssignableFrom(type)
                 && type.GetCustomAttribute<DummyInheritedAttribute>() != null;
 
             // Search type implementing IDummyInterface and inheriting DummyInheritedAttribute -> find defined type C

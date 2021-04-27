@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameEngine.Core.Utilities;
+﻿using GameEngine.Core.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace GameEnginesTest.UnitTests.Core
 {
@@ -103,7 +103,7 @@ namespace GameEnginesTest.UnitTests.Core
 
             // All separators are normalized in standard or alternative form according to useAltSeparator
             string validPath = "//Computer\\Share\\Dir1/Dir2\\Dir3/file.html";
-            Assert.AreEqual("\\\\Computer\\Share\\Dir1\\Dir2\\Dir3\\file.html", 
+            Assert.AreEqual("\\\\Computer\\Share\\Dir1\\Dir2\\Dir3\\file.html",
                 PathUtils.Normalize(validPath, true, false));
             Assert.AreEqual("//Computer/Share/Dir1/Dir2/Dir3/file.html",
                 PathUtils.Normalize(validPath, true, true));

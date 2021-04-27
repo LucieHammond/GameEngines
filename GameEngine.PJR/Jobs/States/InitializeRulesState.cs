@@ -1,5 +1,5 @@
-﻿using GameEngine.Core.Logger;
-using GameEngine.Core.FSM;
+﻿using GameEngine.Core.FSM;
+using GameEngine.Core.Logger;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Rules;
 using System;
@@ -87,7 +87,7 @@ namespace GameEngine.PJR.Jobs.States
                 else if (m_Performance.CheckStallingRules && m_RuleInitTime.ElapsedMilliseconds >= m_Performance.InitStallingTimeout)
                 {
                     m_RuleInitTime.Restart();
-                    
+
                     if (m_NbStallingWarnings >= m_Performance.NbWarningsBeforeException)
                     {
                         int TotalTimeMs = m_Performance.InitStallingTimeout * (m_NbStallingWarnings + 1);

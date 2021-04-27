@@ -36,7 +36,7 @@ namespace GameEngine.Core.FSM.CustomFSM
             for (int i = 1; i < states.Count; i++)
             {
                 m_StateQueue.Enqueue(states[i].Id);
-            } 
+            }
         }
 
         /// <summary>

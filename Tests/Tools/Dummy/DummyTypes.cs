@@ -7,7 +7,7 @@ namespace GameEnginesTest.Tools.Dummy
     public class DummyTypeA { }
 
     public class DummyTypeB : DummyTypeA { }
-    
+
     public class DummyTypeC : DummyTypeA, IDummyInterface { }
 
     public class DummyTypeD : IDummyInterface { }

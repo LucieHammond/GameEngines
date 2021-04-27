@@ -5,6 +5,10 @@ using System.Globalization;
 
 namespace GameEnginesTest.UnitTests.Core
 {
+    /// <summary>
+    /// Unit tests for the class TimeUtils
+    /// <see cref="TimeUtils"/>
+    /// </summary>
     [TestClass]
     public class TimeUtilsTest
     {

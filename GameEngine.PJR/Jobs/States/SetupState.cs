@@ -1,11 +1,11 @@
-﻿using GameEngine.Core.Logger;
-using GameEngine.Core.FSM;
+﻿using GameEngine.Core.FSM;
+using GameEngine.Core.Logger;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process.Services;
-using System;
-using System.Linq;
 using GameEngine.PJR.Rules;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameEngine.PJR.Jobs.States
 {
