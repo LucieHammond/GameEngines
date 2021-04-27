@@ -56,12 +56,12 @@ namespace GameEngine.Core.Utilities
         /// <param name="path">The path to normalize</param>
         /// <param name="isFile">Whether the path represents a file (true) or a directory (false)</param>
         /// <param name="useAltSeparator">Use the alternate platform-specific character to separate directories (instead of standard)</param>
-        /// <param name="dirEndSeparator">Make the path end with a separator if it is a directory path</param>
+        /// <param name="trimEndSeparator">Trim the path's ending separator (for directory paths)</param>
         /// <returns>The normalized path string</returns>
-        public static string Normalize(string path, bool isFile = true, bool useAltSeparator = false, bool dirEndSeparator = true)
+        public static string Normalize(string path, bool isFile = true, bool useAltSeparator = false, bool trimEndSeparator = false)
         {
             Decompose(path, out string root, out List<string> folders, out string fileName, isFile);
-            return Format(root, folders, fileName, useAltSeparator, dirEndSeparator);
+            return Format(root, folders, fileName, useAltSeparator, trimEndSeparator);
         }
 
         /// <summary>
@@ -70,13 +70,13 @@ namespace GameEngine.Core.Utilities
         /// <param name="path">The path to process</param>
         /// <param name="isFile">Whether the path represents a file (true) or a directory (false)</param>
         /// <param name="useAltSeparator">Use the alternate platform-specific character to separate directories (instead of standard)</param>
-        /// <param name="dirEndSeparator">Make the path end with a separator if it is a directory path</param>
+        /// <param name="trimEndSeparator">Trim the path's ending separator (for directory paths)</param>
         /// <returns>The full path string</returns>
-        public static string GetFullPath(string path, bool isFile = true, bool useAltSeparator = false, bool dirEndSeparator = true)
+        public static string GetFullPath(string path, bool isFile = true, bool useAltSeparator = false, bool trimEndSeparator = false)
         {
             Decompose(path, out string root, out List<string> folders, out string fileName, isFile);
             ApplyFullRoot(ref root, ref folders);
-            return Format(root, folders, fileName, useAltSeparator, dirEndSeparator);
+            return Format(root, folders, fileName, useAltSeparator, trimEndSeparator);
         }
 
         /// <summary>
@@ -86,16 +86,16 @@ namespace GameEngine.Core.Utilities
         /// <param name="relativeTo">The base path the result should be relative to (always considered a directory)</param>
         /// <param name="isFile">Whether the main path represents a file (true) or a directory (false)</param>
         /// <param name="useAltSeparator">Use the alternate platform-specific character to separate directories (instead of standard)</param>
-        /// <param name="dirEndSeparator">Make the path end with a separator if it is a directory path</param>
+        /// <param name="trimEndSeparator">Trim the path's ending separator (for directory paths)</param>
         /// <returns>The relative path string</returns>
-        public static string GetRelativePath(string path, string relativeTo, bool isFile = true, bool useAltSeparator = false, bool dirEndSeparator = true)
+        public static string GetRelativePath(string path, string relativeTo, bool isFile = true, bool useAltSeparator = false, bool trimEndSeparator = false)
         {
             Decompose(path, out string root, out List<string> folders, out string fileName, isFile);
             ApplyFullRoot(ref root, ref folders);
             Decompose(relativeTo, out string baseRoot, out List<string> baseFolders, out _, false);
             ApplyFullRoot(ref baseRoot, ref baseFolders);
             SetRelativeTo(ref root, ref folders, baseRoot, baseFolders);
-            return Format(root, folders, fileName, useAltSeparator, dirEndSeparator);
+            return Format(root, folders, fileName, useAltSeparator, trimEndSeparator);
         }
 
         /// <summary>
@@ -365,10 +365,10 @@ namespace GameEngine.Core.Utilities
             fileName = fileName.TrimEnd(' ', '.');
         }
 
-        internal static string Format(string root, List<string> folders, string fileName, bool useAltSeparator = false, bool dirEndSeparator = true)
+        internal static string Format(string root, List<string> folders, string fileName, bool useAltSeparator = false, bool trimEndSeparator = false)
         {
             string separator = (useAltSeparator ? AltDirectorySeparator : DirectorySeparator).ToString();
-            string endSeparator = (dirEndSeparator || fileName.Length > 0) ? separator : string.Empty;
+            string endSeparator = (fileName.Length > 0 || !trimEndSeparator) ? separator : string.Empty;
 
             string path = "";
             path += useAltSeparator ? root.Replace(DirectorySeparator, AltDirectorySeparator) : root;
@@ -378,14 +378,14 @@ namespace GameEngine.Core.Utilities
 
             return path;
         }
-        
+
         internal static void ApplyFullRoot(ref string root, ref List<string> folders)
         {
             RootType type = GetRootType(root);
             if (type == RootType.None || type == RootType.CurrentDrive || type == RootType.DriveRelative)
             {
                 Parse(Environment.CurrentDirectory, out string fullRoot, out List<string> fullFolders, out _, true, false);
-                
+
                 switch(type)
                 {
                     case RootType.None:
@@ -414,7 +414,7 @@ namespace GameEngine.Core.Utilities
                     folders.RemoveAt(0);
                     index++;
                 }
-                    
+
                 while (index < baseFolders.Count)
                 {
                     folders.Insert(0, ParentFolder);

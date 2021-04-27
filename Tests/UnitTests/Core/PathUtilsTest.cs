@@ -108,9 +108,9 @@ namespace GameEnginesTest.UnitTests.Core
             Assert.AreEqual("//Computer/Share/Dir1/Dir2/Dir3/file.html",
                 PathUtils.Normalize(validPath, true, true));
 
-            // Directory path ends with a separator, unless dirEndSeparator is false
-            Assert.AreEqual($"C:/Directory/", PathUtils.Normalize("C:/Directory", false, true, true));
-            Assert.AreEqual($"C:/Directory", PathUtils.Normalize("C:/Directory/", false, true, false));
+            // Directory path ends with a separator, unless trimEndSeparator is true
+            Assert.AreEqual($"C:/Directory/", PathUtils.Normalize("C:/Directory", false, true, false));
+            Assert.AreEqual($"C:/Directory", PathUtils.Normalize("C:/Directory/", false, true, true));
 
             // Path with relative directory components is correctly evaluated
             string pathToSimplify = "Dir1/./Dir2/../Dir3/Dir4/../";
