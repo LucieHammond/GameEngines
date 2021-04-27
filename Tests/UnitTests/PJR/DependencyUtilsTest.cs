@@ -5,7 +5,6 @@ using GameEngine.PJR.Rules.Dependencies;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
 namespace GameEnginesTest.UnitTests.PJR
 {

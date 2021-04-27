@@ -65,7 +65,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             // Report error during initialization
             DummyGameRule rule1 = new DummyGameRule();
             rule1.OnInitialize += () => rule1.CallMarkError();
-            
+
             Assert.IsFalse(rule1.ErrorDetected);
             rule1.BaseInitialize();
             Assert.IsTrue(rule1.ErrorDetected);
@@ -76,7 +76,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             rule2.OnInitialize += () => rule2.CallMarkInitialized();
             rule2.OnUpdate += () => rule2.CallMarkError();
             rule2.BaseInitialize();
-            
+
             Assert.IsFalse(rule2.ErrorDetected);
             rule2.BaseUpdate();
             Assert.IsTrue(rule2.ErrorDetected);

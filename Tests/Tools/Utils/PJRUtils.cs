@@ -13,7 +13,7 @@ namespace GameEnginesTest.Tools.Utils
             while (!condition() && i < maxFrames)
             {
                 process.Update();
-                ((MockProcessTime) process.Time).GoToNextFrame();
+                ((MockProcessTime)process.Time).GoToNextFrame();
                 i++;
             }
 

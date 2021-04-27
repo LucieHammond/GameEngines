@@ -73,7 +73,7 @@ namespace GameEnginesTest.IntegrationTests.PJR
         {
             m_Job.Start();
             m_Job.SimulateExecutionUntil(m_Time, () => m_Job.State == GameJobState.InitializeRules);
-            
+
             // Rules will all declare themselves initialized when Initialize() is called
             m_Rules[0].OnInitialize += () => m_Rules[0].CallMarkInitialized();
             m_Rules[1].OnInitialize += () => m_Rules[1].CallMarkInitialized();
@@ -129,7 +129,7 @@ namespace GameEnginesTest.IntegrationTests.PJR
             m_Rules[1].OnUnload += () => { rulesUnloaded.Add(1); m_Rules[1].CallMarkUnloaded(); };
             m_Rules[2].OnUnload += () => { rulesUnloaded.Add(2); m_Rules[2].CallMarkUnloaded(); };
 
-            m_Job.Unload(); 
+            m_Job.Unload();
             Assert.IsTrue(m_Job.SimulateExecutionUntil(m_Time, () => rulesUnloaded.Count == 3));
             Assert.AreEqual(2, rulesUnloaded[0]);
             Assert.AreEqual(1, rulesUnloaded[1]);
@@ -275,7 +275,7 @@ namespace GameEnginesTest.IntegrationTests.PJR
 
             // Timeout exception is called during load, and provokes pause (OnExceptionBehaviour)
             object objLock = new object();
-            m_Rules[1].OnInitialize = () => Task.Run(() => 
+            m_Rules[1].OnInitialize = () => Task.Run(() =>
             {
                 Thread.Sleep(stallingTimeout);
                 m_Rules[1].CallMarkInitialized();

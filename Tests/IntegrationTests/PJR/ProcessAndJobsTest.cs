@@ -8,7 +8,6 @@ using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Mocks;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 
 namespace GameEnginesTest.IntegrationTests.PJR
@@ -89,12 +88,12 @@ namespace GameEnginesTest.IntegrationTests.PJR
             // If the job is a GameMode -> switch to fallback mode
             m_Process.Start();
             m_Process.SimulateExecutionUntil(() => m_Process.CurrentGameMode != null && m_Process.CurrentGameMode.IsOperational);
-            
+
             DummyGameModeSetup fallbackSetup = new DummyGameModeSetup();
             fallbackSetup.CustomRules = new List<GameRule>();
             fallbackSetup.CustomName = "Fallback";
             m_Process.CurrentGameMode.ExceptionPolicy.FallbackMode = fallbackSetup;
-            
+
             m_Process.CurrentGameMode.AskUnload();
             RunNextFrame();
             Assert.IsTrue(m_Process.CurrentGameMode.IsUnloading);
