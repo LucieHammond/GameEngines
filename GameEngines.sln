@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEnginesTest", "Tests\Ga
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.MVC", "GameEngine.MVC\GameEngine.MVC.csproj", "{85710E5E-5C62-465F-9FFB-8363E383C1AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine.SAI", "GameEngine.SAI\GameEngine.SAI.csproj", "{0196D1E1-F106-4F46-A34B-648801AC76D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.SAI", "GameEngine.SAI\GameEngine.SAI.csproj", "{0196D1E1-F106-4F46-A34B-648801AC76D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

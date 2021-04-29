@@ -79,7 +79,7 @@ namespace GameEngine.Core.FSM.CustomFSM
         {
             if (index == m_CurrentStateIndex)
                 throw new InvalidOperationException($"Cannot withdraw the state at index {index} because the FSM is currently in that state.");
-            
+
             m_StateOrderedList.RemoveAt(index);
 
             if (m_CurrentStateIndex > index)

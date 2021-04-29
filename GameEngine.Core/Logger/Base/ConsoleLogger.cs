@@ -52,7 +52,7 @@ namespace GameEngine.Core.Logger.Base
 
         private void PrintMessage(string tag, LogLevel level, string message)
         {
-            lock(m_ConsoleLock)
+            lock (m_ConsoleLock)
             {
                 // Print time
                 Console.Write("{0}\t", LogUtils.GetTime());
@@ -76,7 +76,7 @@ namespace GameEngine.Core.Logger.Base
 
         private ConsoleColor GetLevelColor(LogLevel level)
         {
-            switch(level)
+            switch (level)
             {
                 case LogLevel.Error:
                     return ConsoleColor.DarkRed;

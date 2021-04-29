@@ -1,7 +1,4 @@
 ﻿using GameEngine.PJR.Jobs;
-using GameEngine.PJR.Rules;
-using System;
-using System.Collections.Generic;
 
 namespace GameEngine.PJR.Process.Services
 {
@@ -11,6 +8,6 @@ namespace GameEngine.PJR.Process.Services
     /// </summary>
     public interface IServiceSetup : IGameJobSetup
     {
-        
+
     }
 }

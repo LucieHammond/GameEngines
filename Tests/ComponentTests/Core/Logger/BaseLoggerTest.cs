@@ -43,7 +43,7 @@ namespace GameEnginesTest.ComponentTests.Core
 
             // For an exception
             try { throw new InvalidOperationException("exception message", new ArgumentException("inner exception message")); }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 ResetLogs();
                 m_Logger.LogException(tag, exception);
@@ -112,7 +112,7 @@ namespace GameEnginesTest.ComponentTests.Core
                     i = -1;
                     Assert.Fail();
                 }
-                    
+
                 Assert.IsTrue(line.Contains(tags[i]));
                 Assert.IsTrue(line.Contains(messages[i]));
             }

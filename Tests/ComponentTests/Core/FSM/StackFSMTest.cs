@@ -14,7 +14,7 @@ namespace GameEnginesTest.ComponentTests.Core
     [TestClass]
     public class StackFSMTest
     {
-        
+
         [TestMethod]
         public void ManageVerticalStateTransitions()
         {

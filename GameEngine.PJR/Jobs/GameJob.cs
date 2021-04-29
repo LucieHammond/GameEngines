@@ -1,7 +1,7 @@
-﻿using GameEngine.Core.Logger;
-using GameEngine.Core.Model;
-using GameEngine.Core.FSM;
+﻿using GameEngine.Core.FSM;
 using GameEngine.Core.FSM.CustomFSM;
+using GameEngine.Core.Logger;
+using GameEngine.Core.Model;
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Jobs.States;
 using GameEngine.PJR.Process;
@@ -137,7 +137,7 @@ namespace GameEngine.PJR.Jobs
             Log.Info(ParentProcess.Name, $"<< Unload {Name} >>");
 
             byte priority = 100;
-            while (m_StateMachine.TryDequeueState(out GameJobState state, priority: priority++) && state != GameJobState.UnloadRules);
+            while (m_StateMachine.TryDequeueState(out GameJobState state, priority: priority++) && state != GameJobState.UnloadRules) ;
 
             if (State == GameJobState.Setup || State == GameJobState.DependencyInjection)
                 m_StateMachine.DequeueState(priority: priority++);
@@ -163,7 +163,7 @@ namespace GameEngine.PJR.Jobs
                 {
                     ruleInfo.Value.BaseQuit();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Log.Exception(ruleInfo.Value.Name, e);
                 }
@@ -220,7 +220,3 @@ namespace GameEngine.PJR.Jobs
         }
     }
 }
-
-
-
-
