@@ -30,6 +30,9 @@
 # Visual Studio cache directory
 .vs/
 
+# Visual Studio configuration file
+.vsconfig
+
 # Gradle cache directory
 .gradle/
 
@@ -89,6 +92,6 @@ crashlytics-build.properties
 **/Libraries/*.pdb
 !**/Libraries/*.pdb.meta
 
-# Ignore GameEngineSettings folder
-/[Aa]ssets/[Gg]ameEngineSettings/
-/[Aa]ssets/[Gg]ameEngineSettings.meta
+# Ignore GameEngine Settings folder
+/Assets/GameEngineSettings/
+/Assets/GameEngineSettings.meta
