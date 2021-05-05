@@ -31,10 +31,10 @@ namespace GameEnginesTest.ComponentTests.Core
             string tag = "TestTag";
 
             // For a warning message
-            string message = "test warning to log";
+            string message = "a rather important message to log";
             m_Logger.LogWarning(tag, message);
             string outputLogs = GetLogsAsString();
-            string[] outputLines = outputLogs.Split("\n").Where((line) => line != "").ToArray();
+            string[] outputLines = outputLogs.Split('\n').Where((line) => line != "").ToArray();
 
             Assert.AreEqual(1, outputLines.Length);
             Assert.IsTrue(outputLogs.Contains(tag));
@@ -42,13 +42,14 @@ namespace GameEnginesTest.ComponentTests.Core
             Assert.IsTrue(outputLogs.ToLower().Contains("warning"));
 
             // For an exception
-            try { throw new InvalidOperationException("exception message", new ArgumentException("inner exception message")); }
+            try { throw new InvalidOperationException("message of the exception", new ArgumentException("message of the inner exception")); }
             catch (Exception exception)
             {
                 ResetLogs();
                 m_Logger.LogException(tag, exception);
                 string exceptionLogs = GetLogsAsString();
 
+                Assert.IsTrue(exceptionLogs.Contains(tag));
                 Assert.IsTrue(exceptionLogs.Contains(exception.GetType().Name));
                 Assert.IsTrue(exceptionLogs.Contains(exception.Message));
                 Assert.IsTrue(exceptionLogs.Contains(exception.StackTrace));
@@ -69,7 +70,7 @@ namespace GameEnginesTest.ComponentTests.Core
             m_Logger.LogWarning(tags[2], messages[2]);
             m_Logger.LogError(tags[3], messages[3]);
             string outputLogs = GetLogsAsString();
-            string[] outputLines = outputLogs.Split("\n").Where((line) => line != "").ToArray();
+            string[] outputLines = outputLogs.Split('\n').Where((line) => line != "").ToArray();
 
             Assert.AreEqual(4, outputLines.Length);
             for (int i = 0; i < tags.Length; i++)
@@ -97,7 +98,7 @@ namespace GameEnginesTest.ComponentTests.Core
             Task.WaitAll(tasks);
 
             string outputLogs = GetLogsAsString();
-            string[] outputLines = outputLogs.Split("\n").Where((line) => line != "").ToArray();
+            string[] outputLines = outputLogs.Split('\n').Where((line) => line != "").ToArray();
 
             Assert.AreEqual(4, outputLines.Length);
             foreach (string line in outputLines)
@@ -128,7 +129,7 @@ namespace GameEnginesTest.ComponentTests.Core
             m_Logger.LogError("Tag", null);
 
             string outputLogs = GetLogsAsString();
-            string[] outputLines = outputLogs.Split("\n").Where((line) => line != "").ToArray();
+            string[] outputLines = outputLogs.Split('\n').Where((line) => line != "").ToArray();
             Assert.AreEqual(4, outputLines.Length);
 
             // Exceptions can't be null -> thow NullReferenceException
