@@ -1,4 +1,5 @@
 ﻿using GameEngine.Core.Model;
+using GameEngine.Core.Utilities.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -166,16 +167,24 @@ namespace GameEnginesTest.ComponentTests.Core
             Path path = new Path($@"\\A\B", "C/D/E/");
 
             // Format with standard directory separators and an end separator
-            Assert.AreEqual(@"\\A\B\C\D\E\", path.Format(false, false));
+            string expectedFormat = System.IO.Path.DirectorySeparatorChar == '\\' ? @"\\A\B\C\D\E\" : @"//A/B/C/D/E/";
+            Assert.AreEqual(expectedFormat, path.Format(PathSeparatorType.StdSeparator, false));
 
             // Format with alternative directory separators and an end separator
-            Assert.AreEqual(@"//A/B/C/D/E/", path.Format(true, false));
+            expectedFormat = System.IO.Path.AltDirectorySeparatorChar == '\\' ? @"\\A\B\C\D\E\" : @"//A/B/C/D/E/";
+            Assert.AreEqual(expectedFormat, path.Format(PathSeparatorType.AltSeparator, false));
 
-            // Format with standard directory separators and no end separator
-            Assert.AreEqual(@"\\A\B\C\D\E", path.Format(false, true));
+            // Format with forward slash directory separators and an end separator
+            Assert.AreEqual(@"//A/B/C/D/E/", path.Format(PathSeparatorType.ForwardSlash, false));
 
-            // Format with alternative directory separators and no end separator
-            Assert.AreEqual(@"//A/B/C/D/E", path.Format(true, true));
+            // Format with backslash directory separators and an end separator
+            Assert.AreEqual(@"\\A\B\C\D\E\", path.Format(PathSeparatorType.BackSlash, false));
+
+            // Format with forward slash directory separators and no end separator
+            Assert.AreEqual(@"//A/B/C/D/E", path.Format(PathSeparatorType.ForwardSlash, true));
+
+            // Format with backslash directory separators and no end separator
+            Assert.AreEqual(@"\\A\B\C\D\E", path.Format(PathSeparatorType.BackSlash, true));
 
             // Use ToString() method for standard formatting
             Assert.AreEqual(@"\\A\B\C\D\E\", path.ToString());
