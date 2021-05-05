@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameEngine.Core.Utilities;
+using GameEngine.Core.Utilities.Enums;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -8,8 +9,9 @@ namespace GameEngine.Core.UnityEditor.Settings
 {
     public static class GameEngineSettings
     {
-        public const string SETTINGS_FOLDER_DEFAULT = "Assets/GameEngineSettings/";
-        public const string ROOT_FILE_NAME = "gameengine_settings";
+        private const string SETTINGS_FOLDER_DEFAULT = "Assets/Frameworks/GameEngine";
+        private const string ROOT_FILE_NAME = "gameengine_settings_root";
+        private const string TAG = "GameEngineSettings";
 
         private static string m_SettingsFolder;
 
@@ -19,43 +21,74 @@ namespace GameEngine.Core.UnityEditor.Settings
             AssetDatabase.Refresh();
         }
 
+        /// <summary>
+        /// Register a custom project setting provider for the GameEngine framework package
+        /// </summary>
+        /// <returns>The GameEngine setting provider</returns>
         [SettingsProvider]
         public static SettingsProvider GameEngineSettingsProvider()
         {
             FindSettingsFolder();
-            string displayedFolder = m_SettingsFolder;
+            string folderPath = m_SettingsFolder;
             SettingsProvider provider = new SettingsProvider("Project/GameEngine", SettingsScope.Project)
             {
                 label = "Game Engine",
 
                 guiHandler = (searchContext) =>
                 {
-                    displayedFolder = EditorGUILayout.TextField("Settings Folder Path", displayedFolder);
-                    EditorGUILayout.HelpBox("All the GameEngine settings for your project are stored in a single folder (inside Assets/). " +
-                        "If you change the path of the settings folder and click 'Apply change', the folder will be moved automatically " +
-                        "to the new location.", MessageType.Info);
+                    EditorGUILayout.LabelField("Change Settings Location", EditorStyles.boldLabel);
+                    folderPath = EditorGUILayout.TextField("Settings Folder Path", folderPath);
+                    EditorGUILayout.HelpBox("This is the folder in which are stored all the GameEngine settings for your project.\n" +
+                        "Applying a change will move all settings to the new location without loss.", MessageType.Info);
 
                     EditorGUILayout.BeginHorizontal();
                     EditorGUILayout.Space();
-                    if (GUILayout.Button("Apply Change") && displayedFolder != m_SettingsFolder)
+                    if (GUILayout.Button("Apply Change"))
                     {
-                        MoveSettingsFolder(m_SettingsFolder, displayedFolder);
-                        m_SettingsFolder = displayedFolder;
-                        AssetDatabase.Refresh();
+                        if (TryMoveSettingsFolder(folderPath))
+                            AssetDatabase.Refresh();
+
+                        folderPath = m_SettingsFolder;
+                        GUI.FocusControl("");
+                    }
+                    EditorGUILayout.Space();
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Space();
+
+                    EditorGUILayout.LabelField("Ignore User Settings", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("You should add the following lines to your .gitignore file:");
+                    string gitignoreLines = "# GameEngine user settings" +
+                        $"\n{m_SettingsFolder}/UserSettings/" +
+                        $"\n{m_SettingsFolder}/UserSettings.meta";
+                    EditorGUILayout.TextArea(gitignoreLines, EditorStyles.helpBox, GUILayout.Width(350));
+
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.Space();
+                    if (GUILayout.Button("Append to .gitignore"))
+                    {
+                        UpdateGitignoreFile(gitignoreLines);
                     }
                     EditorGUILayout.Space();
                     EditorGUILayout.EndHorizontal();
                 },
 
-                keywords = new HashSet<string>(new[] { "GameEngine", "Settings", "Folder", "Path" })
+                keywords = new HashSet<string>(new[] { "GameEngine", "Settings", "Package" })
             };
 
             return provider;
         }
 
-        public static T GetOrCreateSettingAsset<T>(string assetPath, SettingsScope scope) where T : ScriptableObject
+        /// <summary>
+        /// Find or create a specified setting asset in the GameEngine setting folder and return its content once loaded
+        /// </summary>
+        /// <typeparam name="T">The type of the setting asset to load</typeparam>
+        /// <param name="assetName">The name of the setting asset</param>
+        /// <param name="assetScope">The scope of the setting asset (user or project)</param>
+        /// <returns>The content of the setting asset that has been loaded</returns>
+        public static T GetOrCreateSettingAsset<T>(string assetName, SettingsScope assetScope) where T : ScriptableObject
         {
-            string fullAssetPath = Path.Combine(m_SettingsFolder, assetPath);
+            string fullAssetPath = Path.Combine(m_SettingsFolder, $"{assetScope}Settings", "Resources", $"{assetName}.asset");
             T settings = AssetDatabase.LoadAssetAtPath<T>(fullAssetPath);
             if (settings == null)
             {
@@ -67,9 +100,6 @@ namespace GameEngine.Core.UnityEditor.Settings
                 settings = ScriptableObject.CreateInstance<T>();
                 AssetDatabase.CreateAsset(settings, fullAssetPath);
                 AssetDatabase.SaveAssets();
-
-                if (scope == SettingsScope.User)
-                    AddAssetToGitignore(assetPath);
             }
 
             return settings;
@@ -80,49 +110,69 @@ namespace GameEngine.Core.UnityEditor.Settings
             string[] searchResult = Directory.GetFiles("Assets", ROOT_FILE_NAME, SearchOption.AllDirectories);
             if (searchResult.Length == 0)
             {
+                InitializeSettingsFolder(SETTINGS_FOLDER_DEFAULT);
                 m_SettingsFolder = SETTINGS_FOLDER_DEFAULT;
-                Directory.CreateDirectory(m_SettingsFolder);
-                File.Create(Path.Combine(m_SettingsFolder, ROOT_FILE_NAME)).Close();
             }
             else
             {
-                m_SettingsFolder = Path.GetDirectoryName(searchResult[0]);
+                m_SettingsFolder = PathUtils.Normalize(Path.GetDirectoryName(searchResult[0]), false, PathSeparatorType.ForwardSlash, true);
                 if (searchResult.Length > 1)
                 {
-                    Debug.LogWarning($"[GameEngine] Duplicate file {ROOT_FILE_NAME} found in Assets ({string.Join(", ", searchResult)})." +
-                        $"\nPlease keep only one Settings Folder for GameEngine package with {ROOT_FILE_NAME} file at root." +
+                    Debug.LogWarning($"[{TAG}] Duplicate file {ROOT_FILE_NAME} found in Assets ({string.Join(", ", searchResult)})." +
+                        $"\nPlease keep only one settings folder for the GameEngine package with {ROOT_FILE_NAME} file at root." +
                         $"\nOtherwise you may face unwanted behaviour when loading and storing settings.");
                 }
             }
         }
 
-        private static void MoveSettingsFolder(string oldPath, string newPath)
+        private static bool TryMoveSettingsFolder(string folderPath)
         {
-            if (!newPath.StartsWith("Assets\\") && !newPath.StartsWith("Assets/"))
-                throw new ArgumentException("Folder path should be inside Assets/");
-
-            if (Directory.Exists(oldPath) && !Directory.Exists(newPath))
+            string newSettingsFolder = PathUtils.Normalize(folderPath, false, PathSeparatorType.ForwardSlash, true);
+            if (newSettingsFolder != m_SettingsFolder)
             {
-                Directory.Move(oldPath, newPath);
-            }
-            else
-            {
-                if (!Directory.Exists(newPath))
-                    Directory.CreateDirectory(newPath);
-                if (Directory.Exists(oldPath))
-                    Directory.Delete(oldPath, true);
+                if (newSettingsFolder.StartsWith("Assets/"))
+                {
+                    if (!Directory.Exists(newSettingsFolder + "/../"))
+                        Directory.CreateDirectory(newSettingsFolder + "/../");
 
-                File.Create(Path.Combine(newPath, ROOT_FILE_NAME)).Close();
+                    if (Directory.Exists(newSettingsFolder))
+                        Directory.Delete(newSettingsFolder, true);
+
+                    Directory.Move(m_SettingsFolder, newSettingsFolder);
+                    File.Move(m_SettingsFolder + ".meta", newSettingsFolder + ".meta");
+                    m_SettingsFolder = newSettingsFolder;
+
+                    Debug.Log($"[{TAG}] Settings folder was changed to {newSettingsFolder}");
+                    return true;
+                }
+
+                Debug.LogError($"[{TAG}] The given path \"{newSettingsFolder}\" is invalid (should be inside Assets/)");
             }
+
+            Debug.Log($"[{TAG}] Settings folder didn't change");
+            return false;
         }
 
-        private static void AddAssetToGitignore(string assetPath)
+        private static void InitializeSettingsFolder(string path)
         {
-            string gitignorePath = Path.Combine(m_SettingsFolder, ".gitignore");
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+
+            Directory.CreateDirectory(path);
+
+            File.Create(Path.Combine(path, ROOT_FILE_NAME)).Close();
+        }
+
+        private static void UpdateGitignoreFile(string ignoreLines)
+        {
+            string gitignorePath = Path.Combine(".gitignore");
             using (StreamWriter writer = new StreamWriter(File.Open(gitignorePath, FileMode.Append)))
             {
-                writer.WriteLine(assetPath);
+                writer.WriteLine();
+                writer.Write(ignoreLines);
             }
+
+            Debug.Log($"[{TAG}] User Settings folder was successfully added to your .gitignore");
         }
     }
 }

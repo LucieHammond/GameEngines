@@ -4,28 +4,35 @@ using UnityEngine;
 
 namespace GameEngine.Core.UnityEditor.Settings
 {
+    /// <summary>
+    /// Editor window for Log Settings
+    /// </summary>
     [CustomEditor(typeof(LogSettings))]
     public class LogSettingsEditor : Editor
     {
-        public const string ASSET_PATH = "Resources/LogSettings.asset";
-
         private string m_TagToAdd = "";
         private string m_TagToRemove = null;
         private bool m_ShowAllTags = true;
 
-        [MenuItem("GameEngine/User Preferences/LogSettings", priority = 1)]
+        /// <summary>
+        /// Find the unique Log Settings asset defined in the project and display it in the inspector window
+        /// </summary>
+        [MenuItem("GameEngine/User Settings/Log Settings", priority = 1)]
         public static void DisplayLogSettings()
         {
-            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<LogSettings>(ASSET_PATH, SettingsScope.User); ;
+            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<LogSettings>(LogSettings.ASSET_NAME, SettingsScope.User); ;
         }
 
+        /// <summary>
+        /// Display a custom inspector for Log Settings
+        /// </summary>
         public override void OnInspectorGUI()
         {
             LogSettings settings = (LogSettings)target;
 
             EditorGUILayout.Space();
             settings.MinLogLevel = (LogLevel)EditorGUILayout.EnumPopup("Min level to log", settings.MinLogLevel);
-            
+
             EditorGUILayout.Space();
             settings.ActivateFiltering = EditorGUILayout.BeginToggleGroup("Filter on tags", settings.ActivateFiltering);
             TagFilterSectionGUI(settings);
@@ -44,7 +51,7 @@ namespace GameEngine.Core.UnityEditor.Settings
                 TagsListGUI(settings);
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
-            
+
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
 
