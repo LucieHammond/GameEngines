@@ -1,4 +1,7 @@
 ﻿using GameEngine.Core.Logger;
+using GameEngine.Core.Logger.Base;
+using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,9 +13,17 @@ namespace GameEngine.Core.UnityEditor.Settings
     [CustomEditor(typeof(LogSettings))]
     public class LogSettingsEditor : Editor
     {
+        private const string TAG = "LogSettings";
+
         private string m_TagToAdd = "";
         private string m_TagToRemove = null;
         private bool m_ShowAllTags = true;
+
+        private BaseLoggerType m_LoggerToAdd;
+        private BaseLoggerType? m_LoggerToRemove = null;
+        private bool m_ShowAddLoggers = false;
+
+        private GUIStyle m_TitleStyle;
 
         /// <summary>
         /// Find the unique Log Settings asset defined in the project and display it in the inspector window
@@ -30,16 +41,30 @@ namespace GameEngine.Core.UnityEditor.Settings
         {
             LogSettings settings = (LogSettings)target;
 
+            m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
+            m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
+
+            EditorGUILayout.LabelField("Unity Logger", m_TitleStyle);
             EditorGUILayout.Space();
+
             settings.MinLogLevel = (LogLevel)EditorGUILayout.EnumPopup("Min level to log", settings.MinLogLevel);
 
             EditorGUILayout.Space();
             settings.ActivateFiltering = EditorGUILayout.BeginToggleGroup("Filter on tags", settings.ActivateFiltering);
-            TagFilterSectionGUI(settings);
+            TagFilteringGUI(settings);
             EditorGUILayout.EndToggleGroup();
+
+            foreach (KeyValuePair<BaseLoggerType, object[]> logger in settings.AdditionalLoggers)
+            {
+                EditorGUILayout.Space(25);
+                AdditionalLoggerSectionGUI(logger.Key, logger.Value);
+            }
+            
+            EditorGUILayout.Space(25);
+            AddNewLoggerGUI(settings);
         }
 
-        private void TagFilterSectionGUI(LogSettings settings)
+        private void TagFilteringGUI(LogSettings settings)
         {
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(15);
@@ -93,13 +118,101 @@ namespace GameEngine.Core.UnityEditor.Settings
             {
                 if (m_TagToAdd.Length > 0)
                 {
-                    settings.TagsFilter.Add(m_TagToAdd);
-                    settings.TagsColors.Add(m_TagToAdd, LogSettings.GetColorForTag(m_TagToAdd));
+                    if (settings.TagsFilter.Contains(m_TagToAdd))
+                    {
+                        Debug.Log($"[{TAG}] Tag \"{m_TagToAdd}\" is already in list");
+                    }
+                    else
+                    {
+                        settings.TagsFilter.Add(m_TagToAdd);
+                        settings.TagsColors.Add(m_TagToAdd, LogSettings.GetColorForTag(m_TagToAdd));
+                    }
+
                     m_TagToAdd = "";
                 }
             }
-            GUILayout.Space(25);
             EditorGUILayout.EndHorizontal();
+        }
+
+        private void AdditionalLoggerSectionGUI(BaseLoggerType loggerType, object[] loggerParameters)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(ObjectNames.NicifyVariableName(loggerType.ToString()), m_TitleStyle);
+            if (GUILayout.Button("Remove", GUILayout.MaxWidth(80)))
+            {
+                m_LoggerToRemove = loggerType;
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
+
+            int index = 0;
+            switch (loggerType)
+            {
+                case BaseLoggerType.ConsoleLogger:
+                case BaseLoggerType.DebugLogger:
+                    break;
+                case BaseLoggerType.FileLogger:
+                    loggerParameters[0] = EditorGUILayout.TextField("Log File Path", (string)loggerParameters[0]);
+                    index = 1;
+                    break;
+                case BaseLoggerType.NetLogger:
+                    loggerParameters[0] = EditorGUILayout.TextField("Log API Url", (string)loggerParameters[0]);
+                    loggerParameters[1] = EditorGUILayout.TextField("App Version", (string)loggerParameters[1]);
+                    loggerParameters[2] = EditorGUILayout.TextField("Environment", (string)loggerParameters[2]);
+                    index = 3;
+                    break;
+                default:
+                    throw new NotImplementedException($"Missing implementation for logger type {loggerType}");
+            }
+
+            loggerParameters[index] = (LogLevel)EditorGUILayout.EnumPopup("Min level to log", (LogLevel)loggerParameters[index]);
+        }
+
+        private void AddNewLoggerGUI(LogSettings settings)
+        {
+            m_ShowAddLoggers = EditorGUILayout.BeginFoldoutHeaderGroup(m_ShowAddLoggers, " Add Additional Logger");
+            EditorGUILayout.Space();
+            if (m_ShowAddLoggers)
+            {
+                EditorGUILayout.BeginHorizontal();
+                m_LoggerToAdd = (BaseLoggerType)EditorGUILayout.EnumPopup("Logger Type", m_LoggerToAdd);
+                if (GUILayout.Button("Add", GUILayout.MaxWidth(50)))
+                {
+                    if (settings.AdditionalLoggers.ContainsKey(m_LoggerToAdd))
+                    {
+                        Debug.Log($"[{TAG}] A {m_LoggerToAdd} has already been added");
+                    }
+                    else
+                    {
+                        object[] loggerParameters;
+                        switch (m_LoggerToAdd)
+                        {
+                            case BaseLoggerType.ConsoleLogger:
+                            case BaseLoggerType.DebugLogger:
+                                loggerParameters = new object[1] { LogLevel.Debug };
+                                break;
+                            case BaseLoggerType.FileLogger:
+                                loggerParameters = new object[2] { string.Empty, LogLevel.Debug };
+                                break;
+                            case BaseLoggerType.NetLogger:
+                                loggerParameters = new object[4] { string.Empty, Application.version, "Local", LogLevel.Debug };
+                                break;
+                            default:
+                                throw new NotImplementedException($"Missing implementation for logger type {m_LoggerToAdd}");
+                        };
+                        settings.AdditionalLoggers.Add(m_LoggerToAdd, loggerParameters);
+                        m_LoggerToAdd = default(BaseLoggerType);
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+
+            if (m_LoggerToRemove != null)
+            {
+                settings.AdditionalLoggers.Remove(m_LoggerToRemove.Value);
+                m_LoggerToRemove = null;
+            }
         }
     }
 }

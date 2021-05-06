@@ -9,7 +9,7 @@ namespace GameEngine.Core.Logger.Base
     /// </summary>
     public class NetLogger : ILogger
     {
-        private Uri m_LogUrl;
+        private readonly Uri m_LogUrl;
         private readonly string m_AppVersion;
         private readonly string m_Environment;
 

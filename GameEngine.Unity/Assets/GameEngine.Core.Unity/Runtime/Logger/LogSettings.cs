@@ -1,11 +1,12 @@
-﻿using System;
+﻿using GameEngine.Core.Logger.Base;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace GameEngine.Core.Logger
 {
     /// <summary>
-    /// Settings for the runtime logs, allowing customization of display and filtering
+    /// Settings for the runtime logs in Unity, allowing customization of display and filtering
     /// </summary>
     public class LogSettings : ScriptableObject
     {
@@ -15,34 +16,40 @@ namespace GameEngine.Core.Logger
         public const string ASSET_NAME = "LogSettings";
 
         /// <summary>
-        /// The minimal level of logs to display. All logs with an inferior level of importance will be ignored
+        /// The minimal level of logs to display in Unity console. All logs with an inferior level of importance will be ignored
         /// </summary>
         public LogLevel MinLogLevel;
 
         /// <summary>
-        /// Whether or not to filter the logs on their tags
+        /// Whether or not to filter the logs on their tags in Unity console
         /// </summary>
         public bool ActivateFiltering;
 
         /// <summary>
-        /// The tags on which to filter the logs. Only the logs corresponding to the tags in the list are displayed
+        /// The tags on which to filter the logs in Unity console. Only the logs corresponding to the tags in the list are displayed
         /// </summary>
         public HashSet<string> TagsFilter;
 
         /// <summary>
-        /// The colors to use when displaying the specific associated tags
+        /// The colors to use when displaying the specific associated tags in Unity console
         /// </summary>
         public Dictionary<string, Color> TagsColors;
+
+        /// <summary>
+        /// Other logger types to use besides the Unity console (with their own parameters and filtering policies)
+        /// </summary>
+        public Dictionary<BaseLoggerType, object[]> AdditionalLoggers;
 
         /// <summary>
         /// Initialize a new instance of LogSettings
         /// </summary>
         public LogSettings()
         {
-            MinLogLevel = LogLevel.Info;
+            MinLogLevel = LogLevel.Debug;
             ActivateFiltering = false;
             TagsFilter = new HashSet<string>();
             TagsColors = new Dictionary<string, Color>();
+            AdditionalLoggers = new Dictionary<BaseLoggerType, object[]>();
         }
 
         /// <summary>

@@ -9,9 +9,10 @@ namespace GameEngine.Core.UnityEditor.Settings
 {
     public static class GameEngineSettings
     {
+        private const string TAG = "GameEngineSettings";
+
         private const string SETTINGS_FOLDER_DEFAULT = "Assets/Frameworks/GameEngine";
         private const string ROOT_FILE_NAME = "gameengine_settings_root";
-        private const string TAG = "GameEngineSettings";
 
         private static string m_SettingsFolder;
 
