@@ -6,24 +6,25 @@ using System.Diagnostics;
 namespace GameEngine.Core.Logger
 {
     /// <summary>
-    /// A static class accessible from anywhere, used for logging messages (with tags) using a predefined logger
+    /// A static class accessible from anywhere, used for logging messages (with tags) using one or multiple specified loggers
     /// </summary>
     public static class Log
     {
         /// <summary>
-        /// The logger to use for logging messages
+        /// The log targets chosen to receive and display messages
         /// </summary>
-        public static ILogger Logger;
+        public static List<LogTarget> Targets = new List<LogTarget>();
 
         /// <summary>
-        /// The minimal level of logs to display. All logs with an inferior level of importance will be ignored
+        /// Add a new logger to the list of log targets (with associated log filtering policies) 
         /// </summary>
-        public static LogLevel MinLevel = LogLevel.Debug;
-
-        /// <summary>
-        /// The tags on which to filter the logs. If null, all logs are displayed. Otherwise, only the logs having the right tags are displayed
-        /// </summary>
-        public static HashSet<string> TagsFilter;
+        /// <param name="logger">The new targetted logger</param>
+        /// <param name="minLevel">The minimal level of logs to display with the targetted logger</param>
+        /// <param name="tagsFilter">The tags filtering policy to apply with the targetted logger</param>
+        public static void AddLogger(ILogger logger, LogLevel minLevel = LogLevel.Debug, HashSet<string> tagsFilter = null)
+        {
+            Targets.Add(new LogTarget(logger, minLevel, tagsFilter));
+        }
 
         /// <summary>
         /// Log message with LogLevel = Debug
@@ -35,10 +36,13 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (MinLevel <= LogLevel.Debug)
+            foreach (LogTarget target in Targets)
             {
-                if (TagsFilter == null || TagsFilter.Contains(tag))
-                    Logger?.LogDebug(tag, message);
+                if (target.MinLevel <= LogLevel.Debug)
+                {
+                    if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                        target.Logger.LogDebug(tag, message);
+                }
             }
         }
 
@@ -64,10 +68,13 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (MinLevel <= LogLevel.Info)
+            foreach (LogTarget target in Targets)
             {
-                if (TagsFilter == null || TagsFilter.Contains(tag))
-                    Logger?.LogInfo(tag, message);
+                if (target.MinLevel <= LogLevel.Info)
+                {
+                    if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                        target.Logger.LogInfo(tag, message);
+                }
             }
         }
 
@@ -93,10 +100,13 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (MinLevel <= LogLevel.Warning)
+            foreach (LogTarget target in Targets)
             {
-                if (TagsFilter == null || TagsFilter.Contains(tag))
-                    Logger?.LogWarning(tag, message);
+                if (target.MinLevel <= LogLevel.Warning)
+                {
+                    if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                        target.Logger.LogWarning(tag, message);
+                }
             }
         }
 
@@ -122,10 +132,13 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (MinLevel <= LogLevel.Error)
+            foreach (LogTarget target in Targets)
             {
-                if (TagsFilter == null || TagsFilter.Contains(tag))
-                    Logger?.LogError(tag, message);
+                if (target.MinLevel <= LogLevel.Error)
+                {
+                    if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                        target.Logger.LogError(tag, message);
+                }
             }
         }
 
@@ -145,16 +158,19 @@ namespace GameEngine.Core.Logger
         /// Log tagged exception with LogLevel = Error
         /// </summary>
         /// <param name="tag">The tag of the message (cannot be null)</param>
-        /// <param name="e">The exception to log</param>
+        /// <param name="exception">The exception to log</param>
         [Conditional("ENABLE_LOGS")]
-        public static void Exception(string tag, Exception e)
+        public static void Exception(string tag, Exception exception)
         {
             CheckTagValidity(tag);
 
-            if (MinLevel <= LogLevel.Error)
+            foreach (LogTarget target in Targets)
             {
-                if (TagsFilter == null || TagsFilter.Contains(tag))
-                    Logger?.LogException(tag, e);
+                if (target.MinLevel <= LogLevel.Error)
+                {
+                    if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                        target.Logger.LogException(tag, exception);
+                }
             }
         }
 
@@ -168,8 +184,11 @@ namespace GameEngine.Core.Logger
         {
             CheckTagValidity(tag);
 
-            if (TagsFilter == null || TagsFilter.Contains(tag))
-                Logger?.LogError(tag, message);
+            foreach (LogTarget target in Targets)
+            {
+                if (target.TagsFilter == null || target.TagsFilter.Contains(tag))
+                    target.Logger.LogError(tag, message);
+            }
         }
 
         /// <summary>

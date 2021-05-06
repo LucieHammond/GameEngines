@@ -1,4 +1,5 @@
 ﻿using GameEngine.Core.Utilities;
+using GameEngine.Core.Utilities.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -101,24 +102,28 @@ namespace GameEnginesTest.UnitTests.Core
             string invalidSegmentsPath = "C:/Invalid:Folder/invalid?file.json";
             Assert.ThrowsException<ArgumentException>(() => PathUtils.Normalize(invalidSegmentsPath));
 
-            // All separators are normalized in standard or alternative form according to useAltSeparator
+            // All separators are normalized depending on the separatorType
             string validPath = "//Computer\\Share\\Dir1/Dir2\\Dir3/file.html";
-            Assert.AreEqual("\\\\Computer\\Share\\Dir1\\Dir2\\Dir3\\file.html",
-                PathUtils.Normalize(validPath, true, false));
-            Assert.AreEqual("//Computer/Share/Dir1/Dir2/Dir3/file.html",
-                PathUtils.Normalize(validPath, true, true));
+            string forwardSlashFormat = "//Computer/Share/Dir1/Dir2/Dir3/file.html";
+            string backSlashFormat = "\\\\Computer\\Share\\Dir1\\Dir2\\Dir3\\file.html";
+            Assert.AreEqual(Path.DirectorySeparatorChar == '/' ? forwardSlashFormat : backSlashFormat,
+                PathUtils.Normalize(validPath, true, PathSeparatorType.StdSeparator));
+            Assert.AreEqual(Path.AltDirectorySeparatorChar == '/' ? forwardSlashFormat : backSlashFormat,
+                PathUtils.Normalize(validPath, true, PathSeparatorType.AltSeparator));
+            Assert.AreEqual(forwardSlashFormat, PathUtils.Normalize(validPath, true, PathSeparatorType.ForwardSlash));
+            Assert.AreEqual(backSlashFormat, PathUtils.Normalize(validPath, true, PathSeparatorType.BackSlash));
 
             // Directory path ends with a separator, unless trimEndSeparator is true
-            Assert.AreEqual($"C:/Directory/", PathUtils.Normalize("C:/Directory", false, true, false));
-            Assert.AreEqual($"C:/Directory", PathUtils.Normalize("C:/Directory/", false, true, true));
+            Assert.AreEqual($"C:/Directory/", PathUtils.Normalize("C:/Directory", false, PathSeparatorType.ForwardSlash, false));
+            Assert.AreEqual($"C:/Directory", PathUtils.Normalize("C:/Directory/", false, PathSeparatorType.ForwardSlash, true));
 
             // Path with relative directory components is correctly evaluated
             string pathToSimplify = "Dir1/./Dir2/../Dir3/Dir4/../";
-            Assert.AreEqual("Dir1/Dir3/", PathUtils.Normalize(pathToSimplify, false, true));
+            Assert.AreEqual("Dir1/Dir3/", PathUtils.Normalize(pathToSimplify, false, PathSeparatorType.ForwardSlash));
 
             // Path components with unnecessary characters are trimmed
             string pathToTrim = "/Directory./.file ...";
-            Assert.AreEqual("/Directory/.file", PathUtils.Normalize(pathToTrim, true, true));
+            Assert.AreEqual("/Directory/.file", PathUtils.Normalize(pathToTrim, true, PathSeparatorType.ForwardSlash));
         }
 
         [TestMethod]

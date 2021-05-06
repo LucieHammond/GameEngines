@@ -1,4 +1,5 @@
 ﻿using GameEngine.Core.Utilities;
+using GameEngine.Core.Utilities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -330,12 +331,12 @@ namespace GameEngine.Core.Model
         /// <summary>
         /// Represent the path information as a single string, with custom format options
         /// </summary>
-        /// <param name="useAltSeparator">Use the alternate platform-specific character to separate directories (instead of standard)</param>
+        /// <param name="separatorType">Type of directory separator character to use</param>
         /// <param name="trimEndSeparator">Trim the path's ending separator (for directory paths)</param>
         /// <returns>The formatted path string</returns>
-        public string Format(bool useAltSeparator = false, bool trimEndSeparator = false)
+        public string Format(PathSeparatorType separatorType = PathSeparatorType.StdSeparator, bool trimEndSeparator = false)
         {
-            return PathUtils.Format(m_Root, m_Folders, m_FileName, useAltSeparator, trimEndSeparator);
+            return PathUtils.Format(m_Root, m_Folders, m_FileName, separatorType, trimEndSeparator);
         }
 
         /// <summary>

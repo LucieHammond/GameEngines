@@ -4,12 +4,21 @@ using System.Text;
 
 namespace GameEngine.Core.Logger.Base
 {
+    /// <summary>
+    /// A predefined logger that send json formatted log messages to a remote log API
+    /// </summary>
     public class NetLogger : ILogger
     {
-        private Uri m_LogUrl;
+        private readonly Uri m_LogUrl;
         private readonly string m_AppVersion;
         private readonly string m_Environment;
 
+        /// <summary>
+        /// Initialize a new instance of NetLogger
+        /// </summary>
+        /// <param name="url">The URL of the remote log API</param>
+        /// <param name="appVersion">The version of the application to associate with the log messages</param>
+        /// <param name="environment">The running environment to associate with the log messages</param>
         public NetLogger(Uri url, string appVersion = "1.0.0", string environment = "Local")
         {
             m_LogUrl = url;
@@ -17,33 +26,48 @@ namespace GameEngine.Core.Logger.Base
             m_Environment = environment;
         }
 
+        /// <summary>
+        /// <see cref="ILogger.LogDebug(string, string)"/>
+        /// </summary>
         public void LogDebug(string tag, string message)
         {
             SendJsonMessage(FormatJsonMessage(LogLevel.Debug, tag, message));
         }
 
+        /// <summary>
+        /// <see cref="ILogger.LogInfo(string, string)"/>
+        /// </summary>
         public void LogInfo(string tag, string message)
         {
             SendJsonMessage(FormatJsonMessage(LogLevel.Info, tag, message));
         }
 
+        /// <summary>
+        /// <see cref="ILogger.LogWarning(string, string)"/>
+        /// </summary>
         public void LogWarning(string tag, string message)
         {
             SendJsonMessage(FormatJsonMessage(LogLevel.Warning, tag, message));
         }
 
+        /// <summary>
+        /// <see cref="ILogger.LogError(string, string)"/>
+        /// </summary>
         public void LogError(string tag, string message)
         {
             SendJsonMessage(FormatJsonMessage(LogLevel.Error, tag, message));
         }
 
+        /// <summary>
+        /// <see cref="ILogger.LogException(string, Exception)"/>
+        /// </summary>
         public void LogException(string tag, Exception e)
         {
             string message = LogUtils.FormatException(e);
             SendJsonMessage(FormatJsonMessage(LogLevel.Error, tag, message));
         }
 
-        public async void SendJsonMessage(string jsonMessage)
+        private async void SendJsonMessage(string jsonMessage)
         {
             using (var client = new HttpClient())
             {

@@ -30,6 +30,9 @@
 # Visual Studio cache directory
 .vs/
 
+# Visual Studio configuration file
+.vsconfig
+
 # Gradle cache directory
 .gradle/
 
@@ -88,3 +91,7 @@ crashlytics-build.properties
 # Don't version the pdb copied into Libraries folder (but include their .meta files)
 **/Libraries/*.pdb
 !**/Libraries/*.pdb.meta
+
+# Ignore GameEngine Settings folder
+/Assets/GameEngineSettings/
+/Assets/GameEngineSettings.meta

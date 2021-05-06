@@ -2,5 +2,17 @@
     "name": "GameEngine.Core.Unity.Editor",
     "references": [
         "GameEngine.Core.Unity"
-    ]
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GameEngine.Core.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }

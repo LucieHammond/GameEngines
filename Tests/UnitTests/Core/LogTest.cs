@@ -13,303 +13,263 @@ namespace GameEnginesTest.UnitTests.Core
     [TestClass]
     public class LogTest
     {
-        DummyLogger m_Logger;
-        private object m_LogLock = new object();
+        private readonly DummyLogger m_DebugLogger;
+        private readonly DummyLogger m_InfoLogger;
+        private readonly DummyLogger m_WarningLogger;
+        private readonly DummyLogger m_ErrorLogger;
+        private readonly DummyLogger m_FatalLogger;
+        private readonly DummyLogger m_TestTagLogger;
+        private readonly DummyLogger m_OtherTagsLogger;
+
+        private readonly string m_TestTag = "Test";
+        private readonly object m_LogLock = new object();
 
         public LogTest()
         {
-            m_Logger = new DummyLogger();
-            Log.Logger = m_Logger;
+            m_DebugLogger = new DummyLogger();
+            m_InfoLogger = new DummyLogger();
+            m_WarningLogger = new DummyLogger();
+            m_ErrorLogger = new DummyLogger();
+            m_FatalLogger = new DummyLogger();
+            m_TestTagLogger = new DummyLogger();
+            m_OtherTagsLogger = new DummyLogger();
+        }
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            Log.AddLogger(m_DebugLogger, LogLevel.Debug);
+            Log.AddLogger(m_InfoLogger, LogLevel.Info);
+            Log.AddLogger(m_WarningLogger, LogLevel.Warning);
+            Log.AddLogger(m_ErrorLogger, LogLevel.Error);
+            Log.AddLogger(m_FatalLogger, LogLevel.Fatal);
+            Log.AddLogger(m_TestTagLogger, LogLevel.Debug, new HashSet<string>() { m_TestTag });
+            Log.AddLogger(m_OtherTagsLogger, LogLevel.Debug, new HashSet<string>() { "OtherTag1", "OtherTag2", "OtherTag3" });
         }
 
         [TestMethod]
         public void DebugTest()
         {
-            string tag = "Test";
             string message = "debug message";
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogDebug += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Debug(m_TestTag, message);
 
-                // With MinLevel > Debug -> LogDebug is not called
-                Log.MinLevel = LogLevel.Info;
-                Log.Debug(tag, message);
-                Log.MinLevel = LogLevel.Warning;
-                Log.Debug(tag, message);
-                Log.MinLevel = LogLevel.Error;
-                Log.Debug(tag, message);
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Debug(tag, message);
-                Assert.AreEqual(0, totalCalls);
+                // For loggers with MinLevel = Debug -> LogDebug is called
+                Assert.AreEqual(1, m_DebugLogger.LogDebugCalls);
 
-                // With MinLevel = Debug -> LogDebug is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Debug(tag, message);
-                Assert.AreEqual(1, totalCalls);
+                // For loggers with MinLevel > Debug -> LogDebug is not called
+                Assert.AreEqual(0, m_InfoLogger.LogDebugCalls);
+                Assert.AreEqual(0, m_WarningLogger.LogDebugCalls);
+                Assert.AreEqual(0, m_ErrorLogger.LogDebugCalls);
+                Assert.AreEqual(0, m_FatalLogger.LogDebugCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogDebug is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Debug(tag, message);
-                Assert.AreEqual(1, totalCalls);
+                // For loggers filtering on test tag -> LogDebug is called
+                Assert.AreEqual(1, m_TestTagLogger.LogDebugCalls);
 
-                // TagsFilter is set and contains tag -> LogDebug is called
-                Log.TagsFilter.Add(tag);
-                Log.Debug(tag, message);
-                Assert.AreEqual(2, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogDebug is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogDebugCalls);
 
-                // Works with a formatted message
-                Log.Debug(tag, "{0} message", "debug");
-                Assert.AreEqual(3, totalCalls);
+                // The same Works with a formatted message
+                Log.Debug(m_TestTag, "{0} message", "debug");
+                Assert.AreEqual(2, m_DebugLogger.LogDebugCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Debug(null, message));
             }
         }
 
         [TestMethod]
         public void InfoTest()
         {
-            string tag = "Test";
             string message = "info message";
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogInfo += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Info(m_TestTag, message);
 
-                // With MinLevel > Info -> LogInfo is not called
-                Log.MinLevel = LogLevel.Warning;
-                Log.Info(tag, message);
-                Log.MinLevel = LogLevel.Error;
-                Log.Info(tag, message);
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Info(tag, message);
-                Assert.AreEqual(0, totalCalls);
+                // For loggers with MinLevel <= Info -> LogInfo is called
+                Assert.AreEqual(1, m_DebugLogger.LogInfoCalls);
+                Assert.AreEqual(1, m_InfoLogger.LogInfoCalls);
 
-                // With MinLevel <= Info -> LogInfo is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Info(tag, message);
-                Log.MinLevel = LogLevel.Info;
-                Log.Info(tag, message);
-                Assert.AreEqual(2, totalCalls);
+                // For loggers with MinLevel > Info -> LogInfo is not called
+                Assert.AreEqual(0, m_WarningLogger.LogInfoCalls);
+                Assert.AreEqual(0, m_ErrorLogger.LogInfoCalls);
+                Assert.AreEqual(0, m_FatalLogger.LogInfoCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogInfo is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Info(tag, message);
-                Assert.AreEqual(2, totalCalls);
+                // For loggers filtering on test tag -> LogInfo is called
+                Assert.AreEqual(1, m_TestTagLogger.LogInfoCalls);
 
-                // TagsFilter is set and contains tag -> LogInfo is called
-                Log.TagsFilter.Add(tag);
-                Log.Info(tag, message);
-                Assert.AreEqual(3, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogInfo is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogInfoCalls);
 
-                // Works with a formatted message
-                Log.Info(tag, "{0} message", "info");
-                Assert.AreEqual(4, totalCalls);
+                // The same Works with a formatted message
+                Log.Info(m_TestTag, "{0} message", "info");
+                Assert.AreEqual(2, m_InfoLogger.LogInfoCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Info(null, message));
             }
         }
 
         [TestMethod]
         public void WarningTest()
         {
-            string tag = "Test";
             string message = "warning message";
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogWarning += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Warning(m_TestTag, message);
 
-                // With MinLevel > Warning -> LogWarning is not called
-                Log.MinLevel = LogLevel.Error;
-                Log.Warning(tag, message);
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Warning(tag, message);
-                Assert.AreEqual(0, totalCalls);
+                // For loggers with MinLevel <= Warning -> LogWarning is called
+                Assert.AreEqual(1, m_DebugLogger.LogWarningCalls);
+                Assert.AreEqual(1, m_InfoLogger.LogWarningCalls);
+                Assert.AreEqual(1, m_WarningLogger.LogWarningCalls);
 
-                // With MinLevel <= Warning -> LogWarning is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Warning(tag, message);
-                Log.MinLevel = LogLevel.Info;
-                Log.Warning(tag, message);
-                Log.MinLevel = LogLevel.Warning;
-                Log.Warning(tag, message);
-                Assert.AreEqual(3, totalCalls);
+                // For loggers with MinLevel > Warning -> LogWarning is not called
+                Assert.AreEqual(0, m_ErrorLogger.LogWarningCalls);
+                Assert.AreEqual(0, m_FatalLogger.LogWarningCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogWarning is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Warning(tag, message);
-                Assert.AreEqual(3, totalCalls);
+                // For loggers filtering on test tag -> LogWarning is called
+                Assert.AreEqual(1, m_TestTagLogger.LogWarningCalls);
 
-                // TagsFilter is set and contains tag -> LogWarning is called
-                Log.TagsFilter.Add(tag);
-                Log.Warning(tag, message);
-                Assert.AreEqual(4, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogWarning is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogWarningCalls);
 
-                // Works with a formatted message
-                Log.Warning(tag, "{0} message", "warning");
-                Assert.AreEqual(5, totalCalls);
+                // The same Works with a formatted message
+                Log.Warning(m_TestTag, "{0} message", "warning");
+                Assert.AreEqual(2, m_WarningLogger.LogWarningCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Warning(null, message));
             }
         }
 
         [TestMethod]
         public void ErrorTest()
         {
-            string tag = "Test";
             string message = "error message";
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogError += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Error(m_TestTag, message);
 
-                // With MinLevel > Error -> LogError is not called
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Error(tag, message);
-                Assert.AreEqual(0, totalCalls);
+                // For loggers with MinLevel <= Error -> LogError is called
+                Assert.AreEqual(1, m_DebugLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_InfoLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_WarningLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_ErrorLogger.LogErrorCalls);
 
-                // With MinLevel <= Error -> LogError is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Error(tag, message);
-                Log.MinLevel = LogLevel.Info;
-                Log.Error(tag, message);
-                Log.MinLevel = LogLevel.Warning;
-                Log.Error(tag, message);
-                Log.MinLevel = LogLevel.Error;
-                Log.Error(tag, message);
-                Assert.AreEqual(4, totalCalls);
+                // For loggers with MinLevel > Error -> LogError is not called
+                Assert.AreEqual(0, m_FatalLogger.LogErrorCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogError is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Error(tag, message);
-                Assert.AreEqual(4, totalCalls);
+                // For loggers filtering on test tag -> LogError is called
+                Assert.AreEqual(1, m_TestTagLogger.LogErrorCalls);
 
-                // TagsFilter is set and contains tag -> LogError is called
-                Log.TagsFilter.Add(tag);
-                Log.Error(tag, message);
-                Assert.AreEqual(5, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogError is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogErrorCalls);
 
-                // Works with a formatted message
-                Log.Error(tag, "{0} message", "error");
-                Assert.AreEqual(6, totalCalls);
+                // The same Works with a formatted message
+                Log.Error(m_TestTag, "{0} message", "error");
+                Assert.AreEqual(2, m_ErrorLogger.LogErrorCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Error(null, message));
             }
         }
 
         [TestMethod]
         public void ExceptionTest()
         {
-            string tag = "Test";
             Exception exception = new Exception("exception message");
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogException += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Exception(m_TestTag, exception);
 
-                // With MinLevel = Fatal -> LogException is not called
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Exception(tag, exception);
-                Assert.AreEqual(0, totalCalls);
+                // For loggers with MinLevel <= Error -> LogException is called
+                Assert.AreEqual(1, m_DebugLogger.LogExceptionCalls);
+                Assert.AreEqual(1, m_InfoLogger.LogExceptionCalls);
+                Assert.AreEqual(1, m_WarningLogger.LogExceptionCalls);
+                Assert.AreEqual(1, m_ErrorLogger.LogExceptionCalls);
 
-                // With any level -> LogException is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Exception(tag, exception);
-                Log.MinLevel = LogLevel.Info;
-                Log.Exception(tag, exception);
-                Log.MinLevel = LogLevel.Warning;
-                Log.Exception(tag, exception);
-                Log.MinLevel = LogLevel.Error;
-                Log.Exception(tag, exception);
-                Assert.AreEqual(4, totalCalls);
+                // For loggers with MinLevel > Error -> LogException is not called
+                Assert.AreEqual(0, m_FatalLogger.LogExceptionCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogException is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Exception(tag, exception);
-                Assert.AreEqual(4, totalCalls);
+                // For loggers filtering on test tag -> LogException is called
+                Assert.AreEqual(1, m_TestTagLogger.LogExceptionCalls);
 
-                // TagsFilter is set and contains tag -> LogException is called
-                Log.TagsFilter.Add(tag);
-                Log.Exception(tag, exception);
-                Assert.AreEqual(5, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogException is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogExceptionCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Exception(null, exception));
             }
         }
 
         [TestMethod]
         public void FatalTest()
         {
-            string tag = "Test";
             string message = "fatal message";
-            int totalCalls = 0;
 
             lock (m_LogLock)
             {
-                m_Logger.OnLogError += (t, m) => totalCalls++;
-                Log.TagsFilter = null;
+                Log.Fatal(m_TestTag, message);
 
-                // With any level -> LogError is called
-                Log.MinLevel = LogLevel.Debug;
-                Log.Fatal(tag, message);
-                Log.MinLevel = LogLevel.Info;
-                Log.Fatal(tag, message);
-                Log.MinLevel = LogLevel.Warning;
-                Log.Fatal(tag, message);
-                Log.MinLevel = LogLevel.Error;
-                Log.Fatal(tag, message);
-                Log.MinLevel = LogLevel.Fatal;
-                Log.Fatal(tag, message);
-                Assert.AreEqual(5, totalCalls);
+                // For loggers with any MinLevel -> LogError is called
+                Assert.AreEqual(1, m_DebugLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_InfoLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_WarningLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_ErrorLogger.LogErrorCalls);
+                Assert.AreEqual(1, m_FatalLogger.LogErrorCalls);
 
-                // TagsFilter is set but doesn't contain tag -> LogError is not called
-                Log.TagsFilter = new HashSet<string>() { "OtherTag" };
-                Log.Fatal(tag, message);
-                Assert.AreEqual(5, totalCalls);
+                // For loggers filtering on test tag -> LogError is called
+                Assert.AreEqual(1, m_TestTagLogger.LogErrorCalls);
 
-                // TagsFilter is set and contains tag -> LogError is called
-                Log.TagsFilter.Add(tag);
-                Log.Fatal(tag, message);
-                Assert.AreEqual(6, totalCalls);
+                // For loggers filtering on other tags but not test tag -> LogError is not called
+                Assert.AreEqual(0, m_OtherTagsLogger.LogErrorCalls);
 
-                // Works with a formatted message
-                Log.Fatal(tag, "{0} message", "fatal");
-                Assert.AreEqual(7, totalCalls);
+                // The same Works with a formatted message
+                Log.Fatal(m_TestTag, "{0} message", "fatal");
+                Assert.AreEqual(2, m_FatalLogger.LogErrorCalls);
+
+                // If tag is null -> throw ArgumentException
+                Assert.ThrowsException<ArgumentException>(() => Log.Fatal(null, message));
             }
         }
 
         private class DummyLogger : ILogger
         {
-            public Action<string, string> OnLogDebug;
-            public Action<string, string> OnLogInfo;
-            public Action<string, string> OnLogWarning;
-            public Action<string, string> OnLogError;
-            public Action<string, Exception> OnLogException;
+            public int LogDebugCalls = 0;
+            public int LogInfoCalls = 0;
+            public int LogWarningCalls = 0;
+            public int LogErrorCalls = 0;
+            public int LogExceptionCalls = 0;
 
             public void LogDebug(string tag, string message)
             {
-                OnLogDebug?.Invoke(tag, message);
+                LogDebugCalls++;
             }
 
             public void LogInfo(string tag, string message)
             {
-                OnLogInfo?.Invoke(tag, message);
+                LogInfoCalls++;
             }
 
             public void LogWarning(string tag, string message)
             {
-                OnLogWarning?.Invoke(tag, message);
+                LogWarningCalls++;
             }
 
             public void LogError(string tag, string message)
             {
-                OnLogError?.Invoke(tag, message);
+                LogErrorCalls++;
             }
 
             public void LogException(string tag, Exception e)
             {
-                OnLogException?.Invoke(tag, e);
+                LogExceptionCalls++;
             }
         }
     }

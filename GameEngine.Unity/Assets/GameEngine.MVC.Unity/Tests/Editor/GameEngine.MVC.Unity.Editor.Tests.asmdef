@@ -2,5 +2,11 @@
     "name": "GameEngine.MVC.Unity.Editor.Tests",
     "references": [
         "GameEngine.MVC.Unity.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
     ]
 }
