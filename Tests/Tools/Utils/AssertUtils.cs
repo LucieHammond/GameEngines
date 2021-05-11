@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using GameEngine.Core.Logger;
+using GameEnginesTest.Tools.Dummy;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace GameEnginesTest.Tools.Utils
@@ -33,6 +35,69 @@ namespace GameEnginesTest.Tools.Utils
             {
                 Assert.Fail($"Threw exception {e.GetType().Name} when none was excepted.");
             }
+        }
+
+        public static void LogInfo(Action action, string tag = null, string message = null)
+        {
+            DummyLogger logger = DummyLogger.GetDebugLogger();
+            Log.AddLogger(logger);
+            if (tag != null)
+                logger.OnLogInfo += (logTag, logMessage) => Assert.AreEqual(tag, logTag);
+            if (message != null)
+                logger.OnLogInfo += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
+
+            action();
+
+            Assert.IsTrue(logger.LogInfoCalls > 0);
+            logger.Clear();
+            Log.Targets.Clear();
+        }
+
+        public static void LogWarning(Action action, string tag = null, string message = null)
+        {
+            DummyLogger logger = DummyLogger.GetDebugLogger();
+            Log.AddLogger(logger);
+            if (tag != null)
+                logger.OnLogWarning += (logTag, logMessage) => Assert.AreEqual(tag, logTag);
+            if (message != null)
+                logger.OnLogWarning += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
+
+            action();
+
+            Assert.IsTrue(logger.LogWarningCalls > 0);
+            logger.Clear();
+            Log.Targets.Clear();
+        }
+
+        public static void LogError(Action action, string tag = null, string message = null)
+        {
+            DummyLogger logger = DummyLogger.GetDebugLogger();
+            Log.AddLogger(logger);
+            if (tag != null)
+                logger.OnLogError += (logTag, logMessage) => Assert.AreEqual(tag, logTag);
+            if (message != null)
+                logger.OnLogError += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
+
+            action();
+
+            Assert.IsTrue(logger.LogErrorCalls > 0);
+            logger.Clear();
+            Log.Targets.Clear();
+        }
+
+        public static void LogException<T>(Action action, string tag = null) where T : Exception
+        {
+            DummyLogger logger = DummyLogger.GetDebugLogger();
+            Log.AddLogger(logger);
+            if (tag != null)
+                logger.OnLogException += (logTag, logMessage) => Assert.AreEqual(tag, logTag);
+            logger.OnLogException += (logTag, logException) => Assert.IsInstanceOfType(logException, typeof(T));
+
+            action();
+
+            Assert.IsTrue(logger.LogExceptionCalls > 0);
+            logger.Clear();
+            Log.Targets.Clear();
         }
     }
 }
