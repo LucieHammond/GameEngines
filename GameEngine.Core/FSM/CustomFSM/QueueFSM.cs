@@ -55,7 +55,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         /// <returns>The id of the dequeued state.</returns>
         public T DequeueState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
@@ -72,7 +71,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         /// <returns>If the operation succeeded (if the queue wasn't empty)</returns>
         public bool TryDequeueState(out T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {

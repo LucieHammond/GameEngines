@@ -32,7 +32,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         public void PushState(T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
             m_StatesStack.Push(CurrentStateId);
@@ -45,7 +44,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         /// <returns>The id of the withdrawn state</returns>
         public T PopState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
@@ -62,7 +60,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         /// <returns>If the operation succeeded (if the stack wasn't empty)</returns>
         public bool TryPopState(out T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {

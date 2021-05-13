@@ -47,7 +47,6 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="immediate">immediate argument used when setting new state</param>
         /// <param name="ignoreIfCurrentState">ignoreIfCurrentState argument used when setting new state</param>
         /// <param name="priority">priority argument used when setting new state</param>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
         /// <returns>The id of the current state.</returns>
         public T MoveToNextState(bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {

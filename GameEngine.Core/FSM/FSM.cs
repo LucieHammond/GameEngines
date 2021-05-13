@@ -226,9 +226,14 @@ namespace GameEngine.Core.FSM
             return m_States.ContainsKey(stateId);
         }
 
+        /// <summary>
+        /// Ensure that a given state is valid for this FSM, otherwise throw ArgumentException
+        /// </summary>
+        /// <param name="stateId">The id of the state to check</param>
+        /// <exception cref="ArgumentException">Thrown if the state is invalid</exception>
         protected void CheckStateValidity(T stateId)
         {
-            if (!m_States.ContainsKey(stateId))
+            if (!IsValidState(stateId))
                 throw new ArgumentException($"The state {stateId} is not a valid state");
         }
 

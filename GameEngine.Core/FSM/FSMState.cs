@@ -60,7 +60,7 @@ namespace GameEngine.Core.FSM
         /// <summary>
         /// A shortcut that calls the method of the FSM with same signature.
         /// </summary>
-        /// <seealso cref="GameEngine.FSM.FSM.SetState"/>
+        /// <seealso cref="FSM{T}.SetState(T, bool, bool, byte)"/>
         protected void SetState(T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
         {
             m_FSM.SetState(stateId, immediate, ignoreIfCurrentState, priority);
