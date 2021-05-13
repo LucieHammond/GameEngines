@@ -4,6 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;ENABLE_LOGS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="xcopy $(TargetPath) $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
     <Exec Command="xcopy $(TargetDir)$(TargetName).pdb $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
