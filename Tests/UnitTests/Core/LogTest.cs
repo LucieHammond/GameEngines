@@ -1,5 +1,6 @@
 ﻿#define ENABLE_LOGS
 using GameEngine.Core.Logger;
+using GameEnginesTest.Tools.Dummy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -236,40 +237,6 @@ namespace GameEnginesTest.UnitTests.Core
 
                 // If tag is null -> throw ArgumentException
                 Assert.ThrowsException<ArgumentException>(() => Log.Fatal(null, message));
-            }
-        }
-
-        private class DummyLogger : ILogger
-        {
-            public int LogDebugCalls = 0;
-            public int LogInfoCalls = 0;
-            public int LogWarningCalls = 0;
-            public int LogErrorCalls = 0;
-            public int LogExceptionCalls = 0;
-
-            public void LogDebug(string tag, string message)
-            {
-                LogDebugCalls++;
-            }
-
-            public void LogInfo(string tag, string message)
-            {
-                LogInfoCalls++;
-            }
-
-            public void LogWarning(string tag, string message)
-            {
-                LogWarningCalls++;
-            }
-
-            public void LogError(string tag, string message)
-            {
-                LogErrorCalls++;
-            }
-
-            public void LogException(string tag, Exception e)
-            {
-                LogExceptionCalls++;
             }
         }
     }
