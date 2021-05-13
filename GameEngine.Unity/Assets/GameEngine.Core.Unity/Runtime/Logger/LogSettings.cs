@@ -75,9 +75,9 @@ namespace GameEngine.Core.Logger
             try
             {
                 ColorUtility.TryParseHtmlString($"#{Convert.ToString(tag.GetHashCode(), 16)}", out Color color);
-                color.r = Mathf.Lerp(0, 0.9f, color.r);
-                color.g = Mathf.Lerp(0, 0.9f, color.g);
-                color.b = Mathf.Lerp(0, 0.9f, color.b);
+                color.r = Mathf.Lerp(0.1f, 1, color.r);
+                color.g = Mathf.Lerp(0.1f, 1, color.g);
+                color.b = Mathf.Lerp(0.1f, 1, color.b);
                 color.a = 1;
 
                 return color;
@@ -85,7 +85,7 @@ namespace GameEngine.Core.Logger
             catch (UnityException)
             {
                 System.Random rand = new System.Random(tag.GetHashCode());
-                return new Color((float)rand.NextDouble() * 0.9f, (float)rand.NextDouble() * 0.9f, (float)rand.NextDouble() * 0.9f);
+                return new Color(0.1f + 0.9f * (float)rand.NextDouble(), 0.1f + 0.9f * (float)rand.NextDouble(), 0.1f + 0.9f * (float)rand.NextDouble());
             }
         }
     }

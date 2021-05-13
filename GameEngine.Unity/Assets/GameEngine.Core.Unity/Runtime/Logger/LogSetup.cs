@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// A static class providing methods to easily configure the log service provided by the Log class
+/// A static class providing methods to easily configure the log system provided by the Log class
 /// </summary>
 public static class LogSetup
 {
     /// <summary>
-    /// Initialize the log service based on the given log settings
+    /// Initialize the log system based on the given log settings
     /// </summary>
     /// <param name="settings">The log settings to use for configuration</param>
     public static void InitializeLogs(LogSettings settings)

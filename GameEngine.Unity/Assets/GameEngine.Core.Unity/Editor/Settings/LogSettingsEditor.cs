@@ -59,7 +59,7 @@ namespace GameEngine.Core.UnityEditor.Settings
                 EditorGUILayout.Space(25);
                 AdditionalLoggerSectionGUI(logger.Key, logger.Value);
             }
-            
+
             EditorGUILayout.Space(25);
             AddNewLoggerGUI(settings);
         }

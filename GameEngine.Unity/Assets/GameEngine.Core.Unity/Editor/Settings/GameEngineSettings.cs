@@ -37,6 +37,7 @@ namespace GameEngine.Core.UnityEditor.Settings
 
                 guiHandler = (searchContext) =>
                 {
+                    EditorGUILayout.Space();
                     EditorGUILayout.LabelField("Change Settings Location", EditorStyles.boldLabel);
                     folderPath = EditorGUILayout.TextField("Settings Folder Path", folderPath);
                     EditorGUILayout.HelpBox("This is the folder in which are stored all the GameEngine settings for your project.\n" +
