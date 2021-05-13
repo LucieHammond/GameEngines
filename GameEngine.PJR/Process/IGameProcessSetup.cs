@@ -18,7 +18,7 @@ namespace GameEngine.PJR.Process
         /// A ServiceSetup configuring the ServiceMode that will be loaded and run during the whole lifetime of the GameProcess
         /// </summary>
         /// <returns>An instance of a custom ServiceSetup</returns>
-        IServiceSetup GetServiceSetup();
+        IGameServiceSetup GetServiceSetup();
 
         /// <summary>
         /// An ordered list of GameModeSetups that are expected to be loaded and run one after another by the GameProcess

@@ -1,10 +1,7 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.Logger;
 using GameEngine.PJR.Jobs.Policies;
-using GameEngine.PJR.Process.Services;
-using GameEngine.PJR.Rules;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace GameEngine.PJR.Jobs.States
@@ -38,8 +35,6 @@ namespace GameEngine.PJR.Jobs.States
                 m_GameJob.PerformancePolicy = m_Setup.GetPerformancePolicy();
 
                 m_Setup.SetRules(ref m_GameJob.Rules);
-                if (m_GameJob.IsServiceJob)
-                    CheckOnlyServices(m_GameJob.Rules);
 
                 m_GameJob.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameJob.Rules.ContainsKey(ruleType)).ToList();
                 m_GameJob.UpdateScheduler = m_Setup.GetUpdateScheduler().Where((scheduler) => m_GameJob.Rules.ContainsKey(scheduler.RuleType)).ToList();
@@ -69,17 +64,6 @@ namespace GameEngine.PJR.Jobs.States
         public override void Exit()
         {
             Log.Info(m_GameJob.Name, $"Setup completed");
-        }
-
-        private void CheckOnlyServices(RulesDictionary rules)
-        {
-            foreach (KeyValuePair<Type, GameRule> rule in rules)
-            {
-                if (!(rule.Value is GameService))
-                {
-                    throw new InvalidCastException($"Cannot setup rule {rule.Value.Name} in ServiceSetup because it doesn't inherit GameService");
-                }
-            }
         }
     }
 

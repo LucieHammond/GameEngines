@@ -121,7 +121,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             // Create a GameProcess and simulate a dependency injection via a ProcessService acting as provider
             GameProcess process = new GameProcess(new DummyGameProcessSetup(), new MockProcessTime());
             DependencyProvider serviceProvider = new DependencyProvider();
-            serviceProvider.Add(typeof(IProcessAccessor), new ProcessService(process));
+            serviceProvider.Add(typeof(IProcessAccessor), new ProcessAccessorRule(process));
             RulesDictionary rulesToInject = new RulesDictionary();
             rulesToInject.AddRule(rule);
             DependencyUtils.InjectDependencies(rulesToInject, serviceProvider, null);

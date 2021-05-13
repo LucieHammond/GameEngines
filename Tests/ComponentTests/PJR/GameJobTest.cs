@@ -30,7 +30,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             m_Time = new MockProcessTime();
             m_Process = new GameProcess(new DummyGameProcessSetup(), m_Time);
             m_Process.ServiceProvider = new DependencyProvider();
-            m_Process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessService(m_Process));
+            m_Process.ServiceProvider.Add(typeof(IProcessAccessor), new ProcessAccessorRule(m_Process));
             m_Configuration = new Configuration();
         }
 
@@ -54,8 +54,8 @@ namespace GameEnginesTest.ComponentTests.PJR
             Assert.IsNotNull(modeJob.PerformancePolicy);
 
             // A service job is created -> Name, Configuration and Parent can be retrieved immediately
-            GameJob serviceJob = new GameJob(new DummyServiceSetup(), m_Configuration, m_Process);
-            Assert.AreEqual("TestServices", serviceJob.Name);
+            GameJob serviceJob = new GameJob(new DummyGameServiceSetup(), m_Configuration, m_Process);
+            Assert.AreEqual("TestService", serviceJob.Name);
             Assert.IsTrue(serviceJob.IsServiceJob);
             Assert.AreEqual(m_Configuration, serviceJob.Configuration);
             Assert.AreEqual(m_Process, serviceJob.ParentProcess);
@@ -104,7 +104,7 @@ namespace GameEnginesTest.ComponentTests.PJR
             Assert.IsFalse(RunJobState(job, GameJobState.DependencyInjection));
 
             // Service job contains DummyGameService providing dependency for IDummyGameService -> interface appears in ServiceProvider after DependencyInjection state
-            GameJob serviceJob = new GameJob(new DummyServiceSetup(), m_Configuration, m_Process);
+            GameJob serviceJob = new GameJob(new DummyGameServiceSetup(), m_Configuration, m_Process);
             serviceJob.Start();
             Assert.IsTrue(RunJobState(serviceJob, GameJobState.Setup));
             Assert.IsTrue(RunJobState(serviceJob, GameJobState.DependencyInjection));

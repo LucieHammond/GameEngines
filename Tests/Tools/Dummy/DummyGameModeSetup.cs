@@ -11,7 +11,7 @@ namespace GameEnginesTest.Tools.Dummy
     {
         public string Name => CustomName ?? "Test";
 
-        public Type RequiredServiceSetup => typeof(DummyServiceSetup);
+        public Type RequiredServiceSetup => typeof(DummyGameServiceSetup);
 
         public string CustomName;
         public IEnumerable<GameRule> CustomRules;

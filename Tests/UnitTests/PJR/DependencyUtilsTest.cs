@@ -42,7 +42,7 @@ namespace GameEnginesTest.UnitTests.PJR
             // Create the dependency providers from which to provide those dependencies
             DummyGameService dummyService = new DummyGameService();
             DummyGameRuleBis dummyRuleBis = new DummyGameRuleBis();
-            ProcessService processService = new ProcessService(new GameProcess(new DummyGameProcessSetup(), new MockProcessTime())); // this one is mandatory
+            ProcessAccessorRule processService = new ProcessAccessorRule(new GameProcess(new DummyGameProcessSetup(), new MockProcessTime())); // this one is mandatory
             DependencyProvider servicesProvider = new DependencyProvider();
             servicesProvider.Add(typeof(IProcessAccessor), processService);
             servicesProvider.Add(typeof(IDummyGameService), dummyService);

@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Dummy
 {
-    public class DummyServiceSetup : IServiceSetup
+    public class DummyGameServiceSetup : IGameServiceSetup
     {
         public string Name => CustomName ?? "Test";
 
         public string CustomName;
-        public IEnumerable<GameService> CustomServices;
+        public IEnumerable<GameRule> CustomServices;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
         public ExceptionPolicy CustomExceptionPolicy;
@@ -22,7 +22,7 @@ namespace GameEnginesTest.Tools.Dummy
         {
             if (CustomServices != null)
             {
-                foreach (GameService service in CustomServices)
+                foreach (GameRule service in CustomServices)
                     rules.AddRule(service);
             }
             else

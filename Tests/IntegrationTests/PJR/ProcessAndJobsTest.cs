@@ -2,7 +2,6 @@
 using GameEngine.PJR.Jobs.Policies;
 using GameEngine.PJR.Process;
 using GameEngine.PJR.Process.Modes;
-using GameEngine.PJR.Process.Services;
 using GameEngine.PJR.Rules;
 using GameEnginesTest.Tools.Dummy;
 using GameEnginesTest.Tools.Mocks;
@@ -27,8 +26,8 @@ namespace GameEnginesTest.IntegrationTests.PJR
             m_Time = new MockProcessTime();
 
             // Create an empty process with no services and no rules (interactions with rules are not tested here)
-            DummyServiceSetup servicesSetup = new DummyServiceSetup();
-            servicesSetup.CustomServices = new List<GameService>();
+            DummyGameServiceSetup servicesSetup = new DummyGameServiceSetup();
+            servicesSetup.CustomServices = new List<GameRule>();
 
             DummyGameModeSetup modeSetup = new DummyGameModeSetup();
             modeSetup.CustomRules = new List<GameRule>();
