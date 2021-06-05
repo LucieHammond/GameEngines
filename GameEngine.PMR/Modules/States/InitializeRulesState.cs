@@ -9,13 +9,13 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the InitializeRules state of the GameJob, in which GameRules are initialized
+    /// The FSM state corresponding to the InitializeRules state of the GameModule, in which GameRules are initialized
     /// </summary>
     internal class InitializeRulesState : FSMState<GameModuleState>
     {
         public override GameModuleState Id => GameModuleState.InitializeRules;
 
-        private GameModule m_GameJob;
+        private GameModule m_GameModule;
         private IEnumerator<GameRule> m_RulesToInitEnumerator;
         private Stopwatch m_UpdateTime;
         private Stopwatch m_RuleInitTime;
@@ -23,26 +23,26 @@ namespace GameEngine.PMR.Modules.States
         private int m_NbRulesInitialized;
         private int m_NbStallingWarnings;
 
-        public InitializeRulesState(GameModule gameMode)
+        public InitializeRulesState(GameModule gameModule)
         {
-            m_GameJob = gameMode;
+            m_GameModule = gameModule;
             m_UpdateTime = new Stopwatch();
             m_RuleInitTime = new Stopwatch();
         }
 
         public override void Enter()
         {
-            Log.Info(m_GameJob.Name, "Initialize {0}", m_GameJob.IsServiceJob ? "services" : "rules");
+            Log.Info(m_GameModule.Name, "Initialize {0}", m_GameModule.IsService ? "services" : "rules");
 
-            m_GameJob.LoadingProgress = 0;
-            m_RulesToInitEnumerator = m_GameJob.Rules.GetRulesInOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
-            m_Performance = m_GameJob.PerformancePolicy;
+            m_GameModule.LoadingProgress = 0;
+            m_RulesToInitEnumerator = m_GameModule.Rules.GetRulesInOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
+            m_Performance = m_GameModule.PerformancePolicy;
             m_NbRulesInitialized = 0;
             m_NbStallingWarnings = 0;
             if (!m_RulesToInitEnumerator.MoveNext())
             {
-                m_GameJob.LoadingProgress = 1;
-                m_GameJob.GoToNextState();
+                m_GameModule.LoadingProgress = 1;
+                m_GameModule.GoToNextState();
             }
         }
 
@@ -61,26 +61,26 @@ namespace GameEngine.PMR.Modules.States
                     catch (Exception e)
                     {
                         Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
-                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
                             break;
                     }
                 }
 
                 if (m_RulesToInitEnumerator.Current.ErrorDetected)
                 {
-                    m_GameJob.AskUnload();
+                    m_GameModule.AskUnload();
                     break;
                 }
                 else if (m_RulesToInitEnumerator.Current.State == GameRuleState.Initialized)
                 {
                     m_RuleInitTime.Stop();
                     m_NbRulesInitialized++;
-                    m_GameJob.LoadingProgress = m_NbRulesInitialized / (float)m_GameJob.InitUnloadOrder.Count;
+                    m_GameModule.LoadingProgress = m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count;
 
                     if (!m_RulesToInitEnumerator.MoveNext())
                     {
-                        m_GameJob.LoadingProgress = 1;
-                        m_GameJob.GoToNextState();
+                        m_GameModule.LoadingProgress = 1;
+                        m_GameModule.GoToNextState();
                         break;
                     }
                 }
@@ -93,7 +93,7 @@ namespace GameEngine.PMR.Modules.States
                         int TotalTimeMs = m_Performance.InitStallingTimeout * (m_NbStallingWarnings + 1);
                         Exception e = new TimeoutException($"Rule initialization has been stalling for more than {TotalTimeMs} ms");
                         Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
-                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad))
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
                             break;
                     }
                     else
@@ -110,7 +110,7 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameJob.Name, $"Initialization completed");
+            Log.Info(m_GameModule.Name, $"Initialization completed");
             m_RuleInitTime.Reset();
             m_UpdateTime.Reset();
         }

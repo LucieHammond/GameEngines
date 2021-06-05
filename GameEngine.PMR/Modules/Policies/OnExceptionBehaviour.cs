@@ -16,15 +16,15 @@
         SkipFrame,
 
         /// <summary>
-        /// The GameJob is paused, which means it stays in the same state as it was at the moment of the error
-        /// Any new update of the GameJob is skipped until restart but the rest of the process continues running
+        /// The module is paused, which means it stays in the same state as it was at the moment of the error
+        /// Any new update of the module is skipped until restart but the rest of the process continues running
         /// </summary>
-        PauseJob,
+        PauseModule,
 
         /// <summary>
-        /// The GameJob is unloaded. If the job is a GameMode and a fallback mode is defined, this mode is loaded instead
+        /// The module is unloaded. If the job is a GameMode and a fallback mode is defined, this mode is loaded instead
         /// </summary>
-        UnloadJob,
+        UnloadModule,
 
         /// <summary>
         /// The parent GameProcess is paused. The whole program is frozen in the state it was at the moment of the error

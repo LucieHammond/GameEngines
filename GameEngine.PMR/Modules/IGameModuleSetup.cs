@@ -7,23 +7,23 @@ using System.Collections.Generic;
 namespace GameEngine.PMR.Modules
 {
     /// <summary>
-    /// A setup model in the form of an interface to be implemented for defining the characteristics of a custom GameJob
+    /// A setup model in the form of an interface to be implemented for defining the characteristics of a custom GameModule
     /// </summary>
     public interface IGameModuleSetup
     {
         /// <summary>
-        /// The name of the GameJob
+        /// The name of the module
         /// </summary>
         string Name { get; }
 
         /// <summary>
-        /// Instantiate all the GameRules of the GameJob and add them to the given RulesDictionary
+        /// Instantiate all the rules of the module and add them to the given RulesDictionary
         /// </summary>
-        /// <param name="rules">The dictionary storing all the GameRules used in the GameJob</param>
+        /// <param name="rules">The dictionary storing all the GameRules used in the module</param>
         void SetRules(ref RulesDictionary rules);
 
         /// <summary>
-        /// Set and return the order in which the GameRules must be initialized
+        /// Set and return the order in which the rules must be initialized
         /// By deduction, the unloading operations will be done in reverse order
         /// </summary>
         /// <returns>An ordered list of the GameRule types</returns>
@@ -36,13 +36,13 @@ namespace GameEngine.PMR.Modules
         List<RuleScheduling> GetUpdateScheduler();
 
         /// <summary>
-        /// Define a set of configurations concerning exception handling in the GameJob
+        /// Define a set of configurations concerning exception handling in the module
         /// </summary>
         /// <returns>An ExceptionPolicy object</returns>
         ExceptionPolicy GetExceptionPolicy();
 
         /// <summary>
-        /// Define a set of configurations concerning performance management in the GameJob
+        /// Define a set of configurations concerning performance management in the module
         /// </summary>
         /// <returns>A PerformancePolicy object</returns>
         PerformancePolicy GetPerformancePolicy();

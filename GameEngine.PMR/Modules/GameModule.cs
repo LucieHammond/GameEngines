@@ -14,51 +14,51 @@ using System.Collections.Generic;
 namespace GameEngine.PMR.Modules
 {
     /// <summary>
-    /// A subprocess called GameJob loading and running a coherent set of GameRules predefined in a GameJobSetup
+    /// A process unit called GameModule used to load and run a coherent set of GameRules defined in a IGameModuleSetup
     /// </summary>
     public class GameModule
     {
         /// <summary>
-        /// The name of the GameJob, based on the name of the GameJobSetup
+        /// The name of the module, based on the name of the IGameModuleSetup
         /// </summary>
         public string Name { get; private set; }
 
         /// <summary>
-        /// The state of the GameJob
+        /// The state of the module
         /// </summary>
         public GameModuleState State => m_StateMachine.CurrentStateId;
 
         /// <summary>
-        /// If the GameJob is currently in one of its initialization state
+        /// If the module is currently in one of its initialization state
         /// </summary>
         public bool IsLoading => State == GameModuleState.Setup || State == GameModuleState.DependencyInjection || State == GameModuleState.InitializeRules;
 
         /// <summary>
-        /// If the GameJob is currently in its default operating state
+        /// If the module is currently in its default operating state
         /// </summary>
         public bool IsOperational => State == GameModuleState.UpdateRules;
 
         /// <summary>
-        /// If the GameJob is currently in one of its unloading state
+        /// If the module is currently in one of its unloading state
         /// </summary>
         public bool IsUnloading => State == GameModuleState.UnloadRules;
 
         /// <summary>
-        /// If the GameJob has finished its lifecycle and is waiting for closure
+        /// If the module has finished its lifecycle and is waiting for closure
         /// </summary>
         public bool IsFinished => State == GameModuleState.End;
 
         /// <summary>
-        /// A floating number between 0 and 1 indicating the progression of the loading operations of the GameJob
+        /// A floating number between 0 and 1 indicating the progression of the loading operations of the module
         /// </summary>
         public float LoadingProgress { get; internal set; }
 
         /// <summary>
-        /// The configuration of the GameJob, setup at construction, used to pass runtime information
+        /// The configuration of the module, setup at construction, used to pass runtime information
         /// </summary>
         public Configuration Configuration { get; private set; }
 
-        internal bool IsServiceJob;
+        internal bool IsService;
         internal GameProcess ParentProcess;
 
         internal RulesDictionary Rules;
@@ -73,12 +73,12 @@ namespace GameEngine.PMR.Modules
 
         internal GameModule(IGameModuleSetup setup, Configuration configuration, GameProcess parentProcess)
         {
-            IsServiceJob = setup is IGameServiceSetup;
-            Name = string.Format("{0}{1}", setup.Name, IsServiceJob ? "Service" : "Mode");
+            IsService = setup is IGameServiceSetup;
+            Name = string.Format("{0}{1}", setup.Name, IsService ? "Service" : "Mode");
             Configuration = configuration;
             ParentProcess = parentProcess;
             Rules = new RulesDictionary();
-            if (IsServiceJob)
+            if (IsService)
                 Rules.AddRule(new ProcessAccessorRule(parentProcess));
             m_IsPaused = false;
 
@@ -94,7 +94,7 @@ namespace GameEngine.PMR.Modules
         }
 
         /// <summary>
-        /// Pause the GameJob. This will freeze the job and keep it in the same state until Restart
+        /// Pause the module. This will freeze the job and keep it in the same state until Restart
         /// </summary>
         public void Pause()
         {
@@ -103,7 +103,7 @@ namespace GameEngine.PMR.Modules
         }
 
         /// <summary>
-        /// Restart the GameJob, which will undo the effects of Pause
+        /// Restart the module, which will undo the effects of Pause
         /// </summary>
         public void Restart()
         {
@@ -178,7 +178,7 @@ namespace GameEngine.PMR.Modules
 
         internal void AskUnload()
         {
-            if (IsServiceJob)
+            if (IsService)
                 ParentProcess.Stop();
             else
             {
@@ -202,10 +202,10 @@ namespace GameEngine.PMR.Modules
                     return false;
                 case OnExceptionBehaviour.SkipFrame:
                     return true;
-                case OnExceptionBehaviour.PauseJob:
+                case OnExceptionBehaviour.PauseModule:
                     Pause();
                     return true;
-                case OnExceptionBehaviour.UnloadJob:
+                case OnExceptionBehaviour.UnloadModule:
                     AskUnload();
                     return true;
                 case OnExceptionBehaviour.PauseAll:

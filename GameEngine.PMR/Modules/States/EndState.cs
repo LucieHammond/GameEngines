@@ -3,7 +3,7 @@
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the End state of the GameJob, in which it does nothing except waiting to be closed
+    /// The FSM state corresponding to the End state of the GameModule, in which it does nothing except waiting to be closed
     /// </summary>
     internal class EndState : FSMState<GameModuleState>
     {

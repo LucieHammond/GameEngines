@@ -9,13 +9,13 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the UnloadRules state of the GameJob, in which GameRules are unloaded
+    /// The FSM state corresponding to the UnloadRules state of the GameModule, in which GameRules are unloaded
     /// </summary>
     internal class UnloadRulesState : FSMState<GameModuleState>
     {
         public override GameModuleState Id => GameModuleState.UnloadRules;
 
-        private GameModule m_GameJob;
+        private GameModule m_GameModule;
         private IEnumerator<GameRule> m_RulesToUnloadEnumerator;
         private Stopwatch m_UpdateTime;
         private Stopwatch m_RuleUnloadTime;
@@ -23,23 +23,23 @@ namespace GameEngine.PMR.Modules.States
         private bool m_SkipCurrrentRule;
         private int m_NbStallingWarnings;
 
-        public UnloadRulesState(GameModule gameMode)
+        public UnloadRulesState(GameModule gameModule)
         {
-            m_GameJob = gameMode;
+            m_GameModule = gameModule;
             m_UpdateTime = new Stopwatch();
             m_RuleUnloadTime = new Stopwatch();
         }
 
         public override void Enter()
         {
-            Log.Info(m_GameJob.Name, "Unload {0}", m_GameJob.IsServiceJob ? "services" : "rules");
+            Log.Info(m_GameModule.Name, "Unload {0}", m_GameModule.IsService ? "services" : "rules");
 
-            m_RulesToUnloadEnumerator = m_GameJob.Rules.GetRulesInReverseOrder(m_GameJob.InitUnloadOrder).GetEnumerator();
-            m_Performance = m_GameJob.PerformancePolicy;
+            m_RulesToUnloadEnumerator = m_GameModule.Rules.GetRulesInReverseOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
+            m_Performance = m_GameModule.PerformancePolicy;
             m_SkipCurrrentRule = false;
             m_NbStallingWarnings = 0;
             if (!m_RulesToUnloadEnumerator.MoveNext())
-                m_GameJob.GoToNextState();
+                m_GameModule.GoToNextState();
         }
 
         public override void Update()
@@ -57,8 +57,8 @@ namespace GameEngine.PMR.Modules.States
                     catch (Exception e)
                     {
                         Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
-                        m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
-                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
+                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
                             break;
                     }
                 }
@@ -73,7 +73,7 @@ namespace GameEngine.PMR.Modules.States
 
                     if (!m_RulesToUnloadEnumerator.MoveNext())
                     {
-                        m_GameJob.GoToNextState();
+                        m_GameModule.GoToNextState();
                         break;
                     }
                 }
@@ -86,8 +86,8 @@ namespace GameEngine.PMR.Modules.States
                         int TotalTimeMs = m_Performance.UnloadStallingTimeout * (m_NbStallingWarnings + 1);
                         Exception e = new TimeoutException($"Rule unloading has been stalling for more than {TotalTimeMs}ms");
                         Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
-                        m_SkipCurrrentRule = m_GameJob.ExceptionPolicy.SkipUnloadIfException;
-                        if (m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringUnload))
+                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
                             break;
                     }
                     else
@@ -104,7 +104,7 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameJob.Name, $"Unloading completed");
+            Log.Info(m_GameModule.Name, $"Unloading completed");
             m_RuleUnloadTime.Reset();
             m_UpdateTime.Reset();
         }

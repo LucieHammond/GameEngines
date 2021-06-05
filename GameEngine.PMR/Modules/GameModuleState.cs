@@ -1,38 +1,38 @@
 ﻿namespace GameEngine.PMR.Modules
 {
     /// <summary>
-    /// All possible states a GameJob can go through during its lifetime
-    /// Those states are visited by a FSM associated with the GameJob
+    /// All possible states a GameModule can go through during its lifetime
+    /// Those states are visited by a FSM associated with the GameModule
     /// </summary>
     public enum GameModuleState
     {
         /// <summary>
-        /// The GameJob is configured using the GameJobSetup passed at construction
+        /// The module is configured using the IGameModuleSetup passed at construction
         /// </summary>
         Setup,
 
         /// <summary>
-        /// The GameJob fills all dependencies needed by its rules
+        /// The module fills all dependencies needed by its rules
         /// </summary>
         DependencyInjection,
 
         /// <summary>
-        /// The GameJob initialize its rules in the order specified by the setup
+        /// The module initialize its rules in the order specified by the setup
         /// </summary>
         InitializeRules,
 
         /// <summary>
-        /// The GameJob update its rules frame after frame following a schedule specified by the setup
+        /// The module update its rules frame after frame following a schedule specified by the setup
         /// </summary>
         UpdateRules,
 
         /// <summary>
-        /// The GameJob unload its rules in the order specified by the setup
+        /// The module unload its rules in the order specified by the setup
         /// </summary>
         UnloadRules,
 
         /// <summary>
-        /// The GameJob waits to be closed by its parent process
+        /// The module waits to be closed by its parent process
         /// </summary>
         End
     }

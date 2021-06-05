@@ -8,27 +8,27 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the DependencyInjection state of the GameJob, in which the dependencies referenced in the GameRules are filled
+    /// The FSM state corresponding to the DependencyInjection state of the GameModule, in which the dependencies referenced in the GameRules are filled
     /// </summary>
     internal class DependencyInjectionState : FSMState<GameModuleState>
     {
         public override GameModuleState Id => GameModuleState.DependencyInjection;
 
-        private GameModule m_GameJob;
+        private GameModule m_GameModule;
         private DependencyProvider m_InternalProvider;
         private Stopwatch m_UpdateTime;
         private PerformancePolicy m_Performance;
 
-        public DependencyInjectionState(GameModule gameMode)
+        public DependencyInjectionState(GameModule gameModule)
         {
-            m_GameJob = gameMode;
+            m_GameModule = gameModule;
             m_UpdateTime = new Stopwatch();
         }
 
         public override void Enter()
         {
-            Log.Info(m_GameJob.Name, $"Inject dependencies");
-            m_Performance = m_GameJob.PerformancePolicy;
+            Log.Info(m_GameModule.Name, $"Inject dependencies");
+            m_Performance = m_GameModule.PerformancePolicy;
         }
 
         public override void Update()
@@ -39,27 +39,27 @@ namespace GameEngine.PMR.Modules.States
             {
                 if (m_InternalProvider == null)
                 {
-                    m_InternalProvider = DependencyUtils.ExtractDependencies(m_GameJob.Rules);
+                    m_InternalProvider = DependencyUtils.ExtractDependencies(m_GameModule.Rules);
 
-                    if (m_GameJob.IsServiceJob)
+                    if (m_GameModule.IsService)
                     {
-                        m_GameJob.ParentProcess.ServiceProvider = m_InternalProvider;
+                        m_GameModule.ParentProcess.ServiceProvider = m_InternalProvider;
                     }
 
                     if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
                         return;
                 }
 
-                DependencyProvider serviceProvider = m_GameJob.ParentProcess.ServiceProvider;
-                DependencyProvider ruleProvider = m_GameJob.IsServiceJob ? null : m_InternalProvider;
-                DependencyUtils.InjectDependencies(m_GameJob.Rules, serviceProvider, ruleProvider);
+                DependencyProvider serviceProvider = m_GameModule.ParentProcess.ServiceProvider;
+                DependencyProvider ruleProvider = m_GameModule.IsService ? null : m_InternalProvider;
+                DependencyUtils.InjectDependencies(m_GameModule.Rules, serviceProvider, ruleProvider);
 
-                m_GameJob.GoToNextState();
+                m_GameModule.GoToNextState();
             }
             catch (Exception e)
             {
-                Log.Exception(m_GameJob.Name, e);
-                m_GameJob.OnException(m_GameJob.ExceptionPolicy.ReactionDuringLoad);
+                Log.Exception(m_GameModule.Name, e);
+                m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad);
             }
 
             m_UpdateTime.Stop();
@@ -67,7 +67,7 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameJob.Name, $"Dependency injection completed");
+            Log.Info(m_GameModule.Name, $"Dependency injection completed");
             m_UpdateTime.Reset();
         }
     }

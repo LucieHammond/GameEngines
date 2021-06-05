@@ -1,7 +1,7 @@
 ﻿namespace GameEngine.PMR.Modules.Policies
 {
     /// <summary>
-    /// Set of GameJob configurations concerning performance measurement and optimization
+    /// Set of module configurations concerning performance measurement and optimization
     /// </summary>
     public class PerformancePolicy
     {

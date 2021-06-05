@@ -4,7 +4,7 @@ using System;
 namespace GameEngine.PMR.Process.Modes
 {
     /// <summary>
-    /// The setup interface to be implemented for defining GameModes (which are a certain kind of GameJobs, time-limited and service dependent)
+    /// The setup interface to be implemented for defining GameModes (which are a certain kind of GameModule, time-limited and service dependent)
     /// <seealso cref="IGameModuleSetup"/>
     /// </summary>
     public interface IGameModeSetup : IGameModuleSetup
