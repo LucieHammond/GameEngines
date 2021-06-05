@@ -4,6 +4,7 @@ using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Modules.States;
+using GameEngine.PMR.Modules.Transitions;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Modes;
 using GameEngine.PMR.Rules;
@@ -52,11 +53,6 @@ namespace GameEngine.PMR.Modules
         public bool IsFinished => State == GameModuleState.End;
 
         /// <summary>
-        /// A floating number between 0 and 1 indicating the progression of the loading operations of the module
-        /// </summary>
-        public float LoadingProgress { get; internal set; }
-
-        /// <summary>
         /// The configuration of the module, set at construction and used to transmit runtime information
         /// </summary|
         public Configuration Configuration { get; private set; }
@@ -68,6 +64,7 @@ namespace GameEngine.PMR.Modules
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
         internal GameProcess MainProcess;
+        internal TransitionActivity Transition;
 
         internal Action OnFinishLoading;
         internal Action OnFinishUnloading;
@@ -80,6 +77,7 @@ namespace GameEngine.PMR.Modules
             Name = setup.Name;
             Configuration = configuration;
             MainProcess = mainProcess;
+            Transition = setup.GetTransitionActivity();
 
             m_IsPaused = false;
             m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM",
@@ -199,7 +197,7 @@ namespace GameEngine.PMR.Modules
 
         internal void ReportLoadingProgress(float progress)
         {
-            LoadingProgress = progress;
+            Transition?.ReportDefaultProgress(progress);
         }
 
         internal void OnManagedError()
