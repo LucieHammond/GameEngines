@@ -109,7 +109,7 @@ namespace GameEngine.PMR.Modules.States
 
         private bool ExitIfCompleted()
         {
-            if(!m_RulesToInitEnumerator.MoveNext())
+            if (!m_RulesToInitEnumerator.MoveNext())
             {
                 m_GameModule.ReportLoadingProgress(1f);
                 m_GameModule.GoToNextState();

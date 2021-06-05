@@ -1,223 +1,207 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
+using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules.Dependencies;
-using System;
 using System.Collections.Generic;
 
 namespace GameEngine.PMR.Process
 {
     /// <summary>
-    /// A process that simulates the lifecycle of a game whose caracteristics (rules and services) are defined in a given GameProcessSetup
+    /// A GameProcess that simulates the lifecycle of a game whose caracteristics (services and modes) are defined in a given IGameProcessSetup
     /// </summary>
     public class GameProcess
     {
         internal const string TAG = "Process";
 
         /// <summary>
-        /// The name of the GameProcess
+        /// The name of the process
         /// </summary>
         public string Name { get; private set; }
 
         /// <summary>
-        /// A reference to the interface giving time information concerning the GameProcess
+        /// A reference to the interface giving time information concerning the process
         /// </summary>
         public ITime Time { get; private set; }
 
         /// <summary>
-        /// The ServiceGameMode running the GameServices of the game, i.e rules that are running and accessible throughout the life of the process
+        /// The GameServices module running the services of the game, i.e rules that are operational and accessible throughout the life of the process
         /// </summary>
-        public GameModule Services { get; internal set; }
+        public GameModule Services => m_GameServiceOrchestrator.CurrentModule;
 
         /// <summary>
-        /// The Current GameMode running a set of temporary GameRules for the game
+        /// The current GameMode module running a consistent set of temporary rules for the game
         /// </summary>
-        public GameModule CurrentGameMode { get; internal set; }
+        public GameModule CurrentGameMode => m_GameModeOrchestrator.CurrentModule;
 
         /// <summary>
-        /// Inform if the GameProcess is running, that is to say currently performing operations
+        /// If the process has been started
         /// </summary>
-        public bool IsRunning => Services != null;
+        public bool IsStarted => Services != null;
 
-        internal DependencyProvider ServiceProvider;
+        internal DependencyProvider ServiceProvider => Services.DependencyProvider;
 
+        private ModuleOrchestrator m_GameServiceOrchestrator;
+        private ModuleOrchestrator m_GameModeOrchestrator;
         private IGameServiceSetup m_ServiceSetup;
-        private IGameModeSetup m_NextGameModeSetup;
-        private Configuration m_NextGameModeConfig;
         private Queue<IGameModeSetup> m_GameModesToCome;
+        private Dictionary<string, Configuration> m_Configurations;
         private bool m_IsPaused;
-        private bool m_IsStopping;
 
         /// <summary>
         /// Constructor of the GameProcess
         /// </summary>
-        /// <param name="setup">custom setup defining game characteristics</param>
-        /// <param name="time">interface for accessing time information from within the game process</param>
+        /// <param name="setup">Custom setup defining game characteristics</param>
+        /// <param name="time">Interface for accessing time information from within the game process</param>
         public GameProcess(IGameProcessSetup setup, ITime time)
         {
-            Name = $"{setup.Name}Process";
+            Name = setup.Name;
             Time = time;
+
+            m_GameServiceOrchestrator = new ModuleOrchestrator(this, null);
+            m_GameModeOrchestrator = new ModuleOrchestrator(this, null);
             m_ServiceSetup = setup.GetServiceSetup();
             m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
-            if (m_GameModesToCome.Count > 0)
-                m_NextGameModeSetup = m_GameModesToCome.Dequeue();
-            CheckGameModeValidity(m_NextGameModeSetup);
+            m_Configurations = new Dictionary<string, Configuration>();
             m_IsPaused = false;
         }
 
         /// <summary>
-        /// Start the GameProcess
+        /// Start the process, which means begin to load all game rules
         /// </summary>
         public void Start()
         {
-#if CHECK_OPERATIONS_CONTEXT
-            if (IsRunning)
-                throw new InvalidOperationException($"Start() should be called when process {Name} is not already running");
-#endif
-            Log.Info(Name, "** Start process **");
-            Services = new GameModule(m_ServiceSetup, null, null);
-            Services.InnerLoad();
+            Log.Info(TAG, $"Start process {Name}");
+
+            m_GameServiceOrchestrator.LoadModule(m_ServiceSetup, GetModuleConfiguration(m_ServiceSetup));
+            m_GameServiceOrchestrator.OnOperational += () => SwitchToNextGameMode();
         }
 
         /// <summary>
-        /// Update the GameProcess
+        /// Update the process, which means update all game rules according to their schedule
         /// </summary>
         public void Update()
         {
-            if (!m_IsPaused && Services != null)
+            if (!m_IsPaused)
             {
-                Services.InnerUpdate();
+                m_GameServiceOrchestrator.Update();
 
-                if (Services.IsOperational)
-                {
-                    if (CurrentGameMode != null)
-                    {
-                        CurrentGameMode.InnerUpdate();
-
-                        if (CurrentGameMode.IsFinished)
-                        {
-                            CurrentGameMode.InnerStop();
-                            CurrentGameMode = null;
-                        }
-                    }
-
-                    if (CurrentGameMode == null)
-                    {
-                        if (m_NextGameModeSetup != null)
-                        {
-                            CurrentGameMode = new GameModule(m_NextGameModeSetup, m_NextGameModeConfig, null);
-                            CurrentGameMode.InnerLoad();
-                            m_NextGameModeSetup = null;
-                            m_NextGameModeConfig = null;
-                        }
-                        else if (m_IsStopping)
-                        {
-                            Services.InnerUnload();
-                        }
-                    }
-                }
-                else if (Services.IsFinished)
-                {
-                    Services.InnerStop();
-                    Services = null;
-                }
+                m_GameModeOrchestrator.Update();
             }
         }
 
         /// <summary>
-        /// Pause the GameProcess, which means ignoring all updates
+        /// Pause the process, which means ignore all subsequent updates
         /// </summary>
         public void Pause()
         {
-            Log.Info(Name, "** Pause process **");
+            Log.Info(TAG, $"Pause process {Name}");
             m_IsPaused = true;
         }
 
         /// <summary>
-        /// Restart the GameProcess, which means canceling the pause
+        /// Restart the process, which means cancel the pause and resume the updates
         /// </summary>
         public void Restart()
         {
-            Log.Info(Name, "** Restart process **");
+            Log.Info(TAG, $"Restart process {Name}");
             m_IsPaused = false;
         }
 
         /// <summary>
-        /// Stop the GameProcess
-        /// The effects of the stop are not immediate, since it requires potentially long unloading operations
-        /// Check the IsRunning property to be informed when the GameProcess is really stopped
+        /// Stop the process, which means begin to unload all game rules
         /// </summary>
         public void Stop()
         {
-#if CHECK_OPERATIONS_CONTEXT
-            if (!IsRunning)
-                throw new InvalidOperationException($"Stop() should be called when process {Name} is running");
-#endif
-            if (!m_IsStopping)
+            Log.Info(TAG, $"Stop process {Name}");
+
+            if (CurrentGameMode == null)
             {
-                Log.Info(Name, "** Stop process **");
-
-                m_IsStopping = true;
-                m_NextGameModeSetup = null;
-                m_NextGameModeConfig = null;
-
-                if (CurrentGameMode == null)
-                    Services.InnerUnload();
-                else
-                    CurrentGameMode.InnerUnload();
+                m_GameServiceOrchestrator.UnloadModule();
+            }
+            else
+            {
+                m_GameModeOrchestrator.UnloadModule();
+                m_GameModeOrchestrator.OnTerminated += () => m_GameServiceOrchestrator.UnloadModule();
             }
         }
 
         /// <summary>
-        /// Call OnQuit() for a quick and immediate shut down of the GameProcess
-        /// This method executes synchronous operations, that will be finished by the end of the call
+        /// Quit the process, which means perform a quick and immediate shut down of all operations in one synchronous single call
         /// </summary>
         public void OnQuit()
         {
-            Log.Info(Name, "** Quit process **");
-            CurrentGameMode?.InnerQuit();
-            Services?.InnerQuit();
+            Log.Info(TAG, $"Quit process {Name}");
+
+            m_GameModeOrchestrator.OnQuit();
+            m_GameServiceOrchestrator.OnQuit();
         }
 
         /// <summary>
-        /// Switch to a given GameMode : unload the current mode and then load the new one
+        /// Register a default configuration for a specific module type that is likely to be loaded during the game
         /// </summary>
-        /// <param name="setup">setup of the new GameMode to load</param>
-        /// <param name="configuration">initial configuration of the GameMode, used to transmit information between GameModes at runtime</param>
+        /// <param name="moduleSetup">The setup defining the module</param>
+        /// <param name="configuration">The configuration to register for this type of module</param>
+        public void SetModuleConfiguration(IGameModuleSetup moduleSetup, Configuration configuration)
+        {
+            m_Configurations[moduleSetup.Name] = configuration;
+        }
+
+        /// <summary>
+        /// Retrieve the default pre-registered configuration for a specific module type, if exists
+        /// </summary>
+        /// <param name="moduleSetup">The setup defining the module</param>
+        /// <returns>The registered configuration for this type of module (null if not found)</returns>
+        public Configuration GetModuleConfiguration(IGameModuleSetup moduleSetup)
+        {
+            if (m_Configurations.TryGetValue(moduleSetup.Name, out Configuration config))
+                return config;
+            return null;
+        }
+
+        /// <summary>
+        /// Switch to a given game mode, i.e unload the current mode and then load the new one
+        /// </summary>
+        /// <param name="setup">The setup defining the new mode to load</param>
+        /// <param name="configuration">The initial configuration of the mode. If not set, a pre-registered configuration will be used</param>
         public void SwitchToGameMode(IGameModeSetup setup, Configuration configuration = null)
         {
-            if (!m_IsStopping)
-            {
-                CheckGameModeValidity(setup);
+            configuration = configuration ?? GetModuleConfiguration(setup);
 
-                CurrentGameMode?.InnerUnload();
-                m_NextGameModeSetup = setup;
-                m_NextGameModeConfig = configuration;
+            if (m_GameServiceOrchestrator.IsOperational)
+            {
+                if (CurrentGameMode == null)
+                    m_GameModeOrchestrator.LoadModule(setup, configuration);
+                else
+                    m_GameModeOrchestrator.SwitchToModule(setup, configuration);
+            }
+            else
+            {
+                m_GameServiceOrchestrator.OnOperational = () => SwitchToGameMode(setup, configuration);
             }
         }
 
         /// <summary>
-        /// Switch to the next planned GameMode in the list that was prepared in advance
+        /// Switch to the next planned game mode in the list that has been prepared in advance
         /// </summary>
-        /// <param name="configuration">initial configuration of the GameMode, used to transmit information between GameModes at runtime</param>
-        /// <returns>If there was a next GameMode to switch to</returns>
-        public bool SwitchToNextGameMode(Configuration configuration = null)
+        /// <returns>If the switch operation was really executed (the list of modes was not empty)</returns>
+        public bool SwitchToNextGameMode()
         {
             if (m_GameModesToCome.Count > 0)
             {
-                SwitchToGameMode(m_GameModesToCome.Dequeue(), configuration);
+                SwitchToGameMode(m_GameModesToCome.Dequeue());
                 return true;
             }
             return false;
         }
 
         /// <summary>
-        /// Enqueue an anticipated list of GameModes that the process will normally have to pass through
+        /// Enqueue an anticipated list of game modes that the process will normally have to pass through
         /// </summary>
-        /// <param name="gameModes">The ordered list of GameModes to be run in the future</param>
-        /// <param name="replace">If the new given list of GameModes should replace the existing one</param>
-        public void PrepareIncomingGameModes(List<IGameModeSetup> gameModes, bool replace)
+        /// <param name="gameModes">The ordered list of modes to be run in the future</param>
+        /// <param name="replace">If the new given list of modes should replace the existing one</param>
+        public void PlanIncomingGameModes(List<IGameModeSetup> gameModes, bool replace)
         {
             if (replace)
                 m_GameModesToCome = new Queue<IGameModeSetup>(gameModes);
@@ -228,13 +212,6 @@ namespace GameEngine.PMR.Process
                     m_GameModesToCome.Enqueue(mode);
                 }
             }
-        }
-
-        private void CheckGameModeValidity(IGameModeSetup setup)
-        {
-            if (setup != null && setup.RequiredServiceSetup != m_ServiceSetup.Name)
-                throw new ArgumentException($"Cannot load GameMode {setup.Name} because it requires a service setup {setup.RequiredServiceSetup} " +
-                    $"that is different from the current one ({m_ServiceSetup.Name})", "setup.RequiredServiceSetup");
         }
     }
 }

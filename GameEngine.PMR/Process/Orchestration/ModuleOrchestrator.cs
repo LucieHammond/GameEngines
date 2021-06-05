@@ -104,6 +104,8 @@ namespace GameEngine.PMR.Process.Orchestration
             if (!CheckModuleValidity(setup, ParentModule?.CurrentModule))
                 return;
 
+            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup);
+
             StartOrPlanTransformation((onFinish) =>
             {
                 CurrentModule.InnerUnload();
@@ -122,6 +124,8 @@ namespace GameEngine.PMR.Process.Orchestration
         {
             if (!CheckModuleValidity(setup, CurrentModule))
                 return;
+
+            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup);
 
             if (State == ModuleOrchestratorState.ResetSubmodules)
                 throw new InvalidOperationException($"Cannot add submodule during reset phase (all submodules are being unloaded)");

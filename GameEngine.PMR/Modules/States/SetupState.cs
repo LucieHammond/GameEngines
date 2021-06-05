@@ -58,7 +58,7 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            
+
         }
 
         private void CheckRulesOrderValidity()

@@ -5,7 +5,6 @@ using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace GameEngine.PMR.Modules.States
@@ -59,7 +58,7 @@ namespace GameEngine.PMR.Modules.States
                     if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
                         return;
                 }
-                
+
                 if (m_GameModule.DependencyProvider == null)
                 {
                     m_GameModule.DependencyProvider = DependencyUtils.ExtractDependencies(m_GameModule.Rules);

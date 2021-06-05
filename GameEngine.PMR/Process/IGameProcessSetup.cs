@@ -9,20 +9,20 @@ namespace GameEngine.PMR.Process
     public interface IGameProcessSetup
     {
         /// <summary>
-        /// The name of the GameProcess
+        /// The name of the process
         /// </summary>
         string Name { get; }
 
         /// <summary>
-        /// A ServiceSetup configuring the ServiceMode that will be loaded and run during the whole lifetime of the GameProcess
+        /// An IGameServiceSetup configuring the game service that will be loaded and run during the whole lifetime of the process
         /// </summary>
-        /// <returns>An instance of a custom ServiceSetup</returns>
+        /// <returns>An instance of a custom IGameServiceSetup</returns>
         IGameServiceSetup GetServiceSetup();
 
         /// <summary>
-        /// An ordered list of GameModeSetups that are expected to be loaded and run one after another by the GameProcess
+        /// An ordered list of IGameModeSetups configuring the game modes that are expected to be loaded and run one after another by the process
         /// </summary>
-        /// <returns>A list of instantiated custom GameModeSetups</returns>
+        /// <returns>A list of custom instances of IGameModeSetup</returns>
         List<IGameModeSetup> GetFirstGameModes();
     }
 }

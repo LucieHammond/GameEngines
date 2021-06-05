@@ -36,26 +36,6 @@ namespace GameEngine.PMR.Modules
         public ModuleOrchestratorState OrchestrationState => Orchestrator.State;
 
         /// <summary>
-        /// If the module is currently in one of its initialization state
-        /// </summary>
-        public bool IsLoading => State == GameModuleState.Setup || State == GameModuleState.InjectDependencies || State == GameModuleState.InitializeRules;
-
-        /// <summary>
-        /// If the module is currently in its default operating state
-        /// </summary>
-        public bool IsOperational => State == GameModuleState.UpdateRules;
-
-        /// <summary>
-        /// If the module is currently in one of its unloading state
-        /// </summary>
-        public bool IsUnloading => State == GameModuleState.UnloadRules;
-
-        /// <summary>
-        /// If the module has finished its lifecycle and is waiting for closure
-        /// </summary>
-        public bool IsFinished => State == GameModuleState.End;
-
-        /// <summary>
         /// The configuration of the module, set at construction and used to transmit runtime information
         /// </summary|
         public Configuration Configuration { get; private set; }
