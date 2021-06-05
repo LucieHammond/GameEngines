@@ -85,7 +85,7 @@ namespace GameEngine.PMR.Modules
             m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM", new List<FSMState<GameModuleState>>()
             {
                 new SetupState(this, setup),
-                new DependencyInjectionState(this),
+                new DependencyInjectionState(this, ParentProcess),
                 new InitializeRulesState(this),
                 new UpdateRulesState(this),
                 new UnloadRulesState(this),

@@ -9,10 +9,16 @@ namespace GameEngine.PMR.Rules.Dependencies
     internal class DependencyProvider
     {
         private Dictionary<Type, object> m_Dependencies;
+        private DependencyProvider m_ParentProvider;
 
         internal DependencyProvider()
         {
             m_Dependencies = new Dictionary<Type, object>();
+        }
+
+        internal void LinkToParentProvider(DependencyProvider parentProvider)
+        {
+            m_ParentProvider = parentProvider;
         }
 
         internal void Add(Type interfaceType, object dependency)
@@ -34,7 +40,8 @@ namespace GameEngine.PMR.Rules.Dependencies
             if (!interfaceType.IsInterface)
                 throw new ArgumentException($"Cannot inject dependency for type {interfaceType.Name} because {interfaceType.Name} is not an interface");
 
-            return m_Dependencies.TryGetValue(interfaceType, out dependency);
+            return m_Dependencies.TryGetValue(interfaceType, out dependency)
+                || (m_ParentProvider != null && m_ParentProvider.TryGet(interfaceType, out dependency));
         }
     }
 }

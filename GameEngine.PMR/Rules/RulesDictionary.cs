@@ -11,7 +11,7 @@ namespace GameEngine.PMR.Rules
     public class RulesDictionary : Dictionary<Type, GameRule>
     {
         /// <summary>
-        /// Add a game rule of type T to the dictionary
+        /// Add a rule of type T to the dictionary
         /// </summary>
         /// <typeparam name="T">The type of the rule</typeparam>
         /// <param name="rule">The rule object</param>

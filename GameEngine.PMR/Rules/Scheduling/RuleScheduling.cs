@@ -3,7 +3,7 @@
 namespace GameEngine.PMR.Rules.Scheduling
 {
     /// <summary>
-    /// The association of a game rule type and a schedule pattern, used to plan events like updates for the rules of this type
+    /// The association of a GameRule type and a schedule pattern, used to plan events like updates for the rules of this type
     /// </summary>
     public class RuleScheduling
     {

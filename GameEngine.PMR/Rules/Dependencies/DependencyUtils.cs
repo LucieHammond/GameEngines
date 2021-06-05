@@ -52,7 +52,7 @@ namespace GameEngine.PMR.Rules.Dependencies
                     }
                     else if (consumerAtt.Required)
                     {
-                        throw new DependencyException(DependencyType.Service, ruleInfo.Key, field.FieldType);
+                        throw new DependencyException(consumerAtt.Type, ruleInfo.Key, field.FieldType);
                     }
                 }
             }

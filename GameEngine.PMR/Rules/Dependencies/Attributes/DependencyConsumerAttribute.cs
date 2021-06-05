@@ -3,8 +3,8 @@
 namespace GameEngine.PMR.Rules.Dependencies.Attributes
 {
     /// <summary>
-    /// An attribute to use on GameRule fields in order to make them reference other rules or services via customized interfaces
-    /// When used as a dependency consumer, a field must have an interface type so that its value can be found among dependency providers
+    /// An attribute to use on GameRule fields in order to make them reference other rules via customized interfaces.
+    /// When used as a dependency consumer, a field must have an interface type so that its value can be found among dependency providers.
     /// The value of the field will be injected using reflexion 
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
@@ -22,7 +22,7 @@ namespace GameEngine.PMR.Rules.Dependencies.Attributes
         }
 
         /// <summary>
-        /// Type of the dependency, specifying where to find the provider (among Services or Rules)
+        /// Type of the dependency, specifying where to find the provider (Services or Rules)
         /// </summary>
         public DependencyType Type;
 

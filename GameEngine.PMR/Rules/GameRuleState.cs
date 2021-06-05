@@ -6,17 +6,17 @@
     public enum GameRuleState
     {
         /// <summary>
-        /// The rule is created but not yet initialized. Only the constructor has been called
+        /// The rule is created but not yet loaded. Only the constructor has been called
         /// </summary>
         Unused,
 
         /// <summary>
-        /// The rule is being initialized. The initialization process has been started but is not yet finished
+        /// The rule is being initialized. The initializing process has been started but is not yet finished
         /// </summary>
         Initializing,
 
         /// <summary>
-        /// The rule has finished its initialization process. It is fully operational for updates
+        /// The rule has finished its initializing process. It is fully operational for updates
         /// </summary>
         Initialized,
 

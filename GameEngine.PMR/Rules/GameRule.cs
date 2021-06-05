@@ -1,20 +1,17 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.System;
+using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Services;
-using GameEngine.PMR.Rules.Dependencies;
-using GameEngine.PMR.Rules.Dependencies.Attributes;
 using System;
 
 namespace GameEngine.PMR.Rules
 {
     /// <summary>
-    /// Abstract template representing a Game Rule. Each custom rule in a project must inherit from this class (or from a derivative)
+    /// Abstract template representing a GameRule. Each custom rule in a project must inherit from this class (or from a derivative)
     /// </summary>
     public abstract class GameRule
     {
-        [DependencyConsumer(DependencyType.Service, true)]
-        internal IProcessAccessor ProcessAccessor;
+        private const string TAG = "Rules";
 
         /// <summary>
         /// Name of the rule, which correspond to its type formatted as string
@@ -32,17 +29,14 @@ namespace GameEngine.PMR.Rules
         public bool ErrorDetected { get; private set; }
 
         /// <summary>
-        /// Reference to the Game Process that is responsible for running that rule
+        /// A reference to the Game Process that is responsible for running that rule
         /// </summary>
-        protected GameProcess m_Process
-        {
-            get
-            {
-                if (ProcessAccessor == null)
-                    throw new InvalidOperationException("Cannot access process before dependency injection step. Better wait Initialize() call");
-                return ProcessAccessor.GetCurrentProcess();
-            }
-        }
+        protected GameProcess m_Process;
+
+        /// <summary>
+        /// A reference to the Game Module to which the rule belongs
+        /// </summary>
+        protected GameModule m_CurrentModule;
 
         /// <summary>
         /// An object giving time information about the process pace (delta time, frame count, time since startup ...)
@@ -50,7 +44,7 @@ namespace GameEngine.PMR.Rules
         protected ITime m_Time => m_Process.Time;
 
         /// <summary>
-        /// Default constructor of a Game Rule
+        /// Default constructor of a GameRule
         /// </summary>
         protected GameRule()
         {
@@ -58,18 +52,49 @@ namespace GameEngine.PMR.Rules
             ErrorDetected = false;
         }
 
+        internal void InjectProcessDependencies(GameProcess process, GameModule module)
+        {
+            m_Process = process;
+            m_CurrentModule = module;
+        }
+
+        internal void BaseInitialize()
+        {
+            Log.Info(TAG, $"Initializing rule {Name}");
+            State = GameRuleState.Initializing;
+            Initialize();
+        }
+
+        internal void BaseUpdate()
+        {
+            Update();
+        }
+
+        internal void BaseUnload()
+        {
+            Log.Info(TAG, $"Unloading rule {Name}");
+            State = GameRuleState.Unloading;
+            Unload();
+        }
+
+        internal void BaseQuit()
+        {
+            Log.Info(TAG, $"Quit rule {Name}");
+            OnQuit();
+        }
+
         /// <summary>
-        /// The place where to define custom initialization operations for the rule. Will be called only once before any other method
+        /// The place where to define custom initializing operations for the rule. Will be called only once before any other method
         /// </summary>
         protected abstract void Initialize();
 
         /// <summary>
-        /// The place where to define custom update operations for the rule. Will be called every frame between Initialize() and Unload()
+        /// The place where to define custom update operations for the rule. Will be called every relevant frame between Initialize() and Unload()
         /// </summary>
         protected abstract void Update();
 
         /// <summary>
-        /// The place where to define custom unload operations for the rule. Will be called only once after all other methods
+        /// The place where to define custom unloading operations for the rule. Will be called only once after all other methods
         /// </summary>
         protected abstract void Unload();
 
@@ -89,22 +114,22 @@ namespace GameEngine.PMR.Rules
         {
 #if CHECK_OPERATIONS_CONTEXT
             if (State != GameRuleState.Initializing)
-                throw new InvalidOperationException($"MarkInitialized() should be called when rule {Name} is in state Initializing, not {State}");
+                throw new InvalidOperationException($"Invalid time context for calling MarkInitialized(). Current state: {State}. Expected state: Initializing");
 #endif
-            Log.Info(Name, "Rule is initialized");
+            Log.Debug(TAG, $"Successfully complete the loading of rule {Name}");
             State = GameRuleState.Initialized;
         }
 
         /// <summary>
-        /// Call this method to attest that the rule has correctly been unloaded. This mecanism allows asynchronous unload
+        /// Call this method to attest that the rule has correctly been unloaded. This mecanism allows asynchronous unloading
         /// </summary>
         protected void MarkUnloaded()
         {
 #if CHECK_OPERATIONS_CONTEXT
             if (State != GameRuleState.Unloading)
-                throw new InvalidOperationException($"MarkUnloaded() should be called when rule {Name} is in state Unloading, not {State}");
+                throw new InvalidOperationException($"Invalid time context for calling MarkUnloaded(). Current state: {State}. Expected state: Unloading");
 #endif
-            Log.Info(Name, "Rule is unloaded");
+            Log.Debug(TAG, $"Successfully complete the unloading of rule {Name}");
             State = GameRuleState.Unloaded;
         }
 
@@ -113,47 +138,12 @@ namespace GameEngine.PMR.Rules
         /// </summary>
         protected void MarkError()
         {
-            Log.Info(Name, "Rule is blocked due to an error");
-            if (State != GameRuleState.Initialized)
-                State = GameRuleState.Unloaded;
+#if CHECK_OPERATIONS_CONTEXT
+            if (State == GameRuleState.Unused || State == GameRuleState.Unloaded)
+                throw new InvalidOperationException($"Invalid time context for calling MarkError() ({State}). Error may not be taken into account");
+#endif
+            Log.Debug(TAG, $"A blocking error has been detected in rule {Name}");
             ErrorDetected = true;
-        }
-
-        internal void BaseInitialize()
-        {
-#if CHECK_OPERATIONS_CONTEXT
-            if (State != GameRuleState.Unused)
-                throw new InvalidOperationException($"Initialize() should be called when rule {Name} is in state Unused, not {State}");
-#endif
-            Log.Info(Name, "Rule starts initializing");
-            State = GameRuleState.Initializing;
-            Initialize();
-        }
-
-        internal void BaseUpdate()
-        {
-#if CHECK_OPERATIONS_CONTEXT
-            if (State != GameRuleState.Initialized)
-                throw new InvalidOperationException($"Update() should be called when rule {Name} is in state Initialized, not {State}");
-#endif
-            Update();
-        }
-
-        internal void BaseUnload()
-        {
-#if CHECK_OPERATIONS_CONTEXT
-            if (State != GameRuleState.Initialized)
-                throw new InvalidOperationException($"Unload() should be called when rule {Name} is in state Initialized, not {State}");
-#endif
-            Log.Info(Name, "Rule starts unloading");
-            State = GameRuleState.Unloading;
-            Unload();
-        }
-
-        internal void BaseQuit()
-        {
-            Log.Info(Name, "Rule quits");
-            OnQuit();
         }
     }
 }

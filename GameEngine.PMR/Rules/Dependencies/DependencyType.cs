@@ -6,12 +6,12 @@
     public enum DependencyType
     {
         /// <summary>
-        /// The dependency provider is a GameRule that is part of the same GameMode (not available on GameServices)
+        /// The dependency provider is a GameRule that is part of the same GameModule or a parent GameModule
         /// </summary>
         Rule,
 
         /// <summary>
-        /// The dependency provider is a GameService that is part of the ServiceMode executed by the parent GameProcess
+        /// The dependency provider is a GameRule that is registered as part of the Services module executed by the parent GameProcess
         /// </summary>
         Service
     }
