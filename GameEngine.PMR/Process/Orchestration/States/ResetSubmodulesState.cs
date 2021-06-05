@@ -21,7 +21,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             foreach (ModuleOrchestrator submodule in m_Orchestrator.SubModules)
             {
-                submodule.Reset();
+                submodule.UnloadModule();
             }
         }
 

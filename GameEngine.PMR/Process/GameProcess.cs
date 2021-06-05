@@ -13,6 +13,8 @@ namespace GameEngine.PMR.Process
     /// </summary>
     public class GameProcess
     {
+        internal const string TAG = "Process";
+
         /// <summary>
         /// The name of the GameProcess
         /// </summary>
@@ -26,7 +28,7 @@ namespace GameEngine.PMR.Process
         /// <summary>
         /// The ServiceGameMode running the GameServices of the game, i.e rules that are running and accessible throughout the life of the process
         /// </summary>
-        public GameModule ServiceHandler { get; internal set; }
+        public GameModule Services { get; internal set; }
 
         /// <summary>
         /// The Current GameMode running a set of temporary GameRules for the game
@@ -36,7 +38,7 @@ namespace GameEngine.PMR.Process
         /// <summary>
         /// Inform if the GameProcess is running, that is to say currently performing operations
         /// </summary>
-        public bool IsRunning => ServiceHandler != null;
+        public bool IsRunning => Services != null;
 
         internal DependencyProvider ServiceProvider;
 
@@ -74,8 +76,8 @@ namespace GameEngine.PMR.Process
                 throw new InvalidOperationException($"Start() should be called when process {Name} is not already running");
 #endif
             Log.Info(Name, "** Start process **");
-            ServiceHandler = new GameModule(m_ServiceSetup, null, this);
-            ServiceHandler.InnerLoad();
+            Services = new GameModule(m_ServiceSetup, null, null);
+            Services.InnerLoad();
         }
 
         /// <summary>
@@ -83,11 +85,11 @@ namespace GameEngine.PMR.Process
         /// </summary>
         public void Update()
         {
-            if (!m_IsPaused && ServiceHandler != null)
+            if (!m_IsPaused && Services != null)
             {
-                ServiceHandler.InnerUpdate();
+                Services.InnerUpdate();
 
-                if (ServiceHandler.IsOperational)
+                if (Services.IsOperational)
                 {
                     if (CurrentGameMode != null)
                     {
@@ -104,21 +106,21 @@ namespace GameEngine.PMR.Process
                     {
                         if (m_NextGameModeSetup != null)
                         {
-                            CurrentGameMode = new GameModule(m_NextGameModeSetup, m_NextGameModeConfig, this);
+                            CurrentGameMode = new GameModule(m_NextGameModeSetup, m_NextGameModeConfig, null);
                             CurrentGameMode.InnerLoad();
                             m_NextGameModeSetup = null;
                             m_NextGameModeConfig = null;
                         }
                         else if (m_IsStopping)
                         {
-                            ServiceHandler.InnerUnload();
+                            Services.InnerUnload();
                         }
                     }
                 }
-                else if (ServiceHandler.IsFinished)
+                else if (Services.IsFinished)
                 {
-                    ServiceHandler.InnerStop();
-                    ServiceHandler = null;
+                    Services.InnerStop();
+                    Services = null;
                 }
             }
         }
@@ -161,7 +163,7 @@ namespace GameEngine.PMR.Process
                 m_NextGameModeConfig = null;
 
                 if (CurrentGameMode == null)
-                    ServiceHandler.InnerUnload();
+                    Services.InnerUnload();
                 else
                     CurrentGameMode.InnerUnload();
             }
@@ -175,7 +177,7 @@ namespace GameEngine.PMR.Process
         {
             Log.Info(Name, "** Quit process **");
             CurrentGameMode?.InnerQuit();
-            ServiceHandler?.InnerQuit();
+            Services?.InnerQuit();
         }
 
         /// <summary>

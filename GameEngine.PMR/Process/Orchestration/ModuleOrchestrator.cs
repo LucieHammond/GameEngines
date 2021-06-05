@@ -15,7 +15,11 @@ namespace GameEngine.PMR.Process.Orchestration
     /// </summary>
     internal class ModuleOrchestrator
     {
+        internal const string TAG = GameProcess.TAG;
+
         internal ModuleOrchestratorState State => m_StateMachine.CurrentStateId;
+
+        internal bool IsOperational => State == ModuleOrchestratorState.OperateModule;
 
         internal GameProcess MainProcess;
         internal ModuleOrchestrator ParentModule;
@@ -29,6 +33,7 @@ namespace GameEngine.PMR.Process.Orchestration
         internal Action OnTerminated;
 
         private FSM<ModuleOrchestratorState> m_StateMachine;
+        private delegate void TransformActionDelegate(Action OnFinish);
 
         internal ModuleOrchestrator(GameProcess process, ModuleOrchestrator parent)
         {
@@ -55,9 +60,90 @@ namespace GameEngine.PMR.Process.Orchestration
             m_StateMachine.Update();
         }
 
-        internal void Reset()
+        internal void LoadModule(IGameModuleSetup setup, Configuration configuration)
         {
-            CurrentModule = null;
+            if (!CheckModuleValidity(setup, ParentModule?.CurrentModule))
+                return;
+
+            StartOrPlanTransformation((onFinish) =>
+            {
+                CurrentModule = new GameModule(setup, configuration, this);
+                CurrentModule.InnerLoad();
+                CurrentModule.OnFinishLoading += onFinish;
+            },
+            setup.GetTransitionActivity());
+        }
+
+        internal void UnloadModule()
+        {
+            StartOrPlanTransformation((onFinish) =>
+            {
+                CurrentModule.InnerUnload();
+                CurrentModule.OnFinishUnloading += () =>
+                {
+                    CurrentModule.InnerStop();
+                    CurrentModule = null;
+                    onFinish();
+                };
+            },
+            CurrentTransition);
+        }
+
+        internal void ReloadModule()
+        {
+            StartOrPlanTransformation((onFinish) =>
+            {
+                CurrentModule.InnerReload();
+                CurrentModule.OnFinishLoading += onFinish;
+            },
+            CurrentTransition);
+        }
+
+        internal void SwitchToModule(IGameModuleSetup setup, Configuration configuration = null)
+        {
+            if (!CheckModuleValidity(setup, ParentModule?.CurrentModule))
+                return;
+
+            StartOrPlanTransformation((onFinish) =>
+            {
+                CurrentModule.InnerUnload();
+                CurrentModule.OnFinishUnloading += () =>
+                {
+                    CurrentModule.InnerStop();
+                    CurrentModule = new GameModule(setup, configuration, this);
+                    CurrentModule.InnerLoad();
+                    CurrentModule.OnFinishLoading += onFinish;
+                };
+            },
+            setup.GetTransitionActivity());
+        }
+
+        internal void AddSubmodule(IGameModuleSetup setup, Configuration configuration = null)
+        {
+            if (!CheckModuleValidity(setup, CurrentModule))
+                return;
+
+            if (State == ModuleOrchestratorState.ResetSubmodules)
+                throw new InvalidOperationException($"Cannot add submodule during reset phase (all submodules are being unloaded)");
+
+            if (CurrentModule.State == GameModuleState.UnloadRules || CurrentModule.State == GameModuleState.End)
+                throw new InvalidOperationException($"Cannot add submodule when current module is unloading. Module state: {CurrentModule.State}");
+
+            ModuleOrchestrator submodule = new ModuleOrchestrator(MainProcess, this);
+            SubModules.Add(submodule);
+
+            if (CurrentModule.State == GameModuleState.UpdateRules)
+                submodule.LoadModule(setup, configuration);
+            else
+                CurrentModule.OnFinishLoading += () => submodule.LoadModule(setup, configuration);
+        }
+
+        internal void RemoveSubmodule(GameModule submodule)
+        {
+            if (!SubModules.Contains(submodule.Orchestrator))
+                throw new InvalidOperationException($"Invalid submodule {submodule.Name}. Cannot be found in the reference list");
+
+            submodule.Orchestrator.UnloadModule();
         }
 
         internal void Stop()
@@ -65,9 +151,102 @@ namespace GameEngine.PMR.Process.Orchestration
             m_StateMachine.Stop();
         }
 
+        internal void OnQuit()
+        {
+            foreach (ModuleOrchestrator submodule in SubModules)
+            {
+                submodule.OnQuit();
+            }
+            CurrentModule?.InnerQuit();
+            m_StateMachine.Stop();
+        }
+
         internal void GoToState(ModuleOrchestratorState state)
         {
             m_StateMachine.SetState(state);
         }
+
+        #region private
+        private bool CheckModuleValidity(IGameModuleSetup moduleSetup, GameModule parent)
+        {
+            if (moduleSetup is IGameSubmoduleSetup submoduleSetup)
+            {
+                if (submoduleSetup.RequiredServiceSetup != null && submoduleSetup.RequiredServiceSetup != MainProcess.Services.Name)
+                {
+                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current services: {MainProcess.Services.Name}. Expected services: {submoduleSetup.RequiredServiceSetup}");
+                    return false;
+                }
+
+                if (submoduleSetup.RequiredParentSetup != null && submoduleSetup.RequiredParentSetup != parent?.Name)
+                {
+                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current parent module: {parent?.Name}. Expected parent module: {submoduleSetup.RequiredParentSetup}");
+                    return false;
+                }
+            }
+            else if (moduleSetup is IGameModeSetup modeSetup)
+            {
+                if (modeSetup.RequiredServiceSetup != null && modeSetup.RequiredServiceSetup != MainProcess.Services.Name)
+                {
+                    Log.Error(TAG, $"Invalid game mode {modeSetup.Name}. Current services: {MainProcess.Services.Name}. Expected services: {modeSetup.RequiredServiceSetup}");
+                    return false;
+                }
+            }
+            else if (moduleSetup is IGameServiceSetup serviceSetup)
+            {
+                if (!serviceSetup.CheckAppRequirements())
+                {
+                    Log.Error(TAG, $"Invalid services {serviceSetup.Name}. Application requirements are not met for these services");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void StartOrPlanTransformation(TransformActionDelegate transformActon, TransitionActivity transition)
+        {
+            void transformWithTransition(bool skipEnter = false)
+            {
+                if (transition != CurrentTransition)
+                {
+                    CurrentTransition?.BaseCleanup();
+                    CurrentTransition = transition;
+                    CurrentTransition?.BaseInitialize(MainProcess.Time);
+                }
+
+                if (!skipEnter)
+                    m_StateMachine.SetState(ModuleOrchestratorState.EnterTransition);
+                transformActon(() => m_StateMachine.SetState(ModuleOrchestratorState.ExitTransition));
+            }
+
+            if (State == ModuleOrchestratorState.EnterTransition || State == ModuleOrchestratorState.RunTransition || State == ModuleOrchestratorState.ExitTransition)
+            {
+                CurrentModule.OnFinishLoading = null;
+                CurrentModule.OnFinishUnloading = null;
+
+                if (transition == CurrentTransition)
+                {
+                    transformWithTransition(State != ModuleOrchestratorState.ExitTransition);
+                }
+                else
+                {
+                    m_StateMachine.SetState(ModuleOrchestratorState.ExitTransition);
+                    AwaitingAction = () => transformWithTransition();
+                }
+            }
+            else
+            {
+                if (SubModules.Count > 0)
+                {
+                    m_StateMachine.SetState(ModuleOrchestratorState.ResetSubmodules);
+                    OnReset = () => transformWithTransition();
+                }
+                else
+                {
+                    transformWithTransition();
+                }
+            }
+        }
+        #endregion
     }
 }

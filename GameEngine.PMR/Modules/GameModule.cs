@@ -4,9 +4,7 @@ using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Modules.States;
-using GameEngine.PMR.Modules.Transitions;
-using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Structure;
+using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using GameEngine.PMR.Rules.Scheduling;
@@ -31,6 +29,11 @@ namespace GameEngine.PMR.Modules
         /// The state of the module
         /// </summary>
         public GameModuleState State => m_StateMachine.CurrentStateId;
+
+        /// <summary>
+        /// The state of orchestrator that manages the transitions of the module
+        /// </summary>
+        public ModuleOrchestratorState OrchestrationState => Orchestrator.State;
 
         /// <summary>
         /// If the module is currently in one of its initialization state
@@ -63,8 +66,7 @@ namespace GameEngine.PMR.Modules
         internal DependencyProvider DependencyProvider;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
-        internal GameProcess MainProcess;
-        internal TransitionActivity Transition;
+        internal ModuleOrchestrator Orchestrator;
 
         internal Action OnFinishLoading;
         internal Action OnFinishUnloading;
@@ -72,12 +74,11 @@ namespace GameEngine.PMR.Modules
         private QueueFSM<GameModuleState> m_StateMachine;
         private bool m_IsPaused;
 
-        internal GameModule(IGameModuleSetup setup, Configuration configuration, GameProcess mainProcess)
+        internal GameModule(IGameModuleSetup setup, Configuration configuration, ModuleOrchestrator orchestrator)
         {
             Name = setup.Name;
             Configuration = configuration;
-            MainProcess = mainProcess;
-            Transition = setup.GetTransitionActivity();
+            Orchestrator = orchestrator;
 
             m_IsPaused = false;
             m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM",
@@ -85,9 +86,9 @@ namespace GameEngine.PMR.Modules
                 {
                     new StartState(this),
                     new SetupState(this, setup),
-                    new InjectDependenciesState(this, mainProcess, null),
+                    new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.ParentModule.CurrentModule),
                     new InitializeRulesState(this),
-                    new UpdateRulesState(this, mainProcess.Time),
+                    new UpdateRulesState(this, orchestrator.MainProcess.Time),
                     new UnloadRulesState(this),
                     new EndState(this),
                 },
@@ -197,20 +198,15 @@ namespace GameEngine.PMR.Modules
 
         internal void ReportLoadingProgress(float progress)
         {
-            Transition?.ReportDefaultProgress(progress);
+            Orchestrator.CurrentTransition?.ReportDefaultProgress(progress);
         }
 
         internal void OnManagedError()
         {
-            try
-            {
-                MainProcess.SwitchToGameMode((IGameModeSetup)ExceptionPolicy.FallbackModule);
-            }
-            catch (Exception e)
-            {
-                Log.Exception(Name, e);
-                MainProcess.SwitchToGameMode(null);
-            }
+            if (ExceptionPolicy.FallbackModule == null)
+                Orchestrator.UnloadModule();
+            else
+                Orchestrator.SwitchToModule(ExceptionPolicy.FallbackModule);
         }
 
         internal bool OnException(OnExceptionBehaviour behaviour)
@@ -225,19 +221,19 @@ namespace GameEngine.PMR.Modules
                     Pause();
                     return true;
                 case OnExceptionBehaviour.UnloadModule:
-                    MainProcess.SwitchToGameMode(null);
+                    Orchestrator.UnloadModule();
                     return true;
                 case OnExceptionBehaviour.ReloadModule:
-                    InnerReload();
+                    Orchestrator.ReloadModule();
                     return true;
                 case OnExceptionBehaviour.SwitchToFallback:
-                    MainProcess.SwitchToGameMode((IGameModeSetup)ExceptionPolicy.FallbackModule);
+                    Orchestrator.SwitchToModule(ExceptionPolicy.FallbackModule);
                     return true;
                 case OnExceptionBehaviour.PauseAll:
-                    MainProcess.Pause();
+                    Orchestrator.MainProcess.Pause();
                     return true;
                 case OnExceptionBehaviour.StopAll:
-                    MainProcess.Stop();
+                    Orchestrator.MainProcess.Stop();
                     return true;
                 default:
                     return false;
