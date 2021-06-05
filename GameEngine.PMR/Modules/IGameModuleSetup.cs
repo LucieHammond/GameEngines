@@ -30,7 +30,7 @@ namespace GameEngine.PMR.Modules
         List<Type> GetInitUnloadOrder();
 
         /// <summary>
-        /// Set and return a schedule to follow for organizing the update of the GameRules
+        /// Set and return a schedule to follow for organizing the update of the rules
         /// </summary>
         /// <returns>A list of RuleScheduling objects, associating each rule type to a SchedulePattern</returns>
         List<RuleScheduling> GetUpdateScheduler();

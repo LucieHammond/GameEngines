@@ -5,37 +5,41 @@ using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the DependencyInjection state of the GameModule, in which the dependencies referenced in the GameRules are filled
+    /// The FSM state corresponding to the InjectDependencies state of the GameModule, in which the dependencies of the rules are filled
     /// </summary>
-    internal class DependencyInjectionState : FSMState<GameModuleState>
+    internal class InjectDependenciesState : FSMState<GameModuleState>
     {
-        public override GameModuleState Id => GameModuleState.DependencyInjection;
+        public override GameModuleState Id => GameModuleState.InjectDependencies;
 
         private GameModule m_GameModule;
         private GameProcess m_MainProcess;
-        private DependencyProvider m_InternalProvider;
+        private GameModule m_ParentModule;
         private Stopwatch m_UpdateTime;
         private PerformancePolicy m_Performance;
 
         private bool m_IsProcessInjected;
 
-        public DependencyInjectionState(GameModule gameModule, GameProcess process)
+        internal InjectDependenciesState(GameModule gameModule, GameProcess process, GameModule parent)
         {
             m_GameModule = gameModule;
             m_MainProcess = process;
+            m_ParentModule = parent;
             m_UpdateTime = new Stopwatch();
         }
 
         public override void Enter()
         {
-            Log.Info(m_GameModule.Name, $"Inject dependencies");
+            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Inject dependencies");
+
             m_Performance = m_GameModule.PerformancePolicy;
             m_IsProcessInjected = false;
+            m_GameModule.ReportLoadingProgress(0f);
         }
 
         public override void Update()
@@ -55,22 +59,19 @@ namespace GameEngine.PMR.Modules.States
                     if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
                         return;
                 }
-
-                if (m_InternalProvider == null)
+                
+                if (m_GameModule.DependencyProvider == null)
                 {
-                    m_InternalProvider = DependencyUtils.ExtractDependencies(m_GameModule.Rules);
-
-                    if (m_GameModule.IsService)
-                    {
-                        m_GameModule.ParentProcess.ServiceProvider = m_InternalProvider;
-                    }
+                    m_GameModule.DependencyProvider = DependencyUtils.ExtractDependencies(m_GameModule.Rules);
+                    if (m_ParentModule != null)
+                        m_GameModule.DependencyProvider.LinkToParentProvider(m_ParentModule.DependencyProvider);
 
                     if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
                         return;
                 }
 
-                DependencyProvider serviceProvider = m_GameModule.ParentProcess.ServiceProvider;
-                DependencyProvider ruleProvider = m_GameModule.IsService ? null : m_InternalProvider;
+                DependencyProvider serviceProvider = m_MainProcess.ServiceProvider;
+                DependencyProvider ruleProvider = m_GameModule.DependencyProvider;
                 DependencyUtils.InjectDependencies(m_GameModule.Rules, serviceProvider, ruleProvider);
 
                 m_GameModule.GoToNextState();
@@ -86,7 +87,6 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameModule.Name, $"Dependency injection completed");
             m_UpdateTime.Reset();
         }
     }

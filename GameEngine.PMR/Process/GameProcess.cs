@@ -76,7 +76,7 @@ namespace GameEngine.PMR.Process
 #endif
             Log.Info(Name, "** Start process **");
             ServiceHandler = new GameModule(m_ServiceSetup, null, this);
-            ServiceHandler.Start();
+            ServiceHandler.InnerLoad();
         }
 
         /// <summary>
@@ -86,17 +86,17 @@ namespace GameEngine.PMR.Process
         {
             if (!m_IsPaused && ServiceHandler != null)
             {
-                ServiceHandler.Update();
+                ServiceHandler.InnerUpdate();
 
                 if (ServiceHandler.IsOperational)
                 {
                     if (CurrentGameMode != null)
                     {
-                        CurrentGameMode.Update();
+                        CurrentGameMode.InnerUpdate();
 
                         if (CurrentGameMode.IsFinished)
                         {
-                            CurrentGameMode.Stop();
+                            CurrentGameMode.InnerStop();
                             CurrentGameMode = null;
                         }
                     }
@@ -106,19 +106,19 @@ namespace GameEngine.PMR.Process
                         if (m_NextGameModeSetup != null)
                         {
                             CurrentGameMode = new GameModule(m_NextGameModeSetup, m_NextGameModeConfig, this);
-                            CurrentGameMode.Start();
+                            CurrentGameMode.InnerLoad();
                             m_NextGameModeSetup = null;
                             m_NextGameModeConfig = null;
                         }
                         else if (m_IsStopping)
                         {
-                            ServiceHandler.Unload();
+                            ServiceHandler.InnerUnload();
                         }
                     }
                 }
                 else if (ServiceHandler.IsFinished)
                 {
-                    ServiceHandler.Stop();
+                    ServiceHandler.InnerStop();
                     ServiceHandler = null;
                 }
             }
@@ -162,9 +162,9 @@ namespace GameEngine.PMR.Process
                 m_NextGameModeConfig = null;
 
                 if (CurrentGameMode == null)
-                    ServiceHandler.Unload();
+                    ServiceHandler.InnerUnload();
                 else
-                    CurrentGameMode.Unload();
+                    CurrentGameMode.InnerUnload();
             }
         }
 
@@ -175,8 +175,8 @@ namespace GameEngine.PMR.Process
         public void OnQuit()
         {
             Log.Info(Name, "** Quit process **");
-            CurrentGameMode?.OnQuit();
-            ServiceHandler?.OnQuit();
+            CurrentGameMode?.InnerQuit();
+            ServiceHandler?.InnerQuit();
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace GameEngine.PMR.Process
             {
                 CheckGameModeValidity(setup);
 
-                CurrentGameMode?.Unload();
+                CurrentGameMode?.InnerUnload();
                 m_NextGameModeSetup = setup;
                 m_NextGameModeConfig = configuration;
             }

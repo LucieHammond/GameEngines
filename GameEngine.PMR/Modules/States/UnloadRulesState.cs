@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the UnloadRules state of the GameModule, in which GameRules are unloaded
+    /// The FSM state corresponding to the UnloadRules state of the GameModule, in which the rules are unloaded
     /// </summary>
     internal class UnloadRulesState : FSMState<GameModuleState>
     {
@@ -23,7 +23,7 @@ namespace GameEngine.PMR.Modules.States
         private bool m_SkipCurrrentRule;
         private int m_NbStallingWarnings;
 
-        public UnloadRulesState(GameModule gameModule)
+        internal UnloadRulesState(GameModule gameModule)
         {
             m_GameModule = gameModule;
             m_UpdateTime = new Stopwatch();
@@ -32,14 +32,15 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Enter()
         {
-            Log.Info(m_GameModule.Name, "Unload {0}", m_GameModule.IsService ? "services" : "rules");
+            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Unload rules");
+
+            m_GameModule.ReportLoadingProgress(0f);
 
             m_RulesToUnloadEnumerator = m_GameModule.Rules.GetRulesInReverseOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameModule.PerformancePolicy;
             m_SkipCurrrentRule = false;
             m_NbStallingWarnings = 0;
-            if (!m_RulesToUnloadEnumerator.MoveNext())
-                m_GameModule.GoToNextState();
+            ExitIfCompleted();
         }
 
         public override void Update()
@@ -71,29 +72,26 @@ namespace GameEngine.PMR.Modules.States
                     m_RuleUnloadTime.Stop();
                     m_SkipCurrrentRule = false;
 
-                    if (!m_RulesToUnloadEnumerator.MoveNext())
-                    {
-                        m_GameModule.GoToNextState();
+                    if (ExitIfCompleted())
                         break;
-                    }
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
                 {
                     m_RuleUnloadTime.Restart();
+                    m_NbStallingWarnings++;
 
-                    if (m_NbStallingWarnings >= m_Performance.NbWarningsBeforeException)
+                    int totalStallingTime = m_Performance.UnloadStallingTimeout * m_NbStallingWarnings;
+                    if (m_NbStallingWarnings <= m_Performance.NbWarningsBeforeException)
                     {
-                        int TotalTimeMs = m_Performance.UnloadStallingTimeout * (m_NbStallingWarnings + 1);
-                        Exception e = new TimeoutException($"Rule unloading has been stalling for more than {TotalTimeMs}ms");
-                        Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
-                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
-                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
-                            break;
+                        Log.Warning(GameModule.TAG, $"Unloading of rule {m_RulesToUnloadEnumerator.Current.Name} has been pending for {totalStallingTime} ms");
                     }
                     else
                     {
-                        Log.Warning(m_RulesToUnloadEnumerator.Current.Name, $"Rule is pending for over {m_Performance.UnloadStallingTimeout} ms");
-                        m_NbStallingWarnings++;
+                        Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} is stalling (timeout = {totalStallingTime} ms)");
+                        Log.Exception(GameModule.TAG, e);
+                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
+                            break;
                     }
                 }
             }
@@ -104,9 +102,18 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameModule.Name, $"Unloading completed");
             m_RuleUnloadTime.Reset();
             m_UpdateTime.Reset();
+        }
+
+        private bool ExitIfCompleted()
+        {
+            if (!m_RulesToUnloadEnumerator.MoveNext())
+            {
+                m_GameModule.GoToNextState();
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -1,14 +1,12 @@
-﻿using GameEngine.PMR.Process.Modes;
-
-namespace GameEngine.PMR.Modules.Policies
+﻿namespace GameEngine.PMR.Modules.Policies
 {
     /// <summary>
-    /// Set of job configurations concerning exceptions handling
+    /// Set of module configurations concerning exceptions handling
     /// </summary>
     public class ExceptionPolicy
     {
         /// <summary>
-        /// Kind of action to take during Setup, DependencyInjection or InitializeRules when an exception is catched
+        /// Kind of action to take during InjectDependencies or InitializeRules when an exception is catched
         /// </summary>
         public OnExceptionBehaviour ReactionDuringLoad;
 
@@ -28,9 +26,8 @@ namespace GameEngine.PMR.Modules.Policies
         public bool SkipUnloadIfException;
 
         /// <summary>
-        /// The GameMode to load instead of the current one if it needs to be unloaded due to exceptions or reported errors
-        /// Apply only for GameMode jobs
+        /// The module to load instead of the current one if it needs to be unloaded due to exceptions or reported errors
         /// </summary>
-        public IGameModeSetup FallbackMode;
+        public IGameModuleSetup FallbackModule;
     }
 }

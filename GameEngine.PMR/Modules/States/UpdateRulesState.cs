@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the UpdateRules state of the GameModule, in which GameRules are updated
+    /// The FSM state corresponding to the UpdateRules state of the GameModule, in which the rules are updated
     /// </summary>
     internal class UpdateRulesState : FSMState<GameModuleState>
     {
@@ -20,18 +20,21 @@ namespace GameEngine.PMR.Modules.States
         private Stopwatch m_RuleUpdateTime;
         private PerformancePolicy m_Performance;
 
-        public UpdateRulesState(GameModule gameModule)
+        internal UpdateRulesState(GameModule gameModule, ITime time)
         {
             m_GameModule = gameModule;
+            m_Time = time;
             m_RuleUpdateTime = new Stopwatch();
         }
 
         public override void Enter()
         {
-            Log.Info(m_GameModule.ParentProcess.Name, "<< {0} ready >>", m_GameModule.IsService ? "Services are" : "Game mode is");
+            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Ready to update rules");
+
+            m_GameModule.OnFinishLoading?.Invoke();
+            m_GameModule.OnFinishLoading = null;
 
             m_Performance = m_GameModule.PerformancePolicy;
-            m_Time = m_GameModule.ParentProcess.Time;
         }
 
         public override void Update()
@@ -53,13 +56,14 @@ namespace GameEngine.PMR.Modules.States
 
                 if (rule.ErrorDetected)
                 {
-                    m_GameModule.AskUnload();
+                    m_GameModule.OnManagedError();
                     break;
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleUpdateTime.ElapsedMilliseconds >= m_Performance.UpdateStallingTimeout)
                 {
-                    Exception e = new TimeoutException($"Rule update has taken more than {m_Performance.UpdateStallingTimeout}ms to execute");
-                    Log.Exception(rule.Name, e);
+                    int stallingTime = m_Performance.UpdateStallingTimeout;
+                    Exception e = new TimeoutException($"The update of rule {rule.Name} has taken too much time (timeout = {stallingTime} ms)");
+                    Log.Exception(GameModule.TAG, e);
                     if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUpdate))
                         break;
                 }

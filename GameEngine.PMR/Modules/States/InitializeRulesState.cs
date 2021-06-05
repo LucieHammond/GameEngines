@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace GameEngine.PMR.Modules.States
 {
     /// <summary>
-    /// The FSM state corresponding to the InitializeRules state of the GameModule, in which GameRules are initialized
+    /// The FSM state corresponding to the InitializeRules state of the GameModule, in which the rules are initialized
     /// </summary>
     internal class InitializeRulesState : FSMState<GameModuleState>
     {
@@ -23,7 +23,7 @@ namespace GameEngine.PMR.Modules.States
         private int m_NbRulesInitialized;
         private int m_NbStallingWarnings;
 
-        public InitializeRulesState(GameModule gameModule)
+        internal InitializeRulesState(GameModule gameModule)
         {
             m_GameModule = gameModule;
             m_UpdateTime = new Stopwatch();
@@ -32,18 +32,15 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Enter()
         {
-            Log.Info(m_GameModule.Name, "Initialize {0}", m_GameModule.IsService ? "services" : "rules");
+            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Initialize rules");
 
-            m_GameModule.LoadingProgress = 0;
+            m_GameModule.ReportLoadingProgress(0f);
+
             m_RulesToInitEnumerator = m_GameModule.Rules.GetRulesInOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameModule.PerformancePolicy;
             m_NbRulesInitialized = 0;
             m_NbStallingWarnings = 0;
-            if (!m_RulesToInitEnumerator.MoveNext())
-            {
-                m_GameModule.LoadingProgress = 1;
-                m_GameModule.GoToNextState();
-            }
+            ExitIfCompleted();
         }
 
         public override void Update()
@@ -68,38 +65,34 @@ namespace GameEngine.PMR.Modules.States
 
                 if (m_RulesToInitEnumerator.Current.ErrorDetected)
                 {
-                    m_GameModule.AskUnload();
+                    m_GameModule.OnManagedError();
                     break;
                 }
                 else if (m_RulesToInitEnumerator.Current.State == GameRuleState.Initialized)
                 {
                     m_RuleInitTime.Stop();
                     m_NbRulesInitialized++;
-                    m_GameModule.LoadingProgress = m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count;
+                    m_GameModule.ReportLoadingProgress(m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count);
 
-                    if (!m_RulesToInitEnumerator.MoveNext())
-                    {
-                        m_GameModule.LoadingProgress = 1;
-                        m_GameModule.GoToNextState();
+                    if (ExitIfCompleted())
                         break;
-                    }
                 }
                 else if (m_Performance.CheckStallingRules && m_RuleInitTime.ElapsedMilliseconds >= m_Performance.InitStallingTimeout)
                 {
                     m_RuleInitTime.Restart();
+                    m_NbStallingWarnings++;
 
-                    if (m_NbStallingWarnings >= m_Performance.NbWarningsBeforeException)
+                    int totalStallingTime = m_Performance.InitStallingTimeout * m_NbStallingWarnings;
+                    if (m_NbStallingWarnings <= m_Performance.NbWarningsBeforeException)
                     {
-                        int TotalTimeMs = m_Performance.InitStallingTimeout * (m_NbStallingWarnings + 1);
-                        Exception e = new TimeoutException($"Rule initialization has been stalling for more than {TotalTimeMs} ms");
-                        Log.Exception(m_RulesToInitEnumerator.Current.Name, e);
-                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
-                            break;
+                        Log.Warning(GameModule.TAG, $"Initialization of rule {m_RulesToInitEnumerator.Current.Name} has been pending for {totalStallingTime} ms");
                     }
                     else
                     {
-                        Log.Warning(m_RulesToInitEnumerator.Current.Name, $"Rule is pending for over {m_Performance.InitStallingTimeout} ms");
-                        m_NbStallingWarnings++;
+                        Exception e = new TimeoutException($"The initialization of rule {m_RulesToInitEnumerator.Current.Name} is stalling (timeout = {totalStallingTime} ms)");
+                        Log.Exception(GameModule.TAG, e);
+                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
+                            break;
                     }
                 }
             }
@@ -110,9 +103,19 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Exit()
         {
-            Log.Info(m_GameModule.Name, $"Initialization completed");
             m_RuleInitTime.Reset();
             m_UpdateTime.Reset();
+        }
+
+        private bool ExitIfCompleted()
+        {
+            if(!m_RulesToInitEnumerator.MoveNext())
+            {
+                m_GameModule.ReportLoadingProgress(1f);
+                m_GameModule.GoToNextState();
+                return true;
+            }
+            return false;
         }
     }
 }

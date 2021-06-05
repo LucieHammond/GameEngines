@@ -16,23 +16,33 @@
         SkipFrame,
 
         /// <summary>
-        /// The module is paused, which means it stays in the same state as it was at the moment of the error
+        /// The module is paused, which means it stays in the same state as it was at the moment of the error.
         /// Any new update of the module is skipped until restart but the rest of the process continues running
         /// </summary>
         PauseModule,
 
         /// <summary>
-        /// The module is unloaded. If the job is a GameMode and a fallback mode is defined, this mode is loaded instead
+        /// The module is unloaded, stopped and dereferenced by its parents
         /// </summary>
         UnloadModule,
 
         /// <summary>
-        /// The parent GameProcess is paused. The whole program is frozen in the state it was at the moment of the error
+        /// The module is reloaded, which means all its rules are unloaded and initialized again
+        /// </summary>
+        ReloadModule,
+
+        /// <summary>
+        /// The module is unloaded and the predefined fallback module is loaded instead
+        /// </summary>
+        SwitchToFallback,
+
+        /// <summary>
+        /// The main process is paused. The whole program is frozen in the state it was at the moment of the error
         /// </summary>
         PauseAll,
 
         /// <summary>
-        /// The parent GameProcess is stopped, which means the CurrentGameMode and the ServiceHandler are unloaded and the application quits
+        /// The main process is stopped, which means the CurrentGameMode and the Services are unloaded and the application quits
         /// </summary>
         StopAll
     }

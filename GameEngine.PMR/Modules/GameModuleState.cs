@@ -1,20 +1,25 @@
 ﻿namespace GameEngine.PMR.Modules
 {
     /// <summary>
-    /// All possible states a GameModule can go through during its lifetime
+    /// All possible states a GameModule can go through during its lifetime.
     /// Those states are visited by a FSM associated with the GameModule
     /// </summary>
     public enum GameModuleState
     {
+        /// <summary>
+        /// The module is created and waits to be loaded by its orchestrator
+        /// </summary>
+        Start,
+
         /// <summary>
         /// The module is configured using the IGameModuleSetup passed at construction
         /// </summary>
         Setup,
 
         /// <summary>
-        /// The module fills all dependencies needed by its rules
+        /// The mudule fills all dependencies needed by its rules
         /// </summary>
-        DependencyInjection,
+        InjectDependencies,
 
         /// <summary>
         /// The module initialize its rules in the order specified by the setup
@@ -27,13 +32,13 @@
         UpdateRules,
 
         /// <summary>
-        /// The module unload its rules in the order specified by the setup
+        /// The module unload its rules in the reverse order specified by the setup
         /// </summary>
         UnloadRules,
 
         /// <summary>
-        /// The module waits to be closed by its parent process
+        /// The module waits to be stopped and destroyed by its orchestrator
         /// </summary>
-        End
+        End,
     }
 }

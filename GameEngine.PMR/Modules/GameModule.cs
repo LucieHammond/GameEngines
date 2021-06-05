@@ -5,8 +5,9 @@ using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Modules.States;
 using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Services;
+using GameEngine.PMR.Process.Modes;
 using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Dependencies;
 using GameEngine.PMR.Rules.Scheduling;
 using System;
 using System.Collections.Generic;
@@ -18,8 +19,10 @@ namespace GameEngine.PMR.Modules
     /// </summary>
     public class GameModule
     {
+        internal const string TAG = "Module";
+
         /// <summary>
-        /// The name of the module, based on the name of the IGameModuleSetup
+        /// The name of the module, given by the IGameModuleSetup
         /// </summary>
         public string Name { get; private set; }
 
@@ -31,7 +34,7 @@ namespace GameEngine.PMR.Modules
         /// <summary>
         /// If the module is currently in one of its initialization state
         /// </summary>
-        public bool IsLoading => State == GameModuleState.Setup || State == GameModuleState.DependencyInjection || State == GameModuleState.InitializeRules;
+        public bool IsLoading => State == GameModuleState.Setup || State == GameModuleState.InjectDependencies || State == GameModuleState.InitializeRules;
 
         /// <summary>
         /// If the module is currently in its default operating state
@@ -54,74 +57,77 @@ namespace GameEngine.PMR.Modules
         public float LoadingProgress { get; internal set; }
 
         /// <summary>
-        /// The configuration of the module, setup at construction, used to pass runtime information
-        /// </summary>
+        /// The configuration of the module, set at construction and used to transmit runtime information
+        /// </summary|
         public Configuration Configuration { get; private set; }
-
-        internal bool IsService;
-        internal GameProcess ParentProcess;
 
         internal RulesDictionary Rules;
         internal List<Type> InitUnloadOrder;
         internal List<RuleScheduling> UpdateScheduler;
-
+        internal DependencyProvider DependencyProvider;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
+        internal GameProcess MainProcess;
+
+        internal Action OnFinishLoading;
+        internal Action OnFinishUnloading;
 
         private QueueFSM<GameModuleState> m_StateMachine;
         private bool m_IsPaused;
 
-        internal GameModule(IGameModuleSetup setup, Configuration configuration, GameProcess parentProcess)
+        internal GameModule(IGameModuleSetup setup, Configuration configuration, GameProcess mainProcess)
         {
-            IsService = setup is IGameServiceSetup;
-            Name = string.Format("{0}{1}", setup.Name, IsService ? "Service" : "Mode");
+            Name = setup.Name;
             Configuration = configuration;
-            ParentProcess = parentProcess;
-            Rules = new RulesDictionary();
-            if (IsService)
-                Rules.AddRule(new ProcessAccessorRule(parentProcess));
-            m_IsPaused = false;
+            MainProcess = mainProcess;
 
-            m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM", new List<FSMState<GameModuleState>>()
-            {
-                new SetupState(this, setup),
-                new DependencyInjectionState(this, ParentProcess),
-                new InitializeRulesState(this),
-                new UpdateRulesState(this),
-                new UnloadRulesState(this),
-                new EndState()
-            });
+            m_IsPaused = false;
+            m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM",
+                new List<FSMState<GameModuleState>>()
+                {
+                    new StartState(this),
+                    new SetupState(this, setup),
+                    new InjectDependenciesState(this, mainProcess, null),
+                    new InitializeRulesState(this),
+                    new UpdateRulesState(this, mainProcess.Time),
+                    new UnloadRulesState(this),
+                    new EndState(this),
+                },
+                new List<GameModuleState>() { GameModuleState.Start });
+            m_StateMachine.Start();
         }
 
         /// <summary>
-        /// Pause the module. This will freeze the job and keep it in the same state until Restart
+        /// Pause the module. This will freeze all its rules and keep them in the same state until restart
         /// </summary>
         public void Pause()
         {
-            Log.Info(ParentProcess.Name, $"<< Pause {Name} >>");
+            Log.Info(TAG, $"Pause module {Name}");
             m_IsPaused = true;
         }
 
         /// <summary>
-        /// Restart the module, which will undo the effects of Pause
+        /// Restart the module, which will undo the effects of pause
         /// </summary>
         public void Restart()
         {
-            Log.Info(ParentProcess.Name, $"<< Restart {Name} >>");
+            Log.Info(TAG, $"Restart module {Name}");
             m_IsPaused = false;
         }
 
-        internal void Start()
+        internal void InnerLoad()
         {
-#if CHECK_OPERATIONS_CONTEXT
-            if (State != GameModuleState.Setup)
-                throw new InvalidOperationException($"Start() should be called when job {Name} is in state Setup, not {State}");
-#endif
-            Log.Info(ParentProcess.Name, $"<< Load {Name} >>");
-            m_StateMachine.Start();
+            Log.Info(TAG, $"Load module {Name}");
+
+            m_StateMachine.ClearStateQueue();
+            m_StateMachine.EnqueueState(GameModuleState.Setup);
+            m_StateMachine.EnqueueState(GameModuleState.InjectDependencies);
+            m_StateMachine.EnqueueState(GameModuleState.InitializeRules);
+            m_StateMachine.EnqueueState(GameModuleState.UpdateRules);
+            m_StateMachine.DequeueState();
         }
 
-        internal void Update()
+        internal void InnerUpdate()
         {
             if (!m_IsPaused)
             {
@@ -129,33 +135,48 @@ namespace GameEngine.PMR.Modules
             }
         }
 
-        internal void Unload()
+        internal void InnerUnload()
         {
-            if (State == GameModuleState.UnloadRules || State == GameModuleState.End)
+            if (State == GameModuleState.End)
                 return;
 
-            Log.Info(ParentProcess.Name, $"<< Unload {Name} >>");
+            Log.Info(TAG, $"Unload module {Name}");
 
-            byte priority = 100;
-            while (m_StateMachine.TryDequeueState(out GameModuleState state, priority: priority++) && state != GameModuleState.UnloadRules) ;
-
-            if (State == GameModuleState.Setup || State == GameModuleState.DependencyInjection)
-                m_StateMachine.DequeueState(priority: priority++);
+            m_StateMachine.ClearStateQueue();
+            if (State == GameModuleState.UpdateRules || State == GameModuleState.InitializeRules || State == GameModuleState.UnloadRules)
+                m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
+            m_StateMachine.EnqueueState(GameModuleState.End);
+            m_StateMachine.DequeueState(priority: 100);
         }
 
-        internal void Stop()
+        internal void InnerReload()
         {
-#if CHECK_OPERATIONS_CONTEXT
-            if (State != GameModuleState.End)
-                throw new InvalidOperationException($"Stop() should be called when job {Name} is in state End, not {State}");
-#endif
-            Log.Info(ParentProcess.Name, $"<< End {Name} >>");
+            if (State == GameModuleState.Start)
+                InnerLoad();
+
+            if (State == GameModuleState.End)
+                return;
+
+            Log.Info(TAG, $"Reload module {Name}");
+
+            if (State == GameModuleState.Setup || State == GameModuleState.InjectDependencies)
+                return;
+
+            m_StateMachine.ClearStateQueue();
+            m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
+            m_StateMachine.EnqueueState(GameModuleState.InitializeRules);
+            m_StateMachine.EnqueueState(GameModuleState.UpdateRules);
+            m_StateMachine.DequeueState(priority: 100);
+        }
+
+        internal void InnerStop()
+        {
             m_StateMachine.Stop();
         }
 
-        internal void OnQuit()
+        internal void InnerQuit()
         {
-            Log.Info(ParentProcess.Name, $"<< Quit {Name} >>");
+            Log.Info(TAG, $"Quit module {Name}");
 
             foreach (KeyValuePair<Type, GameRule> ruleInfo in Rules)
             {
@@ -168,7 +189,7 @@ namespace GameEngine.PMR.Modules
                     Log.Exception(ruleInfo.Value.Name, e);
                 }
             }
-            m_StateMachine.Stop();
+            InnerStop();
         }
 
         internal void GoToNextState()
@@ -176,21 +197,21 @@ namespace GameEngine.PMR.Modules
             m_StateMachine.DequeueState();
         }
 
-        internal void AskUnload()
+        internal void ReportLoadingProgress(float progress)
         {
-            if (IsService)
-                ParentProcess.Stop();
-            else
+            LoadingProgress = progress;
+        }
+
+        internal void OnManagedError()
+        {
+            try
             {
-                try
-                {
-                    ParentProcess.SwitchToGameMode(ExceptionPolicy.FallbackMode);
-                }
-                catch (Exception e)
-                {
-                    Log.Exception(Name, e);
-                    ParentProcess.SwitchToGameMode(null);
-                }
+                MainProcess.SwitchToGameMode((IGameModeSetup)ExceptionPolicy.FallbackModule);
+            }
+            catch (Exception e)
+            {
+                Log.Exception(Name, e);
+                MainProcess.SwitchToGameMode(null);
             }
         }
 
@@ -206,13 +227,19 @@ namespace GameEngine.PMR.Modules
                     Pause();
                     return true;
                 case OnExceptionBehaviour.UnloadModule:
-                    AskUnload();
+                    MainProcess.SwitchToGameMode(null);
+                    return true;
+                case OnExceptionBehaviour.ReloadModule:
+                    InnerReload();
+                    return true;
+                case OnExceptionBehaviour.SwitchToFallback:
+                    MainProcess.SwitchToGameMode((IGameModeSetup)ExceptionPolicy.FallbackModule);
                     return true;
                 case OnExceptionBehaviour.PauseAll:
-                    ParentProcess.Pause();
+                    MainProcess.Pause();
                     return true;
                 case OnExceptionBehaviour.StopAll:
-                    ParentProcess.Stop();
+                    MainProcess.Stop();
                     return true;
                 default:
                     return false;
