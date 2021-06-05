@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.Core", "GameEngine.Core\GameEngine.Core.csproj", "{BCB293A9-EB50-455A-9C26-63FB20DCD911}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.PJR", "GameEngine.PJR\GameEngine.PJR.csproj", "{98D2A30B-1717-47CA-BB88-BFD35C8809A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.PMR", "GameEngine.PMR\GameEngine.PMR.csproj", "{98D2A30B-1717-47CA-BB88-BFD35C8809A4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameEngine.ECS", "GameEngine.ECS\GameEngine.ECS.csproj", "{2C226FA2-37F2-48E7-9C0C-55A5608142A7}"
 EndProject
