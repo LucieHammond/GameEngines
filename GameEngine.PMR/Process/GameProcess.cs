@@ -1,8 +1,7 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
-using GameEngine.PMR.Process.Modes;
-using GameEngine.PMR.Process.Services;
+using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules.Dependencies;
 using System;
 using System.Collections.Generic;
@@ -231,9 +230,9 @@ namespace GameEngine.PMR.Process
 
         private void CheckGameModeValidity(IGameModeSetup setup)
         {
-            if (setup != null && setup.RequiredServiceSetup != m_ServiceSetup.GetType())
+            if (setup != null && setup.RequiredServiceSetup != m_ServiceSetup.Name)
                 throw new ArgumentException($"Cannot load GameMode {setup.Name} because it requires a service setup {setup.RequiredServiceSetup} " +
-                    $"that is different from the current one ({m_ServiceSetup.GetType()})", "setup.RequiredServiceSetup");
+                    $"that is different from the current one ({m_ServiceSetup.Name})", "setup.RequiredServiceSetup");
         }
     }
 }

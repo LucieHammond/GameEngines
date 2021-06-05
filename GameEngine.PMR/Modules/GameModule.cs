@@ -6,7 +6,7 @@ using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Modules.States;
 using GameEngine.PMR.Modules.Transitions;
 using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Modes;
+using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using GameEngine.PMR.Rules.Scheduling;

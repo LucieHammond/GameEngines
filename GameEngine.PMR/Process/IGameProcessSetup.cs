@@ -1,5 +1,4 @@
-﻿using GameEngine.PMR.Process.Modes;
-using GameEngine.PMR.Process.Services;
+﻿using GameEngine.PMR.Process.Structure;
 using System.Collections.Generic;
 
 namespace GameEngine.PMR.Process
