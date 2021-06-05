@@ -47,12 +47,12 @@ namespace GameEnginesTest.ComponentTests.Core
 
             // If predefined path is custom -> use first constructor
             List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
-            Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
-            order.Enqueue(StatesEnumTest.FirstState);
-            order.Enqueue(StatesEnumTest.ThirdState);
-            order.Enqueue(StatesEnumTest.SecondState);
-            order.Enqueue(StatesEnumTest.SecondState);
-            order.Enqueue(StatesEnumTest.ThirdState);
+            List<StatesEnumTest> order = new List<StatesEnumTest>();
+            order.Add(StatesEnumTest.FirstState);
+            order.Add(StatesEnumTest.ThirdState);
+            order.Add(StatesEnumTest.SecondState);
+            order.Add(StatesEnumTest.SecondState);
+            order.Add(StatesEnumTest.ThirdState);
             QueueFSM<StatesEnumTest> customQueueFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
             customQueueFsm.Start();
 
@@ -77,8 +77,7 @@ namespace GameEnginesTest.ComponentTests.Core
         {
             // Use first constructor to create a queueFsm with only an initial state
             List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
-            Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
-            order.Enqueue(StatesEnumTest.FirstState);
+            List<StatesEnumTest> order = new List<StatesEnumTest>() { StatesEnumTest.FirstState };
             QueueFSM<StatesEnumTest> queueFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
             queueFsm.Start();
 
@@ -125,8 +124,7 @@ namespace GameEnginesTest.ComponentTests.Core
         {
             // Create and start queue FSM with SecondState as initial state
             List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
-            Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
-            order.Enqueue(StatesEnumTest.SecondState);
+            List<StatesEnumTest> order = new List<StatesEnumTest>() { StatesEnumTest.SecondState };
             QueueFSM<StatesEnumTest> stackFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
             stackFsm.Start();
 
@@ -146,13 +144,13 @@ namespace GameEnginesTest.ComponentTests.Core
         public void DequeueFailsWhenQueueIsEmpty()
         {
             List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
-            Queue<StatesEnumTest> order = new Queue<StatesEnumTest>();
+            List<StatesEnumTest> order = new List<StatesEnumTest>();
 
             // Cannot create queue FSM with no initial state to dequeue -> throw InvalidOperationException
             Assert.ThrowsException<InvalidOperationException>(() => new QueueFSM<StatesEnumTest>("TestFSM", states, order));
 
             // Create and start an empty queue FSM with FirstState as initial state
-            order.Enqueue(StatesEnumTest.FirstState);
+            order.Add(StatesEnumTest.FirstState);
             QueueFSM<StatesEnumTest> queueFsm = new QueueFSM<StatesEnumTest>("TestFSM", states, order);
             queueFsm.Start();
             Assert.AreEqual(StatesEnumTest.FirstState, queueFsm.CurrentStateId);

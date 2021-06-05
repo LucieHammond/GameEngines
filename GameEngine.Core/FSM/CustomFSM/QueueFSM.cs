@@ -19,10 +19,11 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// </summary>
         /// <param name="name">The name of the QueueFSM.</param>
         /// <param name="states">An IEnumerable containing all the possible states of the QueueFSM.</param>
-        /// <param name="initialStateQueue">A queue of states used as initial queue.</param>
-        public QueueFSM(string name, IEnumerable<FSMState<T>> states, Queue<T> initialStateQueue) : base(name, states, initialStateQueue.Dequeue())
+        /// <param name="initialStateQueue">A list of states used as initial queue.</param>
+        public QueueFSM(string name, IEnumerable<FSMState<T>> states, List<T> initialStateQueue) : base(name, states, initialStateQueue[0])
         {
-            m_StateQueue = initialStateQueue;
+            initialStateQueue.RemoveAt(0);
+            m_StateQueue = new Queue<T>(initialStateQueue);
         }
 
         /// <summary>
