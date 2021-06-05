@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.Logger;
+using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
 using System;
 using System.Diagnostics;
@@ -16,7 +16,7 @@ namespace GameEngine.PMR.Modules.States
         public override GameModuleState Id => GameModuleState.UpdateRules;
 
         private GameModule m_GameModule;
-        private IProcessTime m_Time;
+        private ITime m_Time;
         private Stopwatch m_RuleUpdateTime;
         private PerformancePolicy m_Performance;
 

@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.FSM.CustomFSM;
 using GameEngine.Core.Logger;
-using GameEngine.Core.Model;
+using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Modules.States;
 using GameEngine.PMR.Process;

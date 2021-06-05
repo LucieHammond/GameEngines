@@ -1,9 +1,9 @@
-﻿namespace GameEngine.PMR.Process
+﻿namespace GameEngine.Core.System
 {
     /// <summary>
     /// An interface giving time information regarding the GameProcess being run
     /// </summary>
-    public interface IProcessTime
+    public interface ITime
     {
         /// <summary>
         /// The completion time in seconds since the last frame update of the GameProcess

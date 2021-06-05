@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameEngine.Core.Model
+namespace GameEngine.Core.System
 {
     /// <summary>
     /// A type representing an in-memory configuration object, that can be used like a dictionary with string keys

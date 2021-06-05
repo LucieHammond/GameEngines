@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.Logger;
-using GameEngine.Core.Model;
+using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process.Modes;
 using GameEngine.PMR.Process.Services;
@@ -22,7 +22,7 @@ namespace GameEngine.PMR.Process
         /// <summary>
         /// A reference to the interface giving time information concerning the GameProcess
         /// </summary>
-        public IProcessTime Time { get; private set; }
+        public ITime Time { get; private set; }
 
         /// <summary>
         /// The ServiceGameMode running the GameServices of the game, i.e rules that are running and accessible throughout the life of the process
@@ -53,7 +53,7 @@ namespace GameEngine.PMR.Process
         /// </summary>
         /// <param name="setup">custom setup defining game characteristics</param>
         /// <param name="time">interface for accessing time information from within the game process</param>
-        public GameProcess(IGameProcessSetup setup, IProcessTime time)
+        public GameProcess(IGameProcessSetup setup, ITime time)
         {
             Name = $"{setup.Name}Process";
             Time = time;

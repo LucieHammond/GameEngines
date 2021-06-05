@@ -1,10 +1,9 @@
-﻿using GameEngine.Core.Utilities;
-using GameEngine.Core.Utilities.Enums;
+﻿using GameEngine.Core.Utilities.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GameEngine.Core.Model
+namespace GameEngine.Core.Utilities.Models
 {
     /// <summary>
     /// An object representation of a file or directory path, providing normalization, formatting, comparators and 

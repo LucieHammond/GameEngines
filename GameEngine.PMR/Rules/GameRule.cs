@@ -1,4 +1,5 @@
 ﻿using GameEngine.Core.Logger;
+using GameEngine.Core.System;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Services;
 using GameEngine.PMR.Rules.Dependencies;
@@ -46,7 +47,7 @@ namespace GameEngine.PMR.Rules
         /// <summary>
         /// An object giving time information about the process pace (delta time, frame count, time since startup ...)
         /// </summary>
-        protected IProcessTime m_Time => m_Process.Time;
+        protected ITime m_Time => m_Process.Time;
 
         /// <summary>
         /// Default constructor of a Game Rule
