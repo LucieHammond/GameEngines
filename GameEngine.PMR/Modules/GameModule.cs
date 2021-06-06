@@ -21,6 +21,11 @@ namespace GameEngine.PMR.Modules
         internal const string TAG = "Module";
 
         /// <summary>
+        /// The type of the module setup, that serves as an identifier
+        /// </summary>
+        public Type Id { get; private set; }
+
+        /// <summary>
         /// The name of the module, given by the IGameModuleSetup
         /// </summary>
         public string Name { get; private set; }
@@ -56,6 +61,7 @@ namespace GameEngine.PMR.Modules
 
         internal GameModule(IGameModuleSetup setup, Configuration configuration, ModuleOrchestrator orchestrator)
         {
+            Id = setup.GetType();
             Name = setup.Name;
             Configuration = configuration;
             Orchestrator = orchestrator;
