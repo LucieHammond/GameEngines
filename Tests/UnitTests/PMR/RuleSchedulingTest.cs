@@ -1,5 +1,5 @@
 ﻿using GameEngine.PMR.Rules.Scheduling;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Stubs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -17,13 +17,13 @@ namespace GameEnginesTest.UnitTests.PMR
         {
             // Create RuleScheduling with valid rule type and predefined SchedulePattern -> given parameters are correctly retrievable
             SchedulePattern evenPattern = new SchedulePattern(2, 0);
-            RuleScheduling ruleScheduling1 = new RuleScheduling(typeof(DummyGameRule), evenPattern);
-            Assert.AreEqual(typeof(DummyGameRule), ruleScheduling1.RuleType);
+            RuleScheduling ruleScheduling1 = new RuleScheduling(typeof(StubGameRule), evenPattern);
+            Assert.AreEqual(typeof(StubGameRule), ruleScheduling1.RuleType);
             Assert.AreEqual(evenPattern, ruleScheduling1.Pattern);
 
             // Create RuleScheduling with valid rule type, Frequency and Offset -> given parameters are correctly retrievable
-            RuleScheduling ruleScheduling2 = new RuleScheduling(typeof(DummyGameRuleBis), 4, 4);
-            Assert.AreEqual(typeof(DummyGameRuleBis), ruleScheduling2.RuleType);
+            RuleScheduling ruleScheduling2 = new RuleScheduling(typeof(StubGameRuleBis), 4, 4);
+            Assert.AreEqual(typeof(StubGameRuleBis), ruleScheduling2.RuleType);
             Assert.AreEqual(4, ruleScheduling2.Pattern.Frequency);
             Assert.AreEqual(0, ruleScheduling2.Pattern.Offset); // Offset has been simplified to 4 % 4 = 0
 
@@ -35,8 +35,8 @@ namespace GameEnginesTest.UnitTests.PMR
         public void IsExpectedAtFrameTest()
         {
             // Create 2 scheduling rules
-            RuleScheduling everyFrame = new RuleScheduling(typeof(DummyGameRule), 1, 0);
-            RuleScheduling multipleOfThree = new RuleScheduling(typeof(DummyGameRuleTer), 3, 0);
+            RuleScheduling everyFrame = new RuleScheduling(typeof(StubGameRule), 1, 0);
+            RuleScheduling multipleOfThree = new RuleScheduling(typeof(StubGameRuleTer), 3, 0);
 
             // When frame = 0 -> true for everyFrame, true for multipleOfThree
             Assert.IsTrue(everyFrame.IsExpectedAtFrame(0));

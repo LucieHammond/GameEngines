@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Dummies
 {
     [Dummy]
     [DummyInherited]

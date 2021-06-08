@@ -1,5 +1,5 @@
 using GameEngine.Core.FSM;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -21,19 +21,19 @@ namespace GameEnginesTest.UnitTests.Core
         {
             // 1) Valid args -> fsm is created
             string name = "testFsm";
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection(); // returns a collection of 4 Mock States
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             StatesEnumTest initialStateId = StatesEnumTest.FirstState;
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>(name, states, initialStateId);
 
             // Names are coherent
             Assert.AreEqual(name, fsm.Name);
-            foreach (DummyFSMState state in states)
+            foreach (SpyFSMState state in states)
             {
                 Assert.AreEqual($"{name}_{state.Id}", state.Name);
             }
 
             // All states are valid
-            foreach (DummyFSMState state in states)
+            foreach (SpyFSMState state in states)
             {
                 Assert.IsTrue(fsm.IsValidState(state.Id));
             }
@@ -43,11 +43,11 @@ namespace GameEnginesTest.UnitTests.Core
             Assert.AreEqual(states[0], fsm.CurrentState);
 
             // 2) Multiple states with same id -> throws ArgumentException
-            List<DummyFSMState> invalidStates = new List<DummyFSMState>()
+            List<SpyFSMState> invalidStates = new List<SpyFSMState>()
             {
-                new DummyFSMState(StatesEnumTest.FirstState),
-                new DummyFSMState(StatesEnumTest.SecondState),
-                new DummyFSMState(StatesEnumTest.SecondState)
+                new SpyFSMState(StatesEnumTest.FirstState),
+                new SpyFSMState(StatesEnumTest.SecondState),
+                new SpyFSMState(StatesEnumTest.SecondState)
             };
             Assert.ThrowsException<ArgumentException>(() => new FSM<StatesEnumTest>(name, invalidStates, initialStateId));
 
@@ -58,10 +58,10 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void StartTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
-            DummyFSMState initialState = states[0];
-            DummyFSMState otherState = states[1];
+            SpyFSMState initialState = states[0];
+            SpyFSMState otherState = states[1];
 
             // Before start, none of the states methods have been called and the CurrentStateDuration is 0
             Assert.AreEqual(0, initialState.InitializeCallCount);
@@ -105,9 +105,9 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void UpdateTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
-            DummyFSMState initialState = states[0];
+            SpyFSMState initialState = states[0];
 
             fsm.Start();
 
@@ -136,10 +136,10 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void StopTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
-            DummyFSMState initialState = states[0];
-            DummyFSMState otherState = states[1];
+            SpyFSMState initialState = states[0];
+            SpyFSMState otherState = states[1];
 
             Stopwatch watch = Stopwatch.StartNew();
             fsm.Start();
@@ -183,11 +183,11 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void SetStateTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
-            DummyFSMState firstState = states[0];
-            DummyFSMState secondState = states[1];
-            DummyFSMState thirdState = states[2];
+            SpyFSMState firstState = states[0];
+            SpyFSMState secondState = states[1];
+            SpyFSMState thirdState = states[2];
             fsm.Start();
 
             // CurrentState = first state
@@ -207,14 +207,14 @@ namespace GameEnginesTest.UnitTests.Core
             fsm.SetState(StatesEnumTest.SecondState);
             fsm.Update();
             Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(0, secondState.UpdateCallCount);
+            Assert.AreEqual(1, secondState.UpdateCallCount);
             Assert.AreEqual(1, secondState.ExitCallCount);
 
             // IgnoreIfCurrentState = true -> nothing happens when trying to set same state
             fsm.SetState(StatesEnumTest.SecondState, false, true);
             fsm.Update();
             Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(1, secondState.UpdateCallCount);
+            Assert.AreEqual(2, secondState.UpdateCallCount);
             Assert.AreEqual(1, secondState.ExitCallCount);
 
             // Simultaneous change with same priority (default) -> throws InvalidOperationException
@@ -231,34 +231,33 @@ namespace GameEnginesTest.UnitTests.Core
             Assert.ThrowsException<ArgumentException>(() => fsm.SetState(StatesEnumTest.FifthState));
 
             // SetState can be called from the Enter, Update or Exit of FSM states
-            thirdState.OnUpdate += () => fsm.SetState(StatesEnumTest.SecondState);
-            thirdState.OnExit += () => fsm.SetState(StatesEnumTest.ThirdState, priority: 20);
-            thirdState.OnEnter += () => fsm.SetState(StatesEnumTest.FirstState);
+            fsm.SetState(StatesEnumTest.FirstState, false, false);
+            thirdState.OnExit += () => fsm.SetState(StatesEnumTest.SecondState, priority: 20);
+            secondState.OnEnter += () => fsm.SetState(StatesEnumTest.FirstState);
+            firstState.OnUpdate += () => fsm.SetState(StatesEnumTest.ThirdState, immediate: true);
             fsm.Update();
             Assert.AreEqual(thirdState, fsm.CurrentState);
-            thirdState.OnExit = null;
-            fsm.Update();
-            Assert.AreEqual(firstState, fsm.CurrentState);
+            fsm.Stop();
 
             // Check Enter, Update and Exit methods have been called the right number of times
-            // First -> Third -> Second -> Second -> Third -> Tird -> First
+            // First -> Third (update) -> Second (update) -> Second (update) -> Third (update) -> Second -> First (update) -> Third
             Assert.AreEqual(2, firstState.EnterCallCount);
-            Assert.AreEqual(0, firstState.UpdateCallCount);
-            Assert.AreEqual(1, firstState.ExitCallCount);
+            Assert.AreEqual(1, firstState.UpdateCallCount);
+            Assert.AreEqual(2, firstState.ExitCallCount);
 
-            Assert.AreEqual(2, secondState.EnterCallCount);
-            Assert.AreEqual(1, secondState.UpdateCallCount);
-            Assert.AreEqual(2, secondState.ExitCallCount);
+            Assert.AreEqual(3, secondState.EnterCallCount);
+            Assert.AreEqual(2, secondState.UpdateCallCount);
+            Assert.AreEqual(3, secondState.ExitCallCount);
 
             Assert.AreEqual(3, thirdState.EnterCallCount);
-            Assert.AreEqual(1, thirdState.UpdateCallCount);
+            Assert.AreEqual(2, thirdState.UpdateCallCount);
             Assert.AreEqual(3, thirdState.ExitCallCount);
         }
 
         [TestMethod]
         public void ResetTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
 
             fsm.Start();
@@ -280,9 +279,9 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void AddStateTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
-            DummyFSMState fifthState = new DummyFSMState(StatesEnumTest.FifthState);
+            SpyFSMState fifthState = new SpyFSMState(StatesEnumTest.FifthState);
             fsm.Start();
 
             // Before AddState, the fifth state is invalid (GetMockStateCollection() returns a collection of four states)
@@ -306,7 +305,7 @@ namespace GameEnginesTest.UnitTests.Core
         [TestMethod]
         public void RemoveStateTest()
         {
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             FSM<StatesEnumTest> fsm = new FSM<StatesEnumTest>("TestFSM", states, StatesEnumTest.FirstState);
             fsm.Start();
 

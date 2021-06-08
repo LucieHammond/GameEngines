@@ -1,5 +1,5 @@
 ﻿using GameEngine.PMR.Rules;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GameEnginesTest.ComponentTests.PMR
@@ -14,9 +14,9 @@ namespace GameEnginesTest.ComponentTests.PMR
         [TestMethod]
         public void PerformCompleteLifeCycle()
         {
-            // Use Dummy implementation of GameRule since GameRule is abstract
-            DummyGameRule rule = new DummyGameRule();
-            Assert.AreEqual("DummyGameRule", rule.Name);
+            // Create a rule
+            SpyGameRule rule = new SpyGameRule();
+            Assert.AreEqual("SpyGameRule", rule.Name);
             Assert.AreEqual(GameRuleState.Unused, rule.State);
             Assert.AreEqual(0, rule.InitializeCallCount);
             Assert.AreEqual(0, rule.UpdateCallCount);
@@ -58,7 +58,7 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void ReportErrorsAtAnyTime()
         {
             // Report error during initialization
-            DummyGameRule rule1 = new DummyGameRule();
+            SpyGameRule rule1 = new SpyGameRule();
             rule1.OnInitialize += () => rule1.CallMarkError();
 
             Assert.IsFalse(rule1.ErrorDetected);
@@ -67,7 +67,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(GameRuleState.Unloaded, rule1.State);
 
             // Report error during update
-            DummyGameRule rule2 = new DummyGameRule();
+            SpyGameRule rule2 = new SpyGameRule();
             rule2.OnInitialize += () => rule2.CallMarkInitialized();
             rule2.OnUpdate += () => rule2.CallMarkError();
             rule2.BaseInitialize();
@@ -75,10 +75,10 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.IsFalse(rule2.ErrorDetected);
             rule2.BaseUpdate();
             Assert.IsTrue(rule2.ErrorDetected);
-            Assert.AreEqual(GameRuleState.Initialized, rule2.State);
+            Assert.AreEqual(GameRuleState.Unloaded, rule2.State);
 
             // Report error during unload
-            DummyGameRule rule3 = new DummyGameRule();
+            SpyGameRule rule3 = new SpyGameRule();
             rule3.OnInitialize += () => rule3.CallMarkInitialized();
             rule3.OnUnload += () => rule3.CallMarkError();
             rule3.BaseInitialize();
@@ -94,7 +94,7 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void ManageAbruptExit()
         {
             // Create dummy GameRule
-            DummyGameRule rule = new DummyGameRule();
+            SpyGameRule rule = new SpyGameRule();
             rule.OnInitialize += () => rule.CallMarkInitialized();
             rule.BaseInitialize();
             Assert.AreEqual(0, rule.UnloadCallCount);

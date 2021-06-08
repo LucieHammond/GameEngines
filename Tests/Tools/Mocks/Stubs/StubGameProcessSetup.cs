@@ -2,11 +2,11 @@
 using GameEngine.PMR.Process.Structure;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class DummyGameProcessSetup : IGameProcessSetup
+    public class StubGameProcessSetup : IGameProcessSetup
     {
-        public string Name => "Test";
+        public string Name => "TestProcess";
 
         public IGameServiceSetup CustomServiceSetup;
         public List<IGameModeSetup> CustomGameModes;
@@ -16,7 +16,7 @@ namespace GameEnginesTest.Tools.Dummy
             if (CustomServiceSetup != null)
                 return CustomServiceSetup;
 
-            return new DummyGameServiceSetup();
+            return new StubGameServiceSetup();
         }
 
         public List<IGameModeSetup> GetFirstGameModes()
@@ -24,7 +24,7 @@ namespace GameEnginesTest.Tools.Dummy
             if (CustomGameModes != null)
                 return CustomGameModes;
 
-            return new List<IGameModeSetup>() { new DummyGameModeSetup() };
+            return new List<IGameModeSetup>() { new StubGameModeSetup() };
         }
     }
 }

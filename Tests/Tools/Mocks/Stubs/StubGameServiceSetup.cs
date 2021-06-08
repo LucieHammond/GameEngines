@@ -6,9 +6,9 @@ using GameEngine.PMR.Rules.Scheduling;
 using System;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class DummyGameServiceSetup : IGameServiceSetup
+    public class StubGameServiceSetup : IGameServiceSetup
     {
         public const string ID = "TestServices";
 
@@ -20,7 +20,7 @@ namespace GameEnginesTest.Tools.Dummy
         }
 
         public string CustomName;
-        public IEnumerable<GameRule> CustomServices;
+        public IEnumerable<GameRule> CustomRules;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
         public ExceptionPolicy CustomExceptionPolicy;
@@ -29,14 +29,14 @@ namespace GameEnginesTest.Tools.Dummy
 
         public void SetRules(ref RulesDictionary rules)
         {
-            if (CustomServices != null)
+            if (CustomRules != null)
             {
-                foreach (GameRule service in CustomServices)
+                foreach (GameRule service in CustomRules)
                     rules.AddRule(service);
             }
             else
             {
-                rules.AddRule(new DummyGameService());
+                rules.AddRule(new StubGameService());
             }
         }
 
@@ -47,7 +47,7 @@ namespace GameEnginesTest.Tools.Dummy
 
             return new List<Type>()
             {
-                typeof(DummyGameService)
+                typeof(StubGameService)
             };
         }
 
@@ -58,7 +58,7 @@ namespace GameEnginesTest.Tools.Dummy
 
             return new List<RuleScheduling>()
             {
-                new RuleScheduling(typeof(DummyGameService), SchedulePattern.Default)
+                new RuleScheduling(typeof(StubGameService), SchedulePattern.Default)
             };
         }
 

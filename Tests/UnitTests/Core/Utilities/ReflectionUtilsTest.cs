@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.Utilities;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Dummies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

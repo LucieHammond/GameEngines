@@ -1,8 +1,8 @@
 ﻿using GameEngine.Core.System;
 
-namespace GameEnginesTest.Tools.Mocks
+namespace GameEnginesTest.Tools.Mocks.Fakes
 {
-    public class MockProcessTime : ITime
+    public class FakeTime : ITime
     {
         public float DeltaTime => 16;
 
@@ -12,7 +12,7 @@ namespace GameEnginesTest.Tools.Mocks
 
         public float RealtimeSinceStartup => Time;
 
-        public MockProcessTime()
+        public FakeTime()
         {
             FrameCount = 0;
         }

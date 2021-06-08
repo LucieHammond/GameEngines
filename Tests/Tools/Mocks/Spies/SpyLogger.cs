@@ -1,9 +1,9 @@
 ﻿using GameEngine.Core.Logger;
 using System;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Spies
 {
-    public class DummyLogger : ILogger
+    public class SpyLogger : ILogger
     {
         public int LogDebugCalls = 0;
         public int LogInfoCalls = 0;
@@ -17,12 +17,12 @@ namespace GameEnginesTest.Tools.Dummy
         public Action<string, string> OnLogError;
         public Action<string, Exception> OnLogException;
 
-        private static DummyLogger m_DebugLogger;
+        private static SpyLogger m_DebugLogger;
 
-        public static DummyLogger GetDebugLogger()
+        public static SpyLogger GetDebugLogger()
         {
             if (m_DebugLogger == null)
-                m_DebugLogger = new DummyLogger();
+                m_DebugLogger = new SpyLogger();
             return m_DebugLogger;
         }
 

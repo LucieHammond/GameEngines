@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.Pools;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,12 +12,12 @@ namespace GameEnginesTest.ComponentTests.Core
     [TestClass]
     public class PoolTest
     {
-        private readonly DummyPooler m_Pooler;
+        private readonly SpyPooler m_Pooler;
         private readonly string m_PoolId;
 
         public PoolTest()
         {
-            m_Pooler = new DummyPooler("Test");
+            m_Pooler = new SpyPooler("Test");
             m_PoolId = "test_pool";
         }
 
@@ -86,7 +86,7 @@ namespace GameEnginesTest.ComponentTests.Core
                 Assert.IsTrue(m_Pooler.CreatedObjects[i].Initialized);
                 Assert.IsFalse(m_Pooler.CreatedObjects[i].Activated);
                 Assert.IsFalse(m_Pooler.CreatedObjects[i].Cleared);
-            } 
+            }
 
             // Get object from pool -> object is prepared by pooler
             TestObject pooledObject = pool.GetFreeObject();

@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.Pools;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Spies
 {
     public class TestObject
     {
@@ -16,12 +16,12 @@ namespace GameEnginesTest.Tools.Dummy
         }
     }
 
-    public class DummyPooler : IObjectPooler<TestObject>
+    public class SpyPooler : IObjectPooler<TestObject>
     {
         public List<TestObject> CreatedObjects;
         private readonly string m_ObjectType;
 
-        public DummyPooler(string objectType)
+        public SpyPooler(string objectType)
         {
             CreatedObjects = new List<TestObject>();
             m_ObjectType = objectType;

@@ -1,6 +1,6 @@
 ﻿#define ENABLE_LOGS
 using GameEngine.Core.Logger;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,26 +14,26 @@ namespace GameEnginesTest.UnitTests.Core
     [TestClass]
     public class LogTest
     {
-        private readonly DummyLogger m_DebugLogger;
-        private readonly DummyLogger m_InfoLogger;
-        private readonly DummyLogger m_WarningLogger;
-        private readonly DummyLogger m_ErrorLogger;
-        private readonly DummyLogger m_FatalLogger;
-        private readonly DummyLogger m_TestTagLogger;
-        private readonly DummyLogger m_OtherTagsLogger;
+        private readonly SpyLogger m_DebugLogger;
+        private readonly SpyLogger m_InfoLogger;
+        private readonly SpyLogger m_WarningLogger;
+        private readonly SpyLogger m_ErrorLogger;
+        private readonly SpyLogger m_FatalLogger;
+        private readonly SpyLogger m_TestTagLogger;
+        private readonly SpyLogger m_OtherTagsLogger;
 
         private readonly string m_TestTag = "Test";
         private readonly object m_LogLock = new object();
 
         public LogTest()
         {
-            m_DebugLogger = new DummyLogger();
-            m_InfoLogger = new DummyLogger();
-            m_WarningLogger = new DummyLogger();
-            m_ErrorLogger = new DummyLogger();
-            m_FatalLogger = new DummyLogger();
-            m_TestTagLogger = new DummyLogger();
-            m_OtherTagsLogger = new DummyLogger();
+            m_DebugLogger = new SpyLogger();
+            m_InfoLogger = new SpyLogger();
+            m_WarningLogger = new SpyLogger();
+            m_ErrorLogger = new SpyLogger();
+            m_FatalLogger = new SpyLogger();
+            m_TestTagLogger = new SpyLogger();
+            m_OtherTagsLogger = new SpyLogger();
         }
 
         [TestInitialize]

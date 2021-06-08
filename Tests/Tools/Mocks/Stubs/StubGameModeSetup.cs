@@ -6,15 +6,15 @@ using GameEngine.PMR.Rules.Scheduling;
 using System;
 using System.Collections.Generic;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class DummyGameModeSetup : IGameModeSetup
+    public class StubGameModeSetup : IGameModeSetup
     {
         public const string ID = "TestMode";
 
         public string Name => CustomName ?? ID;
 
-        public string RequiredServiceSetup => DummyGameServiceSetup.ID;
+        public string RequiredServiceSetup => StubGameServiceSetup.ID;
 
         public string CustomName;
         public IEnumerable<GameRule> CustomRules;
@@ -23,7 +23,6 @@ namespace GameEnginesTest.Tools.Dummy
         public ExceptionPolicy CustomExceptionPolicy;
         public PerformancePolicy CustomPerformancePolicy;
         public TransitionActivity CustomTransitionActivity;
-
 
         public void SetRules(ref RulesDictionary rules)
         {
@@ -34,7 +33,7 @@ namespace GameEnginesTest.Tools.Dummy
             }
             else
             {
-                rules.AddRulePack(new DummyGameRulePack());
+                rules.AddRulePack(new StubGameRulePack());
             }
         }
 
@@ -45,9 +44,9 @@ namespace GameEnginesTest.Tools.Dummy
 
             return new List<Type>()
             {
-                typeof(DummyGameRule),
-                typeof(DummyGameRuleBis),
-                typeof(DummyGameRuleTer)
+                typeof(StubGameRule),
+                typeof(StubGameRuleBis),
+                typeof(StubGameRuleTer)
             };
         }
 
@@ -58,9 +57,9 @@ namespace GameEnginesTest.Tools.Dummy
 
             return new List<RuleScheduling>()
             {
-                new RuleScheduling(typeof(DummyGameRuleBis), 2, 0),
-                new RuleScheduling(typeof(DummyGameRule), SchedulePattern.Default),
-                new RuleScheduling(typeof(DummyGameRuleTer), 2, 1)
+                new RuleScheduling(typeof(StubGameRuleBis), 2, 0),
+                new RuleScheduling(typeof(StubGameRule), SchedulePattern.Default),
+                new RuleScheduling(typeof(StubGameRuleTer), 2, 1)
             };
         }
 

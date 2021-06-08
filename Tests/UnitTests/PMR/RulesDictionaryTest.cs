@@ -1,6 +1,6 @@
 ﻿using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Stubs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -22,17 +22,17 @@ namespace GameEnginesTest.UnitTests.PMR
             Assert.AreEqual(0, dictionary.Count);
 
             // Add a rule to the dictionary -> the rule is visible and retrievable
-            DummyGameRule rule1 = new DummyGameRule();
+            StubGameRule rule1 = new StubGameRule();
             dictionary.AddRule(rule1);
             Assert.AreEqual(1, dictionary.Count);
             Assert.AreEqual(rule1, dictionary[rule1.GetType()]);
 
             // Try to add another rule of the same type -> throw ArgumentException
-            DummyGameRule rule2 = new DummyGameRule();
+            StubGameRule rule2 = new StubGameRule();
             Assert.ThrowsException<ArgumentException>(() => dictionary.AddRule(rule2));
 
             // Try to add another rule of different type -> both rules are visible
-            DummyGameRuleBis rule3 = new DummyGameRuleBis();
+            StubGameRuleBis rule3 = new StubGameRuleBis();
             dictionary.AddRule(rule3);
             Assert.AreEqual(2, dictionary.Count);
         }
@@ -45,12 +45,11 @@ namespace GameEnginesTest.UnitTests.PMR
             Assert.AreEqual(0, dictionary.Count);
 
             // Add a rule pack to the dictionary -> all the rules created by the pack in GetRules() can be found in the dictionary
-            DummyGameRulePack rulePack = new DummyGameRulePack();
-            Assert.IsNull(rulePack.CreatedRules);
+            StubGameRulePack rulePack = new StubGameRulePack();
+            rulePack.CustomRules = new List<GameRule>() { new StubGameRule(), new StubGameRuleBis(), new StubGameRuleTer() };
             dictionary.AddRulePack(rulePack);
-            Assert.IsNotNull(rulePack.CreatedRules);
-            Assert.AreEqual(rulePack.CreatedRules.Count, dictionary.Count);
-            foreach (GameRule rule in rulePack.CreatedRules)
+            Assert.AreEqual(rulePack.CustomRules.Count, dictionary.Count);
+            foreach (GameRule rule in rulePack.CustomRules)
                 Assert.AreEqual(rule, dictionary[rule.GetType()]);
 
             // Try to add the same pack again -> throw ArgumentException
@@ -62,13 +61,13 @@ namespace GameEnginesTest.UnitTests.PMR
         {
             // Create a dictionary with 2 rules
             RulesDictionary dictionary = new RulesDictionary();
-            DummyGameRule rule1 = new DummyGameRule();
-            DummyGameRuleBis rule2 = new DummyGameRuleBis();
+            StubGameRule rule1 = new StubGameRule();
+            StubGameRuleBis rule2 = new StubGameRuleBis();
             dictionary.AddRule(rule1);
             dictionary.AddRule(rule2);
 
             // Call GetRulesInOrder with a correct ordered list of GameRule types -> return an IEnumerable visiting the corresponding rules in that same order
-            List<Type> correctOrder = new List<Type> { typeof(DummyGameRule), typeof(DummyGameRuleBis), typeof(DummyGameRule) };
+            List<Type> correctOrder = new List<Type> { typeof(StubGameRule), typeof(StubGameRuleBis), typeof(StubGameRule) };
             IEnumerator<GameRule> resultEnumerator = dictionary.GetRulesInOrder(correctOrder).GetEnumerator();
             resultEnumerator.MoveNext();
             Assert.AreEqual(rule1, resultEnumerator.Current);
@@ -79,7 +78,7 @@ namespace GameEnginesTest.UnitTests.PMR
             Assert.IsFalse(resultEnumerator.MoveNext());
 
             // The order parameter contains a GameRule type that is not present in the dictionary -> throw KeyNotFoundException when reaching the missing rule
-            List<Type> missingRuleOrder = new List<Type> { typeof(DummyGameRuleTer) };
+            List<Type> missingRuleOrder = new List<Type> { typeof(StubGameRuleTer) };
             IEnumerable<GameRule> result2 = dictionary.GetRulesInOrder(missingRuleOrder);
             Assert.ThrowsException<KeyNotFoundException>(() => result2.GetEnumerator().MoveNext());
 
@@ -94,13 +93,13 @@ namespace GameEnginesTest.UnitTests.PMR
         {
             // Create a dictionary with 2 rules
             RulesDictionary dictionary = new RulesDictionary();
-            DummyGameRule rule1 = new DummyGameRule();
-            DummyGameRuleBis rule2 = new DummyGameRuleBis();
+            StubGameRule rule1 = new StubGameRule();
+            StubGameRuleBis rule2 = new StubGameRuleBis();
             dictionary.AddRule(rule1);
             dictionary.AddRule(rule2);
 
             // Call GetRulesInOrder with a correct ordered list of GameRule types -> return an IEnumerable visiting the corresponding rules in the reverse order
-            List<Type> correctOrder = new List<Type> { typeof(DummyGameRule), typeof(DummyGameRuleBis) };
+            List<Type> correctOrder = new List<Type> { typeof(StubGameRule), typeof(StubGameRuleBis) };
             IEnumerator<GameRule> resultEnumerator = dictionary.GetRulesInReverseOrder(correctOrder).GetEnumerator();
             resultEnumerator.MoveNext();
             Assert.AreEqual(rule2, resultEnumerator.Current);
@@ -109,7 +108,7 @@ namespace GameEnginesTest.UnitTests.PMR
             Assert.IsFalse(resultEnumerator.MoveNext());
 
             // The order parameter contains a GameRule type that is not present in the dictionary -> throw KeyNotFoundException when reaching the missing rule
-            List<Type> missingRuleOrder = new List<Type> { typeof(DummyGameRuleTer) };
+            List<Type> missingRuleOrder = new List<Type> { typeof(StubGameRuleTer) };
             IEnumerable<GameRule> result2 = dictionary.GetRulesInReverseOrder(missingRuleOrder);
             Assert.ThrowsException<KeyNotFoundException>(() => result2.GetEnumerator().MoveNext());
 
@@ -124,8 +123,8 @@ namespace GameEnginesTest.UnitTests.PMR
         {
             // Create dictionary with 2 rules
             RulesDictionary dictionary = new RulesDictionary();
-            DummyGameRule rule1 = new DummyGameRule();
-            DummyGameRuleBis rule2 = new DummyGameRuleBis();
+            StubGameRule rule1 = new StubGameRule();
+            StubGameRuleBis rule2 = new StubGameRuleBis();
             dictionary.AddRule(rule1);
             dictionary.AddRule(rule2);
 
@@ -158,7 +157,7 @@ namespace GameEnginesTest.UnitTests.PMR
             List<RuleScheduling> invalidScheduling = new List<RuleScheduling>()
             {
                 new RuleScheduling(rule1.GetType(), SchedulePattern.Default),
-                new RuleScheduling(typeof(DummyGameRuleTer), 2, 0) // invalid rule
+                new RuleScheduling(typeof(StubGameRuleTer), 2, 0) // invalid rule
             };
             IEnumerator<GameRule> invalidFrame = dictionary.GetRulesInOrderForFrame(invalidScheduling, 10).GetEnumerator();
             Assert.IsTrue(invalidFrame.MoveNext());

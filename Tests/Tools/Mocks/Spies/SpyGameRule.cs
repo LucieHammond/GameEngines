@@ -1,13 +1,11 @@
 ﻿using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
-using GameEngine.PMR.Rules.Dependencies;
-using GameEngine.PMR.Rules.Dependencies.Attributes;
 using System;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Spies
 {
-    public class DummyGameRule : GameRule
+    public class SpyGameRule : GameRule
     {
         public int InitializeCallCount { get; private set; }
         public int UnloadCallCount { get; private set; }
@@ -23,7 +21,7 @@ namespace GameEnginesTest.Tools.Dummy
 
         public GameModule CurrentModule => m_CurrentModule;
 
-        public DummyGameRule() : base()
+        public SpyGameRule() : base()
         {
             InitializeCallCount = 0;
             UnloadCallCount = 0;
@@ -70,24 +68,5 @@ namespace GameEnginesTest.Tools.Dummy
             OnOnQuit?.Invoke();
             base.OnQuit();
         }
-    }
-
-    public interface IDummyGameRuleBis
-    {
-
-    }
-
-    [DependencyProvider(typeof(IDummyGameRuleBis))]
-    public class DummyGameRuleBis : DummyGameRule, IDummyGameRuleBis
-    {
-    }
-
-    public class DummyGameRuleTer : DummyGameRule
-    {
-        [DependencyConsumer(DependencyType.Service, true)]
-        public IDummyGameService DummyServiceReference;
-
-        [DependencyConsumer(DependencyType.Rule, false)]
-        public IDummyGameRuleBis DummyRuleBisReference;
     }
 }

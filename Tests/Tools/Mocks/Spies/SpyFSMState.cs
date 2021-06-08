@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.FSM;
 using System;
 
-namespace GameEnginesTest.Tools.Dummy
+namespace GameEnginesTest.Tools.Mocks.Spies
 {
     public enum StatesEnumTest
     {
@@ -12,7 +12,7 @@ namespace GameEnginesTest.Tools.Dummy
         FifthState
     }
 
-    public class DummyFSMState : FSMState<StatesEnumTest>
+    public class SpyFSMState : FSMState<StatesEnumTest>
     {
         public override StatesEnumTest Id => m_StateId;
         private readonly StatesEnumTest m_StateId;
@@ -29,7 +29,7 @@ namespace GameEnginesTest.Tools.Dummy
         public Action OnUpdate;
         public Action OnExit;
 
-        public DummyFSMState(StatesEnumTest id)
+        public SpyFSMState(StatesEnumTest id)
         {
             m_StateId = id;
 
