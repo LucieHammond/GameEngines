@@ -38,6 +38,7 @@ namespace GameEngine.PMR.Modules.States
 
             m_Performance = m_GameModule.PerformancePolicy;
             m_IsProcessInjected = false;
+
             m_GameModule.ReportLoadingProgress(0f);
         }
 

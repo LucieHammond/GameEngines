@@ -73,7 +73,7 @@ namespace GameEngine.PMR.Process.Orchestration
             if (!CheckModuleValidity(setup, ParentModule?.CurrentModule))
                 return;
 
-            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup);
+            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.Name);
 
             StartOrPlanTransformation((onFinish) =>
             {
@@ -114,7 +114,7 @@ namespace GameEngine.PMR.Process.Orchestration
             if (!CheckModuleValidity(setup, ParentModule?.CurrentModule))
                 return;
 
-            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup);
+            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.Name);
 
             StartOrPlanTransformation((onFinish) =>
             {
@@ -135,7 +135,7 @@ namespace GameEngine.PMR.Process.Orchestration
             if (!CheckModuleValidity(setup, CurrentModule))
                 return;
 
-            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup);
+            configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.Name);
 
             if (State == ModuleOrchestratorState.ResetSubmodules)
                 throw new InvalidOperationException($"Cannot add submodule during reset phase (all submodules are being unloaded)");
@@ -192,23 +192,23 @@ namespace GameEngine.PMR.Process.Orchestration
         {
             if (moduleSetup is IGameSubmoduleSetup submoduleSetup)
             {
-                if (submoduleSetup.RequiredServiceSetup != null && submoduleSetup.RequiredServiceSetup != MainProcess.Services.Id)
+                if (submoduleSetup.RequiredServiceSetup != null && submoduleSetup.RequiredServiceSetup != MainProcess.Services.Name)
                 {
-                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current services: {MainProcess.Services.Id}. Expected services: {submoduleSetup.RequiredServiceSetup}");
+                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current services: {MainProcess.Services.Name}. Expected services: {submoduleSetup.RequiredServiceSetup}");
                     return false;
                 }
 
-                if (submoduleSetup.RequiredParentSetup != null && submoduleSetup.RequiredParentSetup != parent?.Id)
+                if (submoduleSetup.RequiredParentSetup != null && submoduleSetup.RequiredParentSetup != parent?.Name)
                 {
-                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current parent module: {parent?.Id}. Expected parent module: {submoduleSetup.RequiredParentSetup}");
+                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current parent module: {parent?.Name}. Expected parent module: {submoduleSetup.RequiredParentSetup}");
                     return false;
                 }
             }
             else if (moduleSetup is IGameModeSetup modeSetup)
             {
-                if (modeSetup.RequiredServiceSetup != null && modeSetup.RequiredServiceSetup != MainProcess.Services.Id)
+                if (modeSetup.RequiredServiceSetup != null && modeSetup.RequiredServiceSetup != MainProcess.Services.Name)
                 {
-                    Log.Error(TAG, $"Invalid game mode {modeSetup.Name}. Current services: {MainProcess.Services.Id}. Expected services: {modeSetup.RequiredServiceSetup}");
+                    Log.Error(TAG, $"Invalid game mode {modeSetup.Name}. Current services: {MainProcess.Services.Name}. Expected services: {modeSetup.RequiredServiceSetup}");
                     return false;
                 }
             }

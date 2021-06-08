@@ -74,7 +74,7 @@ namespace GameEngine.PMR.Process
         {
             Log.Info(TAG, $"Start process {Name}");
 
-            m_GameServiceOrchestrator.LoadModule(m_ServiceSetup, GetModuleConfiguration(m_ServiceSetup));
+            m_GameServiceOrchestrator.LoadModule(m_ServiceSetup);
             m_GameServiceOrchestrator.OnOperational = () => SwitchToNextGameMode();
         }
 
@@ -144,9 +144,9 @@ namespace GameEngine.PMR.Process
         /// </summary>
         /// <param name="moduleSetup">The setup defining the module</param>
         /// <param name="configuration">The configuration to register for this type of module</param>
-        public void SetModuleConfiguration(IGameModuleSetup moduleSetup, Configuration configuration)
+        public void SetModuleConfiguration(string moduleName, Configuration configuration)
         {
-            m_Configurations[moduleSetup.Name] = configuration;
+            m_Configurations[moduleName] = configuration;
         }
 
         /// <summary>
@@ -154,9 +154,9 @@ namespace GameEngine.PMR.Process
         /// </summary>
         /// <param name="moduleSetup">The setup defining the module</param>
         /// <returns>The registered configuration for this type of module (null if not found)</returns>
-        public Configuration GetModuleConfiguration(IGameModuleSetup moduleSetup)
+        public Configuration GetModuleConfiguration(string moduleName)
         {
-            if (m_Configurations.TryGetValue(moduleSetup.Name, out Configuration config))
+            if (m_Configurations.TryGetValue(moduleName, out Configuration config))
                 return config;
             return null;
         }
@@ -170,7 +170,12 @@ namespace GameEngine.PMR.Process
         {
             if (m_GameServiceOrchestrator.IsOperational)
             {
-                if (CurrentGameMode == null)
+                if (setup == null && CurrentGameMode == null)
+                    return;
+
+                if (setup == null)
+                    m_GameModeOrchestrator.UnloadModule();
+                else if (CurrentGameMode == null)
                     m_GameModeOrchestrator.LoadModule(setup, configuration);
                 else
                     m_GameModeOrchestrator.SwitchToModule(setup, configuration);

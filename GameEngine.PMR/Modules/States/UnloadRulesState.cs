@@ -34,13 +34,14 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Unload rules");
 
-            m_GameModule.ReportLoadingProgress(0f);
-
             m_RulesToUnloadEnumerator = m_GameModule.Rules.GetRulesInReverseOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
             m_Performance = m_GameModule.PerformancePolicy;
             m_SkipCurrrentRule = false;
             m_NbStallingWarnings = 0;
-            ExitIfCompleted();
+
+            m_GameModule.ReportLoadingProgress(0f);
+            if (!m_RulesToUnloadEnumerator.MoveNext())
+                m_RulesToUnloadEnumerator = null;
         }
 
         public override void Update()
@@ -48,53 +49,13 @@ namespace GameEngine.PMR.Modules.States
             m_UpdateTime.Restart();
             do
             {
-                if (m_RulesToUnloadEnumerator.Current.State == GameRuleState.Initialized)
-                {
-                    try
-                    {
-                        m_RuleUnloadTime.Restart();
-                        m_RulesToUnloadEnumerator.Current.BaseUnload();
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
-                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
-                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
-                            break;
-                    }
-                }
+                TriggerActionForCurrentRule(out bool askExit);
+                if (askExit)
+                    break;
 
-                if (m_RulesToUnloadEnumerator.Current.State == GameRuleState.Unloaded ||
-                    m_RulesToUnloadEnumerator.Current.State == GameRuleState.Unused ||
-                    m_RulesToUnloadEnumerator.Current.State == GameRuleState.Initializing ||
-                    m_SkipCurrrentRule)
-                {
-                    m_RuleUnloadTime.Stop();
-                    m_SkipCurrrentRule = false;
-                    m_NbStallingWarnings = 0;
-
-                    if (ExitIfCompleted())
-                        break;
-                }
-                else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
-                {
-                    m_RuleUnloadTime.Restart();
-                    m_NbStallingWarnings++;
-
-                    int totalStallingTime = m_Performance.UnloadStallingTimeout * m_NbStallingWarnings;
-                    if (m_NbStallingWarnings <= m_Performance.NbWarningsBeforeException)
-                    {
-                        Log.Warning(GameModule.TAG, $"Unloading of rule {m_RulesToUnloadEnumerator.Current.Name} has been pending for {totalStallingTime} ms");
-                    }
-                    else
-                    {
-                        Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} is stalling (timeout = {totalStallingTime} ms)");
-                        Log.Exception(GameModule.TAG, e);
-                        m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
-                        if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
-                            break;
-                    }
-                }
+                CheckResults(out askExit);
+                if (askExit)
+                    break;
             }
             while (m_UpdateTime.ElapsedMilliseconds < m_Performance.MaxFrameDuration);
 
@@ -107,14 +68,67 @@ namespace GameEngine.PMR.Modules.States
             m_UpdateTime.Reset();
         }
 
-        private bool ExitIfCompleted()
+        private void TriggerActionForCurrentRule(out bool askExit)
         {
-            if (!m_RulesToUnloadEnumerator.MoveNext())
+            askExit = false;
+
+            if (m_RulesToUnloadEnumerator == null)
             {
                 m_GameModule.GoToNextState();
-                return true;
+                askExit = true;
             }
-            return false;
+            else if (m_RulesToUnloadEnumerator.Current.State == GameRuleState.Initialized)
+            {
+                try
+                {
+                    m_RuleUnloadTime.Restart();
+                    m_RulesToUnloadEnumerator.Current.BaseUnload();
+                }
+                catch (Exception e)
+                {
+                    Log.Exception(m_RulesToUnloadEnumerator.Current.Name, e);
+                    m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
+                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
+                        askExit = true;
+                }
+            }
+        }
+
+        private void CheckResults(out bool askExit)
+        {
+            askExit = false;
+
+            if (m_RulesToUnloadEnumerator.Current.State == GameRuleState.Unloaded ||
+                m_RulesToUnloadEnumerator.Current.State == GameRuleState.Unused ||
+                m_RulesToUnloadEnumerator.Current.State == GameRuleState.Initializing ||
+                m_SkipCurrrentRule)
+            {
+                m_RuleUnloadTime.Stop();
+                m_SkipCurrrentRule = false;
+                m_NbStallingWarnings = 0;
+
+                if (!m_RulesToUnloadEnumerator.MoveNext())
+                    m_RulesToUnloadEnumerator = null;
+            }
+            else if (m_Performance.CheckStallingRules && m_RuleUnloadTime.ElapsedMilliseconds >= m_Performance.UnloadStallingTimeout)
+            {
+                m_RuleUnloadTime.Restart();
+                m_NbStallingWarnings++;
+
+                int totalStallingTime = m_Performance.UnloadStallingTimeout * m_NbStallingWarnings;
+                if (m_NbStallingWarnings <= m_Performance.NbWarningsBeforeException)
+                {
+                    Log.Warning(GameModule.TAG, $"Unloading of rule {m_RulesToUnloadEnumerator.Current.Name} has been pending for {totalStallingTime} ms");
+                }
+                else
+                {
+                    Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} is stalling (timeout = {totalStallingTime} ms)");
+                    Log.Exception(GameModule.TAG, e);
+                    m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
+                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
+                        askExit = true;
+                }
+            }
         }
     }
 }

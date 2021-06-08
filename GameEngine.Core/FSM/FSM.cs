@@ -36,7 +36,6 @@ namespace GameEngine.Core.FSM
             get => m_CurrentStateTimeWatch != null ? m_CurrentStateTimeWatch.Elapsed.TotalSeconds : 0;
         }
 
-
         private bool m_Running;
         private Dictionary<T, FSMState<T>> m_States;
 
@@ -99,15 +98,12 @@ namespace GameEngine.Core.FSM
             if (!m_Running)
                 throw new InvalidOperationException($"The state machine should be started before Update");
 #endif
-            if (!m_StateChangeRequested)
-            {
-                CurrentState.Update();
-            }
-
-            if (m_StateChangeRequested)
+            while (m_StateChangeRequested)
             {
                 SwitchToNextState();
             }
+
+            CurrentState.Update();
         }
 
         /// <summary>

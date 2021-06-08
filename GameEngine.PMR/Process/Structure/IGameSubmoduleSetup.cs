@@ -13,12 +13,12 @@ namespace GameEngine.PMR.Process.Structure
         /// The service setup that the submodule requires (its rules can have service dependencies to it).
         /// Set null if no service setup is required
         /// </summary>
-        Type RequiredServiceSetup { get; }
+        string RequiredServiceSetup { get; }
 
         /// <summary>
         /// The parent module setup that the submodule requires (its rules can have rule dependencies to it, and recursively to all the hierarchy).
         /// Set null if no parent module setup is required
         /// </summary>
-        Type RequiredParentSetup { get; }
+        string RequiredParentSetup { get; }
     }
 }
