@@ -56,7 +56,7 @@ namespace GameEngine.PMR.Process.Orchestration
             }
             catch (InvalidOperationException e)
             {
-                Log.Exception(ModuleOrchestrator.TAG, e);
+                Log.Exception(Orchestrator.TAG, e);
             }
         }
 
@@ -73,7 +73,7 @@ namespace GameEngine.PMR.Process.Orchestration
             }
             catch (InvalidOperationException e)
             {
-                Log.Exception(ModuleOrchestrator.TAG, e);
+                Log.Exception(Orchestrator.TAG, e);
             }
         }
 
@@ -91,7 +91,7 @@ namespace GameEngine.PMR.Process.Orchestration
             }
             catch (InvalidOperationException e)
             {
-                Log.Exception(ModuleOrchestrator.TAG, e);
+                Log.Exception(Orchestrator.TAG, e);
                 return null;
             }
         }

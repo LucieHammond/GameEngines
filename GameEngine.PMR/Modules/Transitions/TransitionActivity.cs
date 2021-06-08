@@ -31,7 +31,7 @@ namespace GameEngine.PMR.Modules.Transitions
         /// <summary>
         /// If the loading progress should be set by default to the proportion of initialized rules in the corresponding module
         /// </summary>
-        protected bool m_UseDefaultProgress = true;
+        protected bool m_UseDefaultReport = true;
 
         /// <summary>
         /// Report the progress of the loading process for the transition to display it
@@ -51,9 +51,9 @@ namespace GameEngine.PMR.Modules.Transitions
             m_LoadingAction = currentAction;
         }
 
-        internal void ReportDefaultProgress(float progress)
+        internal void SetDefaultProgress(float progress)
         {
-            if (m_UseDefaultProgress)
+            if (m_UseDefaultReport)
                 m_LoadingProgress = progress;
         }
 
@@ -121,11 +121,11 @@ namespace GameEngine.PMR.Modules.Transitions
         /// <summary>
         /// Call this method to attest that the transition has complete its starting sequence
         /// </summary>
-        protected void CompleteStartingSequence()
+        protected void MarkStartCompleted()
         {
 #if CHECK_OPERATIONS_CONTEXT
             if (State != TransitionState.Starting)
-                throw new InvalidOperationException($"Invalid time context for calling CompleteStartingSequence(). " +
+                throw new InvalidOperationException($"Invalid time context for calling MarkStartCompleted(). " +
                     $"Current state: {State}. Expected state: Starting");
 #endif
             State = TransitionState.Active;
@@ -134,11 +134,11 @@ namespace GameEngine.PMR.Modules.Transitions
         /// <summary>
         /// Call this method to attest that the transition has complete its stopping sequence
         /// </summary>
-        protected void CompleteStoppingSequence()
+        protected void MarkStopCompleted()
         {
 #if CHECK_OPERATIONS_CONTEXT
             if (State != TransitionState.Stopping)
-                throw new InvalidOperationException($"Invalid time context for calling CompleteStoppingSequence(). " +
+                throw new InvalidOperationException($"Invalid time context for calling MarkStartCompleted(). " +
                     $"Current state: {State}. Expected state: Stopping");
 #endif
             State = TransitionState.Inactive;

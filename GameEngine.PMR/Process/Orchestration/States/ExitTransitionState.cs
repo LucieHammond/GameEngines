@@ -4,15 +4,15 @@ using GameEngine.PMR.Modules.Transitions;
 namespace GameEngine.PMR.Process.Orchestration.States
 {
     /// <summary>
-    /// The FSM state corresponding to the ExitTransition state of the ModuleOrchestrator, in which it performs the exit phase of a transition
+    /// The FSM state corresponding to the ExitTransition state of the Orchestrator, in which it performs the exit phase of a transition
     /// </summary>
-    internal class ExitTransitionState : FSMState<ModuleOrchestratorState>
+    internal class ExitTransitionState : FSMState<OrchestratorState>
     {
-        public override ModuleOrchestratorState Id => ModuleOrchestratorState.ExitTransition;
+        public override OrchestratorState Id => OrchestratorState.ExitTransition;
 
-        private ModuleOrchestrator m_Orchestrator;
+        private Orchestrator m_Orchestrator;
 
-        internal ExitTransitionState(ModuleOrchestrator orchestrator)
+        internal ExitTransitionState(Orchestrator orchestrator)
         {
             m_Orchestrator = orchestrator;
         }
@@ -45,7 +45,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             if (m_Orchestrator.CurrentModule == null)
             {
-                m_Orchestrator.GoToState(ModuleOrchestratorState.Wait);
+                m_Orchestrator.GoToState(OrchestratorState.Wait);
                 m_Orchestrator.OnTerminated?.Invoke();
                 m_Orchestrator.OnTerminated = null;
             }
@@ -56,7 +56,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
             }
             else
             {
-                m_Orchestrator.GoToState(ModuleOrchestratorState.OperateModule);
+                m_Orchestrator.GoToState(OrchestratorState.Operational);
             }
         }
     }

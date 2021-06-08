@@ -4,15 +4,15 @@ using GameEngine.PMR.Modules.Transitions;
 namespace GameEngine.PMR.Process.Orchestration.States
 {
     /// <summary>
-    /// The FSM state corresponding to the EnterTransition state of the ModuleOrchestrator, in which it performs the entry phase of a transition
+    /// The FSM state corresponding to the EnterTransition state of the Orchestrator, in which it performs the entry phase of a transition
     /// </summary>
-    internal class EnterTransitionState : FSMState<ModuleOrchestratorState>
+    internal class EnterTransitionState : FSMState<OrchestratorState>
     {
-        public override ModuleOrchestratorState Id => ModuleOrchestratorState.EnterTransition;
+        public override OrchestratorState Id => OrchestratorState.EnterTransition;
 
-        private ModuleOrchestrator m_Orchestrator;
+        private Orchestrator m_Orchestrator;
 
-        internal EnterTransitionState(ModuleOrchestrator orchestrator)
+        internal EnterTransitionState(Orchestrator orchestrator)
         {
             m_Orchestrator = orchestrator;
         }
@@ -21,7 +21,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             if (m_Orchestrator.CurrentTransition == null)
             {
-                m_Orchestrator.GoToState(ModuleOrchestratorState.RunTransition);
+                m_Orchestrator.GoToState(OrchestratorState.RunTransition);
                 return;
             }
 
@@ -33,7 +33,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
             m_Orchestrator.CurrentTransition.BaseUpdate();
 
             if (m_Orchestrator.CurrentTransition.State == TransitionState.Active)
-                m_Orchestrator.GoToState(ModuleOrchestratorState.RunTransition);
+                m_Orchestrator.GoToState(OrchestratorState.RunTransition);
         }
 
         public override void Exit()

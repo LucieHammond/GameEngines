@@ -33,7 +33,7 @@ namespace GameEngine.PMR.Modules
         /// <summary>
         /// The state of orchestrator that manages the transitions of the module
         /// </summary>
-        public ModuleOrchestratorState OrchestrationState => Orchestrator.State;
+        public OrchestratorState OrchestrationState => Orchestrator.State;
 
         /// <summary>
         /// The configuration of the module, set at construction and used to transmit runtime information
@@ -43,10 +43,10 @@ namespace GameEngine.PMR.Modules
         internal RulesDictionary Rules;
         internal List<Type> InitUnloadOrder;
         internal List<RuleScheduling> UpdateScheduler;
-        internal DependencyProvider DependencyProvider;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
-        internal ModuleOrchestrator Orchestrator;
+        internal DependencyProvider DependencyProvider;
+        internal Orchestrator Orchestrator;
 
         internal Action OnFinishLoading;
         internal Action OnFinishUnloading;
@@ -54,7 +54,7 @@ namespace GameEngine.PMR.Modules
         private QueueFSM<GameModuleState> m_StateMachine;
         private bool m_IsPaused;
 
-        internal GameModule(IGameModuleSetup setup, Configuration configuration, ModuleOrchestrator orchestrator)
+        internal GameModule(IGameModuleSetup setup, Configuration configuration, Orchestrator orchestrator)
         {
             Name = setup.Name;
             Configuration = configuration;
@@ -67,7 +67,7 @@ namespace GameEngine.PMR.Modules
                 {
                     new StartState(this),
                     new SetupState(this, setup),
-                    new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.ParentModule?.CurrentModule),
+                    new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.Parent?.CurrentModule),
                     new InitializeRulesState(this),
                     new UpdateRulesState(this, orchestrator.MainProcess.Time),
                     new UnloadRulesState(this),
@@ -75,6 +75,19 @@ namespace GameEngine.PMR.Modules
                 },
                 new List<GameModuleState>() { GameModuleState.Start });
             m_StateMachine.Start();
+        }
+
+        internal void Update()
+        {
+            if (!m_IsPaused)
+            {
+                m_StateMachine.Update();
+            }
+        }
+
+        internal void Destroy()
+        {
+            m_StateMachine.Stop();
         }
 
         /// <summary>
@@ -105,14 +118,6 @@ namespace GameEngine.PMR.Modules
             m_StateMachine.EnqueueState(GameModuleState.InitializeRules);
             m_StateMachine.EnqueueState(GameModuleState.UpdateRules);
             m_StateMachine.DequeueState();
-        }
-
-        internal void InnerUpdate()
-        {
-            if (!m_IsPaused)
-            {
-                m_StateMachine.Update();
-            }
         }
 
         internal void InnerUnload()
@@ -149,11 +154,6 @@ namespace GameEngine.PMR.Modules
             m_StateMachine.DequeueState(priority: 100);
         }
 
-        internal void InnerStop()
-        {
-            m_StateMachine.Stop();
-        }
-
         internal void InnerQuit()
         {
             Log.Info(TAG, $"Quit module {Name}");
@@ -169,7 +169,7 @@ namespace GameEngine.PMR.Modules
                     Log.Exception(ruleInfo.Value.Name, e);
                 }
             }
-            InnerStop();
+            Destroy();
         }
 
         internal void GoToNextState()
@@ -179,7 +179,7 @@ namespace GameEngine.PMR.Modules
 
         internal void ReportLoadingProgress(float progress)
         {
-            Orchestrator.CurrentTransition?.ReportDefaultProgress(progress);
+            Orchestrator.CurrentTransition?.SetDefaultProgress(progress);
         }
 
         internal void OnManagedError()

@@ -1,10 +1,10 @@
 ﻿namespace GameEngine.PMR.Process.Orchestration
 {
     /// <summary>
-    /// All possible states a ModuleOrchestrator can go through during its lifetime.
-    /// Those states are visited by a FSM associated with the ModuleOrchestrator
+    /// All possible states an Orchestrator can go through during its lifetime.
+    /// Those states are visited by a FSM associated with the Orchestrator
     /// </summary>
-    public enum ModuleOrchestratorState
+    public enum OrchestratorState
     {
         /// <summary>
         /// The orchestrator waits to be linked to a module or removed
@@ -17,7 +17,7 @@
         EnterTransition,
 
         /// <summary>
-        /// The orchcestrator prepares the module while displaying its transition
+        /// The orchestrator prepares the module while displaying its transition
         /// </summary>
         RunTransition,
 
@@ -29,11 +29,11 @@
         /// <summary>
         /// The orchestrator manages the normal execution of the module (and its submodules)
         /// </summary>
-        OperateModule,
+        Operational,
 
         /// <summary>
         /// The orchestrator continues to execute the module while unloading its submodules
         /// </summary>
-        ResetSubmodules,
+        Reset,
     }
 }

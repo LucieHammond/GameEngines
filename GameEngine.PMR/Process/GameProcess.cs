@@ -4,6 +4,7 @@ using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules.Dependencies;
+using System;
 using System.Collections.Generic;
 
 namespace GameEngine.PMR.Process
@@ -42,8 +43,8 @@ namespace GameEngine.PMR.Process
 
         internal DependencyProvider ServiceProvider => Services?.DependencyProvider;
 
-        private ModuleOrchestrator m_GameServiceOrchestrator;
-        private ModuleOrchestrator m_GameModeOrchestrator;
+        private Orchestrator m_GameServiceOrchestrator;
+        private Orchestrator m_GameModeOrchestrator;
         private IGameServiceSetup m_ServiceSetup;
         private Queue<IGameModeSetup> m_GameModesToCome;
         private Dictionary<string, Configuration> m_Configurations;
@@ -59,8 +60,8 @@ namespace GameEngine.PMR.Process
             Name = setup.Name;
             Time = time;
 
-            m_GameServiceOrchestrator = new ModuleOrchestrator("GameServices", this, null);
-            m_GameModeOrchestrator = new ModuleOrchestrator("GameMode", this, null);
+            m_GameServiceOrchestrator = new Orchestrator("GameServices", this, null);
+            m_GameModeOrchestrator = new Orchestrator("GameMode", this, null);
             m_ServiceSetup = setup.GetServiceSetup();
             m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
             m_Configurations = new Dictionary<string, Configuration>();
