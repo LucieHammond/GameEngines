@@ -1,7 +1,8 @@
-﻿using GameEngine.PJR.Jobs.Policies;
-using GameEngine.PJR.Process.Services;
-using GameEngine.PJR.Rules;
-using GameEngine.PJR.Rules.Scheduling;
+﻿using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Transitions;
+using GameEngine.PMR.Process.Structure;
+using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Scheduling;
 using System;
 using System.Collections.Generic;
 
@@ -9,7 +10,14 @@ namespace GameEnginesTest.Tools.Dummy
 {
     public class DummyGameServiceSetup : IGameServiceSetup
     {
-        public string Name => CustomName ?? "Test";
+        public const string ID = "TestServices";
+
+        public string Name => CustomName ?? ID;
+
+        public bool CheckAppRequirements()
+        {
+            return true;
+        }
 
         public string CustomName;
         public IEnumerable<GameRule> CustomServices;
@@ -17,6 +25,7 @@ namespace GameEnginesTest.Tools.Dummy
         public List<RuleScheduling> CustomUpdateScheduler;
         public ExceptionPolicy CustomExceptionPolicy;
         public PerformancePolicy CustomPerformancePolicy;
+        public TransitionActivity CustomTransitionActivity;
 
         public void SetRules(ref RulesDictionary rules)
         {
@@ -60,11 +69,11 @@ namespace GameEnginesTest.Tools.Dummy
 
             return new ExceptionPolicy()
             {
-                ReactionDuringLoad = OnExceptionBehaviour.PauseJob,
+                ReactionDuringLoad = OnExceptionBehaviour.PauseModule,
                 ReactionDuringUpdate = OnExceptionBehaviour.SkipFrame,
                 ReactionDuringUnload = OnExceptionBehaviour.Continue,
                 SkipUnloadIfException = true,
-                FallbackMode = null
+                FallbackModule = null
             };
         }
 
@@ -78,6 +87,14 @@ namespace GameEnginesTest.Tools.Dummy
                 MaxFrameDuration = 16,
                 CheckStallingRules = false
             };
+        }
+
+        public TransitionActivity GetTransitionActivity()
+        {
+            if (CustomTransitionActivity != null)
+                return CustomTransitionActivity;
+
+            return null;
         }
     }
 }

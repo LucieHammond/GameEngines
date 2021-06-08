@@ -1,7 +1,8 @@
-﻿using GameEngine.PJR.Process;
-using GameEngine.PJR.Rules;
-using GameEngine.PJR.Rules.Dependencies;
-using GameEngine.PJR.Rules.Dependencies.Attributes;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Process;
+using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Dependencies;
+using GameEngine.PMR.Rules.Dependencies.Attributes;
 using System;
 
 namespace GameEnginesTest.Tools.Dummy
@@ -19,6 +20,8 @@ namespace GameEnginesTest.Tools.Dummy
         public Action OnOnQuit;
 
         public GameProcess Process => m_Process;
+
+        public GameModule CurrentModule => m_CurrentModule;
 
         public DummyGameRule() : base()
         {

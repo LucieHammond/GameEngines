@@ -1,12 +1,9 @@
-﻿using GameEngine.PJR.Process;
-using GameEngine.PJR.Process.Services;
-using GameEngine.PJR.Rules;
-using GameEngine.PJR.Rules.Dependencies;
+﻿using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Dependencies;
 using GameEnginesTest.Tools.Dummy;
-using GameEnginesTest.Tools.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GameEnginesTest.UnitTests.PJR
+namespace GameEnginesTest.UnitTests.PMR
 {
     /// <summary>
     /// Unit tests for the class DependencyProvider
@@ -18,7 +15,7 @@ namespace GameEnginesTest.UnitTests.PJR
         [TestMethod]
         public void ExtractDependenciesTest()
         {
-            // Create a DummyGameService which is a candidate for being provided as dependency via the IDummyService interface
+            // Create a DummyGameService which is a candidate for being provided as dependency via the IDummyGameService interface
             DummyGameService dependencyProvider = new DummyGameService();
             RulesDictionary services = new RulesDictionary();
             services.AddRule(dependencyProvider);
@@ -42,9 +39,7 @@ namespace GameEnginesTest.UnitTests.PJR
             // Create the dependency providers from which to provide those dependencies
             DummyGameService dummyService = new DummyGameService();
             DummyGameRuleBis dummyRuleBis = new DummyGameRuleBis();
-            ProcessAccessorRule processService = new ProcessAccessorRule(new GameProcess(new DummyGameProcessSetup(), new MockProcessTime())); // this one is mandatory
             DependencyProvider servicesProvider = new DependencyProvider();
-            servicesProvider.Add(typeof(IProcessAccessor), processService);
             servicesProvider.Add(typeof(IDummyGameService), dummyService);
             DependencyProvider rulesProvider = new DependencyProvider();
             rulesProvider.Add(typeof(IDummyGameRuleBis), dummyRuleBis);
@@ -54,19 +49,19 @@ namespace GameEnginesTest.UnitTests.PJR
             Assert.AreEqual(dummyService, dependencyConsumer.DummyServiceReference);
             Assert.AreEqual(dummyRuleBis, dependencyConsumer.DummyRuleBisReference);
 
-            // Try to inject dependencies using only service provider -> no exception thrown, but DummyGameRuleBis stays null (optional dependency)
+            // Try to inject dependencies using only rules provider -> no exception thrown, but DummyServiceReference stays null (optional dependency)
             DummyGameRuleTer dependencyConsumer2 = new DummyGameRuleTer();
             RulesDictionary rules2 = new RulesDictionary();
             rules2.AddRule(dependencyConsumer2);
-            DependencyUtils.InjectDependencies(rules2, servicesProvider, null);
-            Assert.AreEqual(dummyService, dependencyConsumer2.DummyServiceReference);
-            Assert.IsNull(dependencyConsumer2.DummyRuleBisReference);
+            DependencyUtils.InjectDependencies(rules2, null, rulesProvider);
+            Assert.IsNull(dependencyConsumer2.DummyServiceReference);
+            Assert.AreEqual(dummyRuleBis, dependencyConsumer2.DummyRuleBisReference);
 
-            // Try to inject dependencies using only rules provider -> throw DependencyException because the dependency on DummyGameService is required
+            // Try to inject dependencies using only services provider -> throw DependencyException because the dependency on DummyGameRuleTer is required
             DummyGameRuleTer dependencyConsumer3 = new DummyGameRuleTer();
             RulesDictionary rules3 = new RulesDictionary();
             rules3.AddRule(dependencyConsumer3);
-            Assert.ThrowsException<DependencyException>(() => DependencyUtils.InjectDependencies(rules3, null, rulesProvider));
+            Assert.ThrowsException<DependencyException>(() => DependencyUtils.InjectDependencies(rules3, servicesProvider, null));
         }
     }
 }

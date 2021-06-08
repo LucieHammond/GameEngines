@@ -1,6 +1,5 @@
-﻿using GameEngine.PJR.Process;
-using GameEngine.PJR.Process.Modes;
-using GameEngine.PJR.Process.Services;
+﻿using GameEngine.PMR.Process;
+using GameEngine.PMR.Process.Structure;
 using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Dummy

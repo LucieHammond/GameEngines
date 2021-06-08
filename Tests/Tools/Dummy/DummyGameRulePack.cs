@@ -1,4 +1,4 @@
-﻿using GameEngine.PJR.Rules;
+﻿using GameEngine.PMR.Rules;
 using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Dummy

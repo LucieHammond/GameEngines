@@ -1,9 +1,9 @@
-﻿using GameEngine.PJR.Rules.Scheduling;
+﻿using GameEngine.PMR.Rules.Scheduling;
 using GameEnginesTest.Tools.Dummy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace GameEnginesTest.UnitTests.PJR
+namespace GameEnginesTest.UnitTests.PMR
 {
     /// <summary>
     /// Unit tests for the class RuleScheduling

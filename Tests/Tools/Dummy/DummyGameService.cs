@@ -1,5 +1,5 @@
-﻿using GameEngine.PJR.Rules;
-using GameEngine.PJR.Rules.Dependencies.Attributes;
+﻿using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Dependencies.Attributes;
 
 namespace GameEnginesTest.Tools.Dummy
 {

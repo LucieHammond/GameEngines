@@ -1,7 +1,7 @@
-﻿using GameEngine.PJR.Rules.Scheduling;
+﻿using GameEngine.PMR.Rules.Scheduling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GameEnginesTest.UnitTests.PJR
+namespace GameEnginesTest.UnitTests.PMR
 {
     /// <summary>
     /// Unit tests for the class SchedulePattern

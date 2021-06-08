@@ -1,9 +1,9 @@
-﻿using GameEngine.PJR.Rules.Dependencies;
+﻿using GameEngine.PMR.Rules.Dependencies;
 using GameEnginesTest.Tools.Dummy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace GameEnginesTest.UnitTests.PJR
+namespace GameEnginesTest.UnitTests.PMR
 {
     /// <summary>
     /// Unit tests for the class DependencyProvider

@@ -1,13 +1,8 @@
-﻿using GameEngine.PJR.Process;
-using GameEngine.PJR.Process.Services;
-using GameEngine.PJR.Rules;
-using GameEngine.PJR.Rules.Dependencies;
+﻿using GameEngine.PMR.Rules;
 using GameEnginesTest.Tools.Dummy;
-using GameEnginesTest.Tools.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
-namespace GameEnginesTest.ComponentTests.PJR
+namespace GameEnginesTest.ComponentTests.PMR
 {
     /// <summary>
     /// Component tests for the class GameRule
@@ -109,26 +104,6 @@ namespace GameEnginesTest.ComponentTests.PJR
             rule.BaseQuit();
             Assert.AreEqual(1, rule.UnloadCallCount);
             Assert.AreEqual(1, rule.OnQuitCallCount);
-        }
-
-        [TestMethod]
-        public void AccessProcessAfterInjection()
-        {
-            // Trying to access process without dependency injection -> throws InvalidOperationException
-            DummyGameRule rule = new DummyGameRule();
-            Assert.ThrowsException<InvalidOperationException>(() => rule.Process);
-
-            // Create a GameProcess and simulate a dependency injection via a ProcessService acting as provider
-            GameProcess process = new GameProcess(new DummyGameProcessSetup(), new MockProcessTime());
-            DependencyProvider serviceProvider = new DependencyProvider();
-            serviceProvider.Add(typeof(IProcessAccessor), new ProcessAccessorRule(process));
-            RulesDictionary rulesToInject = new RulesDictionary();
-            rulesToInject.AddRule(rule);
-            DependencyUtils.InjectDependencies(rulesToInject, serviceProvider, null);
-
-            // Trying to access process after dependency injection -> process is correctly returned
-            Assert.AreEqual(process, rule.Process);
-            Assert.IsNotNull(rule.Process.Time);
         }
     }
 }

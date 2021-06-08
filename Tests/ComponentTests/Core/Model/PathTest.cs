@@ -1,5 +1,5 @@
-﻿using GameEngine.Core.Model;
-using GameEngine.Core.Utilities.Enums;
+﻿using GameEngine.Core.Utilities.Enums;
+using GameEngine.Core.Utilities.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

@@ -1,8 +1,8 @@
-﻿using GameEngine.PJR.Process;
+﻿using GameEngine.Core.System;
 
 namespace GameEnginesTest.Tools.Mocks
 {
-    public class MockProcessTime : IProcessTime
+    public class MockProcessTime : ITime
     {
         public float DeltaTime => 16;
 
