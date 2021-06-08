@@ -61,14 +61,15 @@ namespace GameEngine.PMR.Modules.Transitions
         {
             m_Time = time;
             State = TransitionState.Inactive;
-            m_LoadingProgress = 0;
-            m_LoadingAction = "";
 
             Initialize();
         }
 
         internal void BaseStart()
         {
+            m_LoadingProgress = 0;
+            m_LoadingAction = "";
+
             State = TransitionState.Starting;
             Start();
         }
@@ -80,12 +81,15 @@ namespace GameEngine.PMR.Modules.Transitions
 
         internal void BaseStop()
         {
+            m_LoadingProgress = 1;
+
             State = TransitionState.Stopping;
             Stop();
         }
 
         internal void BaseCleanup()
         {
+            State = TransitionState.Inactive;
             Cleanup();
         }
 

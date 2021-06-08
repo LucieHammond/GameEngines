@@ -20,7 +20,8 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// <param name="name">The name of the QueueFSM.</param>
         /// <param name="states">An IEnumerable containing all the possible states of the QueueFSM.</param>
         /// <param name="initialStateQueue">A list of states used as initial queue.</param>
-        public QueueFSM(string name, IEnumerable<FSMState<T>> states, List<T> initialStateQueue) : base(name, states, initialStateQueue[0])
+        public QueueFSM(string name, IEnumerable<FSMState<T>> states, List<T> initialStateQueue)
+            : base(name, states, initialStateQueue.Count > 0 ? initialStateQueue[0] : throw new InvalidOperationException("Initial queue cannot be empty"))
         {
             initialStateQueue.RemoveAt(0);
             m_StateQueue = new Queue<T>(initialStateQueue);
@@ -31,7 +32,8 @@ namespace GameEngine.Core.FSM.CustomFSM
         /// </summary>
         /// <param name="name">The name of the QueueFSM.</param>
         /// <param name="states">A list of states representing all the possible states, ordered in the way they have to be visited.</param>
-        public QueueFSM(string name, List<FSMState<T>> states) : base(name, states, states[0].Id)
+        public QueueFSM(string name, List<FSMState<T>> states)
+            : base(name, states, states.Count > 0 ? states[0].Id : throw new InvalidOperationException("Initial queue cannot be empty"))
         {
             m_StateQueue = new Queue<T>();
             for (int i = 1; i < states.Count; i++)

@@ -139,10 +139,11 @@ namespace GameEngine.PMR.Rules
         protected void MarkError()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State == GameRuleState.Unused || State == GameRuleState.Unloaded)
+            if (State == GameRuleState.Unloaded)
                 throw new InvalidOperationException($"Invalid time context for calling MarkError() ({State}). Error may not be taken into account");
 #endif
             Log.Debug(TAG, $"A blocking error has been detected in rule {Name}");
+            State = GameRuleState.Unloaded;
             ErrorDetected = true;
         }
     }

@@ -20,7 +20,10 @@ namespace GameEngine.PMR.Process.Orchestration.States
         public override void Enter()
         {
             if (m_Orchestrator.CurrentTransition == null)
+            {
                 m_Orchestrator.GoToState(ModuleOrchestratorState.RunTransition);
+                return;
+            }
 
             m_Orchestrator.CurrentTransition.BaseStart();
         }

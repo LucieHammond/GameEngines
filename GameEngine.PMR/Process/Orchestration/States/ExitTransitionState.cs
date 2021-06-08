@@ -20,7 +20,10 @@ namespace GameEngine.PMR.Process.Orchestration.States
         public override void Enter()
         {
             if (m_Orchestrator.CurrentTransition == null)
+            {
                 GoToNextState();
+                return;
+            }
 
             m_Orchestrator.CurrentTransition.BaseStop();
         }
@@ -42,10 +45,9 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             if (m_Orchestrator.CurrentModule == null)
             {
+                m_Orchestrator.GoToState(ModuleOrchestratorState.Wait);
                 m_Orchestrator.OnTerminated?.Invoke();
                 m_Orchestrator.OnTerminated = null;
-                m_Orchestrator.Stop();
-                m_Orchestrator.ParentModule?.SubModules.Remove(m_Orchestrator);
             }
             else if (m_Orchestrator.AwaitingAction != null)
             {

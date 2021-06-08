@@ -68,10 +68,12 @@ namespace GameEngine.PMR.Modules.States
                     m_GameModule.OnManagedError();
                     break;
                 }
-                else if (m_RulesToInitEnumerator.Current.State == GameRuleState.Initialized)
+                else if (m_RulesToInitEnumerator.Current.State == GameRuleState.Unused ||
+                    m_RulesToInitEnumerator.Current.State == GameRuleState.Unloaded)
                 {
                     m_RuleInitTime.Stop();
                     m_NbRulesInitialized++;
+                    m_NbStallingWarnings = 0;
                     m_GameModule.ReportLoadingProgress(m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count);
 
                     if (ExitIfCompleted())

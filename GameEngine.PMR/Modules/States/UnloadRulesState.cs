@@ -71,6 +71,7 @@ namespace GameEngine.PMR.Modules.States
                 {
                     m_RuleUnloadTime.Stop();
                     m_SkipCurrrentRule = false;
+                    m_NbStallingWarnings = 0;
 
                     if (ExitIfCompleted())
                         break;

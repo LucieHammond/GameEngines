@@ -40,7 +40,7 @@ namespace GameEngine.PMR.Process
         /// </summary>
         public bool IsStarted => Services != null;
 
-        internal DependencyProvider ServiceProvider => Services.DependencyProvider;
+        internal DependencyProvider ServiceProvider => Services?.DependencyProvider;
 
         private ModuleOrchestrator m_GameServiceOrchestrator;
         private ModuleOrchestrator m_GameModeOrchestrator;
@@ -59,8 +59,8 @@ namespace GameEngine.PMR.Process
             Name = setup.Name;
             Time = time;
 
-            m_GameServiceOrchestrator = new ModuleOrchestrator(this, null);
-            m_GameModeOrchestrator = new ModuleOrchestrator(this, null);
+            m_GameServiceOrchestrator = new ModuleOrchestrator("GameServices", this, null);
+            m_GameModeOrchestrator = new ModuleOrchestrator("GameMode", this, null);
             m_ServiceSetup = setup.GetServiceSetup();
             m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
             m_Configurations = new Dictionary<string, Configuration>();
@@ -75,7 +75,7 @@ namespace GameEngine.PMR.Process
             Log.Info(TAG, $"Start process {Name}");
 
             m_GameServiceOrchestrator.LoadModule(m_ServiceSetup, GetModuleConfiguration(m_ServiceSetup));
-            m_GameServiceOrchestrator.OnOperational += () => SwitchToNextGameMode();
+            m_GameServiceOrchestrator.OnOperational = () => SwitchToNextGameMode();
         }
 
         /// <summary>
@@ -87,7 +87,8 @@ namespace GameEngine.PMR.Process
             {
                 m_GameServiceOrchestrator.Update();
 
-                m_GameModeOrchestrator.Update();
+                if (m_GameServiceOrchestrator.IsOperational)
+                    m_GameModeOrchestrator.Update();
             }
         }
 
@@ -167,8 +168,6 @@ namespace GameEngine.PMR.Process
         /// <param name="configuration">The initial configuration of the mode. If not set, a pre-registered configuration will be used</param>
         public void SwitchToGameMode(IGameModeSetup setup, Configuration configuration = null)
         {
-            configuration = configuration ?? GetModuleConfiguration(setup);
-
             if (m_GameServiceOrchestrator.IsOperational)
             {
                 if (CurrentGameMode == null)

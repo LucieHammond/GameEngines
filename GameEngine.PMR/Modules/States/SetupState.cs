@@ -1,7 +1,6 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.Logger;
 using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Rules;
 using System;
 using System.Linq;
 
@@ -34,7 +33,6 @@ namespace GameEngine.PMR.Modules.States
         {
             try
             {
-                m_GameModule.Rules = new RulesDictionary();
                 m_Setup.SetRules(ref m_GameModule.Rules);
 
                 m_GameModule.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameModule.Rules.ContainsKey(ruleType)).ToList();
@@ -52,7 +50,10 @@ namespace GameEngine.PMR.Modules.States
             catch (Exception e)
             {
                 Log.Exception(m_GameModule.Name, e);
-                m_GameModule.OnException(OnExceptionBehaviour.UnloadModule);
+                if (m_GameModule.ExceptionPolicy != null)
+                    m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad);
+                else
+                    m_GameModule.OnException(OnExceptionBehaviour.UnloadModule);
             }
         }
 
@@ -90,14 +91,14 @@ namespace GameEngine.PMR.Modules.States
             if (m_GameModule.PerformancePolicy.MaxFrameDuration <= 0)
                 throw new Exception("MaxFrameDuration cannot be inferior or equal to zero");
 
-            if (m_GameModule.PerformancePolicy.InitStallingTimeout <= 0)
-                throw new Exception("InitStallingTimeout cannot be inferior or equal to zero");
+            if (m_GameModule.PerformancePolicy.CheckStallingRules && m_GameModule.PerformancePolicy.InitStallingTimeout <= 0)
+                throw new Exception("InitStallingTimeout cannot be inferior or equal to zero if CheckStallingRules is true");
 
-            if (m_GameModule.PerformancePolicy.UpdateStallingTimeout <= 0)
-                throw new Exception("UpdateStallingTimeout cannot be inferior or equal to zero");
+            if (m_GameModule.PerformancePolicy.CheckStallingRules && m_GameModule.PerformancePolicy.UpdateStallingTimeout <= 0)
+                throw new Exception("UpdateStallingTimeout cannot be inferior or equal to zero if CheckStallingRules is true");
 
-            if (m_GameModule.PerformancePolicy.UnloadStallingTimeout <= 0)
-                throw new Exception("UnloadStallingTimeout cannot be inferior or equal to zero");
+            if (m_GameModule.PerformancePolicy.CheckStallingRules && m_GameModule.PerformancePolicy.UnloadStallingTimeout <= 0)
+                throw new Exception("UnloadStallingTimeout cannot be inferior or equal to zero if CheckStallingRules is true");
         }
     }
 }

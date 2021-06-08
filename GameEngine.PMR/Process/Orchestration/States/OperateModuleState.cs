@@ -31,6 +31,8 @@ namespace GameEngine.PMR.Process.Orchestration.States
             {
                 submodule.Update();
             }
+
+            m_Orchestrator.SubModules.RemoveAll((orchestrator) => orchestrator.State == ModuleOrchestratorState.Wait);
         }
 
         public override void Exit()

@@ -42,16 +42,17 @@ namespace GameEngine.PMR.Process.Orchestration
         }
 
         /// <summary>
-        /// Load a given submodule as a child of the current module
+        /// Load a submodule as a child of the current module
         /// </summary>
         /// <param name="module">The parent module on which to load the submodule</param>
+        /// <param name="subcategory">The name of the new subcategory to which the submodule (and its successors) will be attached</param>
         /// <param name="setup">The setup defining the submodule to load</param>
         /// <param name="configuration">The initial configuration of the submodule. If not set, a pre-registered configuration will be used</param>
-        public static void LoadSubmodule(this GameModule module, IGameSubmoduleSetup setup, Configuration configuration = null)
+        public static void LoadSubmodule(this GameModule module, string subcategory, IGameSubmoduleSetup setup, Configuration configuration = null)
         {
             try
             {
-                module.Orchestrator.AddSubmodule(setup, configuration);
+                module.Orchestrator.AddSubmodule(subcategory, setup, configuration);
             }
             catch (InvalidOperationException e)
             {
@@ -60,19 +61,38 @@ namespace GameEngine.PMR.Process.Orchestration
         }
 
         /// <summary>
-        /// Unload the given child submodule from the current module
+        /// Unload a child submodule from the current module
         /// </summary>
         /// <param name="module">The parent module that contains a reference to the submodule</param>
-        /// <param name="submodule">The submodule to unload</param>
-        public static void UnloadSubmodule(this GameModule module, GameModule submodule)
+        /// <param name="subcategory">The subcategory to which the submodule is attached</param>
+        public static void UnloadSubmodule(this GameModule module, string subcategory)
         {
             try
             {
-                module.Orchestrator.RemoveSubmodule(submodule);
+                module.Orchestrator.RemoveSubmodule(subcategory);
             }
             catch (InvalidOperationException e)
             {
                 Log.Exception(ModuleOrchestrator.TAG, e);
+            }
+        }
+
+        /// <summary>
+        /// Retrieve one of the child submodule of the current module
+        /// </summary>
+        /// <param name="module">The parent module that contains a reference to the submodule</param>
+        /// <param name="subcategory">The subcategory to which the submodule is attached</param>
+        /// <returns>The retrieved submodule instance, or null if not found</returns>
+        public static GameModule GetSubmodule(this GameModule module, string subcategory)
+        {
+            try
+            {
+                return module.Orchestrator.GetSubmodule(subcategory);
+            }
+            catch (InvalidOperationException e)
+            {
+                Log.Exception(ModuleOrchestrator.TAG, e);
+                return null;
             }
         }
 

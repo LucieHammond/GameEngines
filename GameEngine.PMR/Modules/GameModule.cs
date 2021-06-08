@@ -65,6 +65,7 @@ namespace GameEngine.PMR.Modules
             Name = setup.Name;
             Configuration = configuration;
             Orchestrator = orchestrator;
+            Rules = new RulesDictionary();
 
             m_IsPaused = false;
             m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM",
@@ -72,7 +73,7 @@ namespace GameEngine.PMR.Modules
                 {
                     new StartState(this),
                     new SetupState(this, setup),
-                    new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.ParentModule.CurrentModule),
+                    new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.ParentModule?.CurrentModule),
                     new InitializeRulesState(this),
                     new UpdateRulesState(this, orchestrator.MainProcess.Time),
                     new UnloadRulesState(this),
