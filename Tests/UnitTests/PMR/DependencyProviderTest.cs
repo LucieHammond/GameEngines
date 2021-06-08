@@ -52,5 +52,34 @@ namespace GameEnginesTest.UnitTests.PMR
             // Try get a dependency that is not an interface -> throw ArgumentException
             Assert.ThrowsException<ArgumentException>(() => provider.TryGet(typeof(StubGameService), out object _));
         }
+
+        [TestMethod]
+        public void LinkToParentProviderTest()
+        {
+            // Link a dependency provider to another parent dependency provider
+            DependencyProvider provider = new DependencyProvider();
+            DependencyProvider parentProvider = new DependencyProvider();
+            provider.LinkToParentProvider(parentProvider);
+
+            // The linked parent provider contains dependencies that the child doesn't have -> dependency can be retrieved
+            IStubGameRuleBis parentDependency = new StubGameRuleBis();
+            parentProvider.Add(typeof(IStubGameRuleBis), parentDependency);
+            Assert.IsTrue(provider.TryGet(typeof(IStubGameRuleBis), out object retrievedDependency));
+            Assert.AreEqual(parentDependency, retrievedDependency);
+
+            // The linked parent provider contains a kind of dependency that the child already have -> the child dependency is retrieved
+            IStubGameRuleBis childDependency = new StubGameRuleBis();
+            provider.Add(typeof(IStubGameRuleBis), childDependency);
+            Assert.IsTrue(provider.TryGet(typeof(IStubGameRuleBis), out retrievedDependency));
+            Assert.AreEqual(childDependency, retrievedDependency);
+
+            // Link multiple parent providers recursively -> can retrieve dependency from the most distant of them
+            DependencyProvider parentProvider2 = new DependencyProvider();
+            parentProvider.LinkToParentProvider(parentProvider2);
+            DependencyProvider parentProvider3 = new DependencyProvider();
+            parentProvider2.LinkToParentProvider(parentProvider3);
+            parentProvider3.Add(typeof(IStubGameService), new StubGameService());
+            Assert.IsTrue(provider.TryGet(typeof(IStubGameService), out _));
+        }
     }
 }

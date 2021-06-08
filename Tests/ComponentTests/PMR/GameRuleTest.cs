@@ -1,5 +1,10 @@
-﻿using GameEngine.PMR.Rules;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Process;
+using GameEngine.PMR.Process.Orchestration;
+using GameEngine.PMR.Rules;
+using GameEnginesTest.Tools.Mocks.Fakes;
 using GameEnginesTest.Tools.Mocks.Spies;
+using GameEnginesTest.Tools.Mocks.Stubs;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GameEnginesTest.ComponentTests.PMR
@@ -104,6 +109,26 @@ namespace GameEnginesTest.ComponentTests.PMR
             rule.BaseQuit();
             Assert.AreEqual(1, rule.UnloadCallCount);
             Assert.AreEqual(1, rule.OnQuitCallCount);
+        }
+
+        [TestMethod]
+        public void AccessProcessAndModule()
+        {
+            // Trying to access current process and module before dependency injection -> return null
+            SpyGameRule rule = new SpyGameRule();
+            Assert.IsNull(rule.Process);
+            Assert.IsNull(rule.CurrentModule);
+
+            // Create a GameProcess and a GameModule in order to simulate a dependency injection 
+            GameProcess process = new GameProcess(new StubGameProcessSetup(), new FakeTime());
+            Orchestrator orchestrator = new Orchestrator("Test", process, null);
+            GameModule module = new GameModule(new StubGameModeSetup(), null, orchestrator);
+            rule.InjectProcessDependencies(process, module);
+
+            // Trying to access process and module after dependency injection -> return correct info
+            Assert.AreEqual(process, rule.Process);
+            Assert.AreEqual(module, rule.CurrentModule);
+            Assert.IsNotNull(rule.Process.Time);
         }
     }
 }
