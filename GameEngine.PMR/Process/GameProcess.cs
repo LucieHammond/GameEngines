@@ -27,7 +27,7 @@ namespace GameEngine.PMR.Process
         public ITime Time { get; private set; }
 
         /// <summary>
-        /// The GameServices module running the services of the game, i.e rules that are operational and accessible throughout the life of the process
+        /// The GameService module running the services of the game, i.e rules that are operational and accessible throughout the life of the process
         /// </summary>
         public GameModule Services => m_GameServiceOrchestrator.CurrentModule;
 
@@ -40,6 +40,11 @@ namespace GameEngine.PMR.Process
         /// If the process has been started
         /// </summary>
         public bool IsStarted => Services != null;
+
+        /// <summary>
+        /// If the process modules (game services and game mode) are completely loaded and currently running
+        /// </summary>
+        public bool IsFullyOperational => m_GameServiceOrchestrator.IsOperational && m_GameModeOrchestrator.IsOperational;
 
         internal DependencyProvider ServiceProvider => Services?.DependencyProvider;
 
@@ -118,7 +123,11 @@ namespace GameEngine.PMR.Process
         {
             Log.Info(TAG, $"Stop process {Name}");
 
-            if (CurrentGameMode == null)
+            if (Services == null)
+            {
+                return;
+            }
+            else if (CurrentGameMode == null)
             {
                 m_GameServiceOrchestrator.UnloadModule();
             }
@@ -223,6 +232,12 @@ namespace GameEngine.PMR.Process
                     m_GameModesToCome.Enqueue(mode);
                 }
             }
+        }
+
+        internal void ResetGameMode()
+        {
+            m_GameModeOrchestrator.OnQuit();
+            m_GameModeOrchestrator.CurrentModule = null;
         }
     }
 }

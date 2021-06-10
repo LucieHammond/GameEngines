@@ -159,7 +159,8 @@ namespace GameEngine.PMR.Process.Orchestration
             if (childOrchestrator == null)
                 throw new InvalidOperationException($"Invalid submodule category {subcategory}. Cannot be found as child of module {CurrentModule.Name}");
 
-            childOrchestrator.UnloadModule();
+            if (childOrchestrator.CurrentModule != null)
+                childOrchestrator.UnloadModule();
         }
 
         internal GameModule GetSubmodule(string subcategory)
@@ -228,6 +229,9 @@ namespace GameEngine.PMR.Process.Orchestration
         {
             void performOperationWithTransition(bool skipEnter = false)
             {
+                if (CurrentModule == MainProcess.Services && MainProcess.CurrentGameMode != null)
+                    MainProcess.ResetGameMode();
+
                 if (transition != CurrentTransition)
                 {
                     CurrentTransition?.BaseCleanup();
@@ -236,14 +240,19 @@ namespace GameEngine.PMR.Process.Orchestration
                 }
 
                 if (!skipEnter)
-                    m_StateMachine.SetState(OrchestratorState.EnterTransition);
+                    m_StateMachine.SetState(OrchestratorState.EnterTransition, priority: 100);
+                else
+                    m_StateMachine.SetState(State, priority: 100);
                 moduleOperation(onFinish: () => m_StateMachine.SetState(OrchestratorState.ExitTransition));
             }
 
             if (State == OrchestratorState.EnterTransition || State == OrchestratorState.RunTransition || State == OrchestratorState.ExitTransition)
             {
-                CurrentModule.OnFinishLoading = null;
-                CurrentModule.OnFinishUnloading = null;
+                if (CurrentModule != null)
+                {
+                    CurrentModule.OnFinishLoading = null;
+                    CurrentModule.OnFinishUnloading = null;
+                }
 
                 if (transition == CurrentTransition)
                 {
@@ -251,7 +260,7 @@ namespace GameEngine.PMR.Process.Orchestration
                 }
                 else
                 {
-                    m_StateMachine.SetState(OrchestratorState.ExitTransition);
+                    m_StateMachine.SetState(OrchestratorState.ExitTransition, priority: 100);
                     AwaitingAction = () => performOperationWithTransition();
                 }
             }
@@ -259,7 +268,7 @@ namespace GameEngine.PMR.Process.Orchestration
             {
                 if (Children.Count > 0)
                 {
-                    m_StateMachine.SetState(OrchestratorState.Reset);
+                    m_StateMachine.SetState(OrchestratorState.Reset, priority: 100);
                     OnReset = () => performOperationWithTransition();
                 }
                 else

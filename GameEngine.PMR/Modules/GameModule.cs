@@ -128,13 +128,13 @@ namespace GameEngine.PMR.Modules
 
         internal void InnerUnload()
         {
-            if (State == GameModuleState.End)
+            if (State == GameModuleState.UnloadRules || State == GameModuleState.End)
                 return;
 
             Log.Info(TAG, $"Unload module {Name}");
 
             m_StateMachine.ClearStateQueue();
-            if (State == GameModuleState.UpdateRules || State == GameModuleState.InitializeRules || State == GameModuleState.UnloadRules)
+            if (State == GameModuleState.UpdateRules || State == GameModuleState.InitializeRules)
                 m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
             m_StateMachine.EnqueueState(GameModuleState.End);
             m_StateMachine.DequeueState(priority: 100);
@@ -145,13 +145,10 @@ namespace GameEngine.PMR.Modules
             if (State == GameModuleState.Start)
                 InnerLoad();
 
-            if (State == GameModuleState.End)
+            if (State == GameModuleState.Setup || State == GameModuleState.InjectDependencies || State == GameModuleState.End)
                 return;
 
             Log.Info(TAG, $"Reload module {Name}");
-
-            if (State == GameModuleState.Setup || State == GameModuleState.InjectDependencies)
-                return;
 
             m_StateMachine.ClearStateQueue();
             m_StateMachine.EnqueueState(GameModuleState.UnloadRules);

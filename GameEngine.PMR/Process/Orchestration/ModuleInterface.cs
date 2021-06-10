@@ -36,7 +36,7 @@ namespace GameEngine.PMR.Process.Orchestration
         /// <param name="module">The current module</param>
         /// <param name="setup">The setup defining the new module</param>
         /// <param name="configuration">The initial configuration of the new module. If not set, a pre-registered configuration will be used</param>
-        public static void SwitchToModule(this GameModule module, IGameSubmoduleSetup setup, Configuration configuration = null)
+        public static void SwitchToModule(this GameModule module, IGameModuleSetup setup, Configuration configuration = null)
         {
             module.Orchestrator.SwitchToModule(setup, configuration);
         }

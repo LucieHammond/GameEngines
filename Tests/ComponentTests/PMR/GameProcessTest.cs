@@ -87,7 +87,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Initialize process with a custom game mode
             IGameModeSetup customMode = GetCustomGameModeSetup("CustomMode");
             process.SwitchToGameMode(customMode, null);
-            process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode != null && process.CurrentGameMode.Orchestrator.IsOperational);
+            process.SimulateExecutionUntil(m_Time, () => process.IsFullyOperational);
             Assert.AreEqual(setup.GetServiceSetup().Name, process.Services.Name);
             Assert.AreNotEqual(setup.GetFirstGameModes()[0].Name, process.CurrentGameMode.Name);
             Assert.AreEqual(customMode.Name, process.CurrentGameMode.Name);
@@ -174,7 +174,7 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Complete loading and check configurations are correct
             process.Start();
-            process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode != null && process.CurrentGameMode.Orchestrator.IsOperational);
+            process.SimulateExecutionUntil(m_Time, () => process.IsFullyOperational);
             Assert.AreEqual(serviceConfig, process.Services.Configuration);
             Assert.AreEqual(modeConfig, process.CurrentGameMode.Configuration);
 

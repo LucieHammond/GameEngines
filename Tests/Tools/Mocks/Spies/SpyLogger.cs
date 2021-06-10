@@ -63,6 +63,12 @@ namespace GameEnginesTest.Tools.Mocks.Spies
             LogWarningCalls = 0;
             LogErrorCalls = 0;
             LogExceptionCalls = 0;
+
+            OnLogDebug = null;
+            OnLogInfo = null;
+            OnLogWarning = null;
+            OnLogError = null;
+            OnLogException = null;
         }
     }
 }

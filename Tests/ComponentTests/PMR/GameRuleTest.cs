@@ -117,7 +117,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Trying to access current process and module before dependency injection -> return null
             SpyGameRule rule = new SpyGameRule();
             Assert.IsNull(rule.Process);
-            Assert.IsNull(rule.CurrentModule);
+            Assert.IsNull(rule.Module);
 
             // Create a GameProcess and a GameModule in order to simulate a dependency injection 
             GameProcess process = new GameProcess(new StubGameProcessSetup(), new FakeTime());
@@ -127,7 +127,7 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Trying to access process and module after dependency injection -> return correct info
             Assert.AreEqual(process, rule.Process);
-            Assert.AreEqual(module, rule.CurrentModule);
+            Assert.AreEqual(module, rule.Module);
             Assert.IsNotNull(rule.Process.Time);
         }
     }

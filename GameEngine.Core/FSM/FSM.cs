@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameEngine.Core.Logger;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -166,7 +167,8 @@ namespace GameEngine.Core.FSM
                 if (priority < m_StateChangePriority)
                     return;
                 else if (priority == m_StateChangePriority)
-                    throw new InvalidOperationException($"The state machine cannot switch to {stateId} because it is already changing state to {m_NextStateId} (same priority operation)");
+                    Log.Warning("FSM", $"Concurrent state change requests were made with the same priority. Oldest call will be ignored.\n" +
+                        $"Previous target state: {m_NextStateId}\n" + $"New target state: {stateId}");
             }
 
             m_StateChangeRequested = true;

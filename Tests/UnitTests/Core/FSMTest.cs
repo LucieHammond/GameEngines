@@ -217,41 +217,29 @@ namespace GameEnginesTest.UnitTests.Core
             Assert.AreEqual(2, secondState.UpdateCallCount);
             Assert.AreEqual(1, secondState.ExitCallCount);
 
-            // Simultaneous change with same priority (default) -> throws InvalidOperationException
+            // Simultaneous change with same priority (default) -> log a warning and respond to the last request
             fsm.SetState(StatesEnumTest.FirstState);
-            Assert.ThrowsException<InvalidOperationException>(() => fsm.SetState(StatesEnumTest.ThirdState));
-
-            // Simultaneous change with different priorities -> higher priority wins
-            fsm.SetState(StatesEnumTest.ThirdState, false, false, 200);
-            fsm.SetState(StatesEnumTest.FirstState, false, false, 1);
+            AssertUtils.LogWarning(() => fsm.SetState(StatesEnumTest.ThirdState));
             fsm.Update();
             Assert.AreEqual(thirdState, fsm.CurrentState);
+
+            // Simultaneous change with different priorities -> higher priority wins
+            fsm.SetState(StatesEnumTest.FirstState, false, false, 200);
+            fsm.SetState(StatesEnumTest.SecondState, false, false, 1);
+            fsm.Update();
+            Assert.AreEqual(firstState, fsm.CurrentState);
 
             // Invalid state -> Throws exception
             Assert.ThrowsException<ArgumentException>(() => fsm.SetState(StatesEnumTest.FifthState));
 
             // SetState can be called from the Enter, Update or Exit of FSM states
             fsm.SetState(StatesEnumTest.FirstState, false, false);
-            thirdState.OnExit += () => fsm.SetState(StatesEnumTest.SecondState, priority: 20);
-            secondState.OnEnter += () => fsm.SetState(StatesEnumTest.FirstState);
-            firstState.OnUpdate += () => fsm.SetState(StatesEnumTest.ThirdState, immediate: true);
+            firstState.OnExit += () => fsm.SetState(StatesEnumTest.SecondState, priority: 20);
+            secondState.OnEnter += () => fsm.SetState(StatesEnumTest.ThirdState);
+            thirdState.OnUpdate += () => fsm.SetState(StatesEnumTest.FirstState, immediate: true);
             fsm.Update();
-            Assert.AreEqual(thirdState, fsm.CurrentState);
+            Assert.AreEqual(firstState, fsm.CurrentState);
             fsm.Stop();
-
-            // Check Enter, Update and Exit methods have been called the right number of times
-            // First -> Third (update) -> Second (update) -> Second (update) -> Third (update) -> Second -> First (update) -> Third
-            Assert.AreEqual(2, firstState.EnterCallCount);
-            Assert.AreEqual(1, firstState.UpdateCallCount);
-            Assert.AreEqual(2, firstState.ExitCallCount);
-
-            Assert.AreEqual(3, secondState.EnterCallCount);
-            Assert.AreEqual(2, secondState.UpdateCallCount);
-            Assert.AreEqual(3, secondState.ExitCallCount);
-
-            Assert.AreEqual(3, thirdState.EnterCallCount);
-            Assert.AreEqual(2, thirdState.UpdateCallCount);
-            Assert.AreEqual(3, thirdState.ExitCallCount);
         }
 
         [TestMethod]

@@ -43,16 +43,19 @@ namespace GameEngine.PMR.Process.Orchestration.States
 
         private void GoToNextState()
         {
-            if (m_Orchestrator.CurrentModule == null)
-            {
-                m_Orchestrator.GoToState(OrchestratorState.Wait);
-                m_Orchestrator.OnTerminated?.Invoke();
-                m_Orchestrator.OnTerminated = null;
-            }
-            else if (m_Orchestrator.AwaitingAction != null)
+            if (m_Orchestrator.AwaitingAction != null)
             {
                 m_Orchestrator.AwaitingAction();
                 m_Orchestrator.AwaitingAction = null;
+            }
+            else if (m_Orchestrator.CurrentModule == null)
+            {
+                m_Orchestrator.GoToState(OrchestratorState.Wait);
+                m_Orchestrator.CurrentTransition?.BaseCleanup();
+                m_Orchestrator.CurrentTransition = null;
+
+                m_Orchestrator.OnTerminated?.Invoke();
+                m_Orchestrator.OnTerminated = null;
             }
             else
             {

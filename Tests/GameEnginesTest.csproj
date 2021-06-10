@@ -20,9 +20,4 @@
     <ProjectReference Include="..\GameEngine.SAI\GameEngine.SAI.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="APITests\" />
-    <Folder Include="EndToEndTests\" />
-  </ItemGroup>
-
 </Project>

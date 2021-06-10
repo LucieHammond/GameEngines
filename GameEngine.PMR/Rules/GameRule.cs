@@ -36,7 +36,7 @@ namespace GameEngine.PMR.Rules
         /// <summary>
         /// A reference to the Game Module to which the rule belongs
         /// </summary>
-        protected GameModule m_CurrentModule;
+        protected GameModule m_Module;
 
         /// <summary>
         /// An object giving time information about the process pace (delta time, frame count, time since startup ...)
@@ -55,7 +55,7 @@ namespace GameEngine.PMR.Rules
         internal void InjectProcessDependencies(GameProcess process, GameModule module)
         {
             m_Process = process;
-            m_CurrentModule = module;
+            m_Module = module;
         }
 
         internal void BaseInitialize()
@@ -139,7 +139,7 @@ namespace GameEngine.PMR.Rules
         protected void MarkError()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State == GameRuleState.Unloaded)
+            if (State == GameRuleState.Unused || State == GameRuleState.Unloaded)
                 throw new InvalidOperationException($"Invalid time context for calling MarkError() ({State}). Error may not be taken into account");
 #endif
             Log.Debug(TAG, $"A blocking error has been detected in rule {Name}");

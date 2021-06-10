@@ -20,14 +20,13 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             foreach (Orchestrator childOrchestrator in m_Orchestrator.Children)
             {
-                childOrchestrator.UnloadModule();
+                if (childOrchestrator.CurrentModule != null)
+                    childOrchestrator.UnloadModule();
             }
         }
 
         public override void Update()
         {
-            m_Orchestrator.CurrentModule.Update();
-
             foreach (Orchestrator childOrchestrator in m_Orchestrator.Children)
             {
                 childOrchestrator.Update();

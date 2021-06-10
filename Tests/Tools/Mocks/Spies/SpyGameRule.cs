@@ -19,7 +19,7 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public GameProcess Process => m_Process;
 
-        public GameModule CurrentModule => m_CurrentModule;
+        public GameModule Module => m_Module;
 
         public SpyGameRule() : base()
         {

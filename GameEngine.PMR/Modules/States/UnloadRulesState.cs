@@ -125,7 +125,7 @@ namespace GameEngine.PMR.Modules.States
                     Exception e = new TimeoutException($"The unloading of rule {m_RulesToUnloadEnumerator.Current.Name} is stalling (timeout = {totalStallingTime} ms)");
                     Log.Exception(GameModule.TAG, e);
                     m_SkipCurrrentRule = m_GameModule.ExceptionPolicy.SkipUnloadIfException;
-                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
+                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload))
                         askExit = true;
                 }
             }

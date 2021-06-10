@@ -4,7 +4,7 @@ namespace GameEnginesTest.Tools.Mocks.Fakes
 {
     public class FakeTime : ITime
     {
-        public float DeltaTime => 16;
+        public float DeltaTime => 0.016f;
 
         public float Time => FrameCount * DeltaTime;
 
