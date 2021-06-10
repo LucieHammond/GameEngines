@@ -23,10 +23,21 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public SpyGameRule() : base()
         {
+            ResetCount();
+        }
+
+        public void ResetCount()
+        {
             InitializeCallCount = 0;
             UnloadCallCount = 0;
             UpdateCallCount = 0;
             OnQuitCallCount = 0;
+        }
+
+        public void SetAutomaticCompletion()
+        {
+            OnInitialize += MarkInitialized;
+            OnUnload += MarkUnloaded;
         }
 
         public void CallMarkInitialized()

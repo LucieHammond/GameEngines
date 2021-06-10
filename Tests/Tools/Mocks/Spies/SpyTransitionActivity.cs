@@ -23,13 +23,24 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public bool UseDefaultReport { get => m_UseDefaultReport; set => m_UseDefaultReport = value; }
 
-        public SpyTransitionActivity()
+        public SpyTransitionActivity() : base()
+        {
+            ResetCount();
+        }
+
+        public void ResetCount()
         {
             InitializeCallCount = 0;
             StartCallCount = 0;
             UpdateCallCount = 0;
             StopCallCount = 0;
             CleanupCallCount = 0;
+        }
+
+        public void SetAutomaticCompletion()
+        {
+            OnStart += MarkStartCompleted;
+            OnStop += MarkStopCompleted;
         }
 
         public void CallMarkStartCompleted()
