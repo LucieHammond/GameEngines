@@ -13,7 +13,7 @@ namespace GameEngine.PMR.Modules
     public interface IGameModuleSetup
     {
         /// <summary>
-        /// The name of the module, used as an identifier
+        /// The name of the module
         /// </summary>
         string Name { get; }
 

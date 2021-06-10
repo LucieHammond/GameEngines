@@ -151,7 +151,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             process.SwitchToGameMode(GetCustomGameModeSetup("OtherMode"));
             process.SimulateOneFrame(m_Time);
             Assert.IsTrue(process.CurrentGameMode.Orchestrator.IsOperational);
-            
+
             process.Restart();
             process.SimulateOneFrame(m_Time);
             Assert.IsFalse(process.CurrentGameMode.Orchestrator.IsOperational);
@@ -168,8 +168,9 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Register configurations for the setup services and game modes
             Configuration serviceConfig = new Configuration() { { "serviceParam", "value" } };
             Configuration modeConfig = new Configuration() { { "modeParam", "value" } };
-            process.SetModuleConfiguration(setup.GetServiceSetup().Name, serviceConfig);
-            process.SetModuleConfiguration(setup.GetFirstGameModes()[0].Name, modeConfig);
+            Assert.ThrowsException<ArgumentException>(() => process.GetModuleConfiguration(typeof(StubGameRulePack)));
+            process.SetModuleConfiguration(typeof(StubGameServiceSetup), serviceConfig);
+            process.SetModuleConfiguration(typeof(StubGameModeSetup), modeConfig);
 
             // Complete loading and check configurations are correct
             process.Start();
@@ -178,8 +179,9 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(modeConfig, process.CurrentGameMode.Configuration);
 
             // Retrieve a module configuration
-            Assert.IsNull(process.GetModuleConfiguration("UnknownModule"));
-            Assert.AreEqual(serviceConfig, process.GetModuleConfiguration(setup.GetServiceSetup().Name));
+            Assert.ThrowsException<ArgumentException>(() => process.GetModuleConfiguration(typeof(StubGameRule)));
+            Assert.IsNull(process.GetModuleConfiguration(typeof(StubGameSubmoduleSetup)));
+            Assert.AreEqual(serviceConfig, process.GetModuleConfiguration(typeof(StubGameServiceSetup)));
 
             // During further loads, use specified configuration instead of preregistered one (if given)
             Configuration customConfig = new Configuration() { { "customParam", "value" } };
@@ -204,7 +206,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             processSetup.CustomServiceSetup = servicesSetup;
             processSetup.CustomGameModes = new List<IGameModeSetup>() { modeSetup };
             setup = processSetup;
-            
+
             return new GameProcess(processSetup, m_Time);
         }
 

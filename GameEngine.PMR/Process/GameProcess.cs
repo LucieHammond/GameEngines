@@ -47,7 +47,7 @@ namespace GameEngine.PMR.Process
         private Orchestrator m_GameModeOrchestrator;
         private IGameServiceSetup m_ServiceSetup;
         private Queue<IGameModeSetup> m_GameModesToCome;
-        private Dictionary<string, Configuration> m_Configurations;
+        private Dictionary<Type, Configuration> m_Configurations;
         private bool m_IsPaused;
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace GameEngine.PMR.Process
             m_GameModeOrchestrator = new Orchestrator("GameMode", this, null);
             m_ServiceSetup = setup.GetServiceSetup();
             m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
-            m_Configurations = new Dictionary<string, Configuration>();
+            m_Configurations = new Dictionary<Type, Configuration>();
             m_IsPaused = false;
         }
 
@@ -143,21 +143,27 @@ namespace GameEngine.PMR.Process
         /// <summary>
         /// Register a default configuration for a specific module type that is likely to be loaded during the game
         /// </summary>
-        /// <param name="moduleSetup">The setup defining the module</param>
+        /// <param name="setupType">The type of the setup defining the module</param>
         /// <param name="configuration">The configuration to register for this type of module</param>
-        public void SetModuleConfiguration(string moduleName, Configuration configuration)
+        public void SetModuleConfiguration(Type setupType, Configuration configuration)
         {
-            m_Configurations[moduleName] = configuration;
+            if (!typeof(IGameModuleSetup).IsAssignableFrom(setupType))
+                throw new ArgumentException($"The given type {setupType} is not a setup type, implementing IGameModuleSetup", nameof(setupType));
+
+            m_Configurations[setupType] = configuration;
         }
 
         /// <summary>
         /// Retrieve the default pre-registered configuration for a specific module type, if exists
         /// </summary>
-        /// <param name="moduleSetup">The setup defining the module</param>
+        /// <param name="setupType">The type of the setup defining the module</param>
         /// <returns>The registered configuration for this type of module (null if not found)</returns>
-        public Configuration GetModuleConfiguration(string moduleName)
+        public Configuration GetModuleConfiguration(Type setupType)
         {
-            if (m_Configurations.TryGetValue(moduleName, out Configuration config))
+            if (!typeof(IGameModuleSetup).IsAssignableFrom(setupType))
+                throw new ArgumentException($"The given type {setupType} is not a setup type, implementing IGameModuleSetup", nameof(setupType));
+
+            if (m_Configurations.TryGetValue(setupType, out Configuration config))
                 return config;
             return null;
         }

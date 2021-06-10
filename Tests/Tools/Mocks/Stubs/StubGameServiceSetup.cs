@@ -10,14 +10,9 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
 {
     public class StubGameServiceSetup : IGameServiceSetup
     {
-        public const string ID = "TestServices";
+        public string Name => CustomName ?? "TestServices";
 
-        public string Name => CustomName ?? ID;
-
-        public bool CheckAppRequirements()
-        {
-            return true;
-        }
+        public bool CheckAppRequirements() => true;
 
         public string CustomName;
         public IEnumerable<GameRule> CustomRules;

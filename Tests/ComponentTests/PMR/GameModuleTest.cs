@@ -32,7 +32,8 @@ namespace GameEnginesTest.ComponentTests.PMR
         {
             GameModule module = CreateValidGameModule(out IGameModuleSetup setup, out Configuration configuration);
 
-            // Module Name corresponds to the setup
+            // Module Id and Name correspond to the setup
+            Assert.AreEqual(setup.GetType(), module.Id);
             Assert.AreEqual(setup.Name, module.Name);
 
             // Module Configuration is the same as the provided one

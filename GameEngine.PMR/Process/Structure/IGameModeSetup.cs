@@ -13,6 +13,6 @@ namespace GameEngine.PMR.Process.Structure
         /// The service setup that the game mode requires (its rules can have service dependencies to it).
         /// Set null if no service setup is required
         /// </summary>
-        string RequiredServiceSetup { get; }
+        Type RequiredServiceSetup { get; }
     }
 }

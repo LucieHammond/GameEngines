@@ -10,13 +10,12 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
 {
     public class StubGameModeSetup : IGameModeSetup
     {
-        public const string ID = "TestMode";
+        public string Name => CustomName ?? "TestMode";
 
-        public string Name => CustomName ?? ID;
-
-        public string RequiredServiceSetup => StubGameServiceSetup.ID;
+        public Type RequiredServiceSetup => CustomRequiredService ?? typeof(StubGameServiceSetup);
 
         public string CustomName;
+        public Type CustomRequiredService;
         public IEnumerable<GameRule> CustomRules;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
