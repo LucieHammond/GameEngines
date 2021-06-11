@@ -60,6 +60,8 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Update
             process.Update();
+            process.FixedUpdate();
+            process.LateUpdate();
 
             // Stop process
             process.Stop();

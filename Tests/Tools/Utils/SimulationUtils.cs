@@ -31,6 +31,8 @@ namespace GameEnginesTest.Tools.Utils
         public static void SimulateOneFrame(this GameModule module, FakeTime time)
         {
             module.Update();
+            module.FixedUpdate();
+            module.LateUpdate();
             time.GoToNextFrame();
         }
 
@@ -59,6 +61,8 @@ namespace GameEnginesTest.Tools.Utils
         internal static void SimulateOneFrame(this Orchestrator orchestrator, FakeTime time)
         {
             orchestrator.Update();
+            orchestrator.FixedUpdate();
+            orchestrator.LateUpdate();
             time.GoToNextFrame();
         }
 
@@ -81,6 +85,8 @@ namespace GameEnginesTest.Tools.Utils
         internal static void SimulateOneFrame(this GameProcess process, FakeTime time)
         {
             process.Update();
+            process.FixedUpdate();
+            process.LateUpdate();
             time.GoToNextFrame();
         }
 

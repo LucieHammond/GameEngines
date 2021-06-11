@@ -43,9 +43,19 @@ namespace GameEnginesTest.ComponentTests.PMR
             for (int i = 0; i < n; i++)
                 rule.BaseUpdate();
             Assert.AreEqual(GameRuleState.Initialized, rule.State);
-            Assert.AreEqual(1, rule.InitializeCallCount);
             Assert.AreEqual(n, rule.UpdateCallCount);
-            Assert.AreEqual(0, rule.UnloadCallCount);
+
+            // Fixed update n times
+            for (int i = 0; i < n; i++)
+                rule.BaseFixedUpdate();
+            Assert.AreEqual(GameRuleState.Initialized, rule.State);
+            Assert.AreEqual(n, rule.FixedUpdateCallCount);
+
+            // Late update n times
+            for (int i = 0; i < n; i++)
+                rule.BaseLateUpdate();
+            Assert.AreEqual(GameRuleState.Initialized, rule.State);
+            Assert.AreEqual(n, rule.LateUpdateCallCount);
 
             // Start unloading
             rule.BaseUnload();

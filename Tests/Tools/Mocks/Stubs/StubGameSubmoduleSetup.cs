@@ -22,6 +22,8 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
         public IEnumerable<GameRule> CustomRules;
         public List<Type> CustomInitUnloadOrder;
         public List<RuleScheduling> CustomUpdateScheduler;
+        public List<RuleScheduling> CustomFixedUpdateScheduler;
+        public List<RuleScheduling> CustomLateUpdateScheduler;
         public ExceptionPolicy CustomExceptionPolicy;
         public PerformancePolicy CustomPerformancePolicy;
         public TransitionActivity CustomTransitionActivity;
@@ -53,11 +55,17 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
 
         public List<RuleScheduling> GetFixedUpdateScheduler()
         {
+            if (CustomFixedUpdateScheduler != null)
+                return CustomFixedUpdateScheduler;
+
             return new List<RuleScheduling>();
         }
 
         public List<RuleScheduling> GetLateUpdateScheduler()
         {
+            if (CustomLateUpdateScheduler != null)
+                return CustomLateUpdateScheduler;
+
             return new List<RuleScheduling>();
         }
 

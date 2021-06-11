@@ -3,12 +3,9 @@ using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Rules;
-using GameEngine.PMR.Rules.Scheduling;
-using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Scenarios;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace GameEnginesTest.IntegrationTests.PMR
@@ -65,60 +62,23 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.SimulateUntil(() => submodule.OrchestrationState == OrchestratorState.Wait);
             Assert.AreEqual(1, m_Scenario.SubmoduleRule.UnloadCallCount);
 
+            // Pause operation
+            m_Process.CurrentGameMode.Pause();
+            m_Scenario.SecondModeRule.ResetCount();
+            m_Scenario.SimulateFrames(5);
+            Assert.AreEqual(0, m_Scenario.SecondModeRule.UpdateCallCount);
+
+            // Restart operation
+            m_Process.CurrentGameMode.Restart();
+            m_Scenario.SecondModeRule.ResetCount();
+            m_Scenario.SimulateFrames(5);
+            Assert.AreEqual(5, m_Scenario.SecondModeRule.UpdateCallCount);
+
             // Unload operation
             m_Process.CurrentGameMode.Unload();
             m_Scenario.SimulateFrames(1);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode == null);
             Assert.AreEqual(1, m_Scenario.SecondModeRule.UnloadCallCount);
-        }
-
-        [TestMethod]
-        public void ModuleIsOperational_RulesUpdatesFollowSchedule()
-        {
-            // Setup service rule to be updated on even frames
-            m_Scenario.ServiceSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 2, 0) };
-
-            // Setup first mode rule to be updated on odd frames
-            m_Scenario.FirstModeSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 2, 1) };
-
-            // Setup submodule rule to be updated every frames
-            m_Scenario.SubmoduleSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 1, 0) };
-
-            // Start and load submodule
-            m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
-            m_Process.CurrentGameMode.LoadSubmodule(m_Scenario.SubmoduleCategory, m_Scenario.SubmoduleSetup);
-            GameModule submodule = m_Process.CurrentGameMode.GetSubmodule(m_Scenario.SubmoduleCategory);
-            m_Scenario.SimulateUntil(() => submodule.OrchestrationState == OrchestratorState.Operational);
-            m_Scenario.SimulateUntil(() => m_Process.Time.FrameCount % 2 == 0);
-
-            m_Scenario.ServiceRule.ResetCount();
-            m_Scenario.FirstModeRule.ResetCount();
-            m_Scenario.SubmoduleRule.ResetCount();
-
-            // Even frame
-            m_Scenario.SimulateFrames(1);
-            Assert.AreEqual(1, m_Scenario.ServiceRule.UpdateCallCount);
-            Assert.AreEqual(0, m_Scenario.FirstModeRule.UpdateCallCount);
-            Assert.AreEqual(1, m_Scenario.SubmoduleRule.UpdateCallCount);
-
-            // Odd frame
-            m_Scenario.SimulateFrames(1);
-            Assert.AreEqual(1, m_Scenario.ServiceRule.UpdateCallCount);
-            Assert.AreEqual(1, m_Scenario.FirstModeRule.UpdateCallCount);
-            Assert.AreEqual(2, m_Scenario.SubmoduleRule.UpdateCallCount);
-
-            // Pause submodule
-            submodule.Pause();
-            m_Scenario.SubmoduleRule.ResetCount();
-            m_Scenario.SimulateFrames(5);
-            Assert.AreEqual(0, m_Scenario.SubmoduleRule.UpdateCallCount);
-
-            // Restart submodule
-            submodule.Restart();
-            m_Scenario.SubmoduleRule.ResetCount();
-            m_Scenario.SimulateFrames(5);
-            Assert.AreEqual(5, m_Scenario.SubmoduleRule.UpdateCallCount);
         }
 
         [TestMethod]

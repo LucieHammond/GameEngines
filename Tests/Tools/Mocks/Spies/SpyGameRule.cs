@@ -10,6 +10,8 @@ namespace GameEnginesTest.Tools.Mocks.Spies
         public int InitializeCallCount { get; private set; }
         public int UnloadCallCount { get; private set; }
         public int UpdateCallCount { get; private set; }
+        public int FixedUpdateCallCount { get; private set; }
+        public int LateUpdateCallCount { get; private set; }
         public int OnQuitCallCount { get; private set; }
 
         public Action OnInitialize;
@@ -32,6 +34,8 @@ namespace GameEnginesTest.Tools.Mocks.Spies
             UnloadCallCount = 0;
             UpdateCallCount = 0;
             OnQuitCallCount = 0;
+            FixedUpdateCallCount = 0;
+            LateUpdateCallCount = 0;
         }
 
         public void SetAutomaticCompletion()
@@ -65,6 +69,16 @@ namespace GameEnginesTest.Tools.Mocks.Spies
         {
             UpdateCallCount++;
             OnUpdate?.Invoke();
+        }
+
+        protected override void FixedUpdate()
+        {
+            FixedUpdateCallCount++;
+        }
+
+        protected override void LateUpdate()
+        {
+            LateUpdateCallCount++;
         }
 
         protected override void Unload()
