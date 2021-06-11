@@ -16,13 +16,8 @@
     <ProjectReference Include="..\GameEngine.Core\GameEngine.Core.csproj" />
     <ProjectReference Include="..\GameEngine.ECS\GameEngine.ECS.csproj" />
     <ProjectReference Include="..\GameEngine.MVC\GameEngine.MVC.csproj" />
-    <ProjectReference Include="..\GameEngine.PJR\GameEngine.PJR.csproj" />
+    <ProjectReference Include="..\GameEngine.PMR\GameEngine.PMR.csproj" />
     <ProjectReference Include="..\GameEngine.SAI\GameEngine.SAI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="APITests\" />
-    <Folder Include="EndToEndTests\" />
   </ItemGroup>
 
 </Project>

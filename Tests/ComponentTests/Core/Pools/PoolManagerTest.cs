@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.Pools;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -135,11 +135,11 @@ namespace GameEnginesTest.ComponentTests.Core
             Assert.ThrowsException<ArgumentException>(() => poolManager.DestroyPool(m_PoolDescriptorC.PoolId));
         }
 
-        private class TestPoolManager : PoolManager<TestObject, DummyPooler, string>
+        private class TestPoolManager : PoolManager<TestObject, SpyPooler, string>
         {
-            protected override DummyPooler CreateObjectPooler(string objectType)
+            protected override SpyPooler CreateObjectPooler(string objectType)
             {
-                return new DummyPooler(objectType);
+                return new SpyPooler(objectType);
             }
         }
     }

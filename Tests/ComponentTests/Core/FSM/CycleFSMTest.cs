@@ -1,6 +1,6 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.FSM.CustomFSM;
-using GameEnginesTest.Tools.Dummy;
+using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -21,10 +21,10 @@ namespace GameEnginesTest.ComponentTests.Core
             // If the cycle to go through is composed of all possible states (once each) -> use second simplified constructor
             List<FSMState<StatesEnumTest>> orderedStates = new List<FSMState<StatesEnumTest>>()
             {
-                new DummyFSMState(StatesEnumTest.FirstState),
-                new DummyFSMState(StatesEnumTest.SecondState),
-                new DummyFSMState(StatesEnumTest.ThirdState),
-                new DummyFSMState(StatesEnumTest.FourthState)
+                new SpyFSMState(StatesEnumTest.FirstState),
+                new SpyFSMState(StatesEnumTest.SecondState),
+                new SpyFSMState(StatesEnumTest.ThirdState),
+                new SpyFSMState(StatesEnumTest.FourthState)
             };
             CycleFSM<StatesEnumTest> simpleCycleFsm = new CycleFSM<StatesEnumTest>("TestFSM", orderedStates);
             simpleCycleFsm.Start();
@@ -44,7 +44,7 @@ namespace GameEnginesTest.ComponentTests.Core
             simpleCycleFsm.Stop();
 
             // For using a custom cycle -> use first constructor
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             List<StatesEnumTest> cycleOrder = new List<StatesEnumTest>()
             {
                 StatesEnumTest.FirstState,
@@ -74,7 +74,7 @@ namespace GameEnginesTest.ComponentTests.Core
         public void ChangeCycleWhileMovingOnIt()
         {
             // Create and start cycle Fsm
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             List<StatesEnumTest> cycleOrder = new List<StatesEnumTest>()
             {
                 StatesEnumTest.FirstState,
@@ -114,7 +114,7 @@ namespace GameEnginesTest.ComponentTests.Core
         public void CanUseSameStateMultipleTimes()
         {
             // Create cycle fsm with twice the state 3
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             List<StatesEnumTest> cycleOrder = new List<StatesEnumTest>()
             {
                 StatesEnumTest.ThirdState,
@@ -135,7 +135,7 @@ namespace GameEnginesTest.ComponentTests.Core
         public void OperationsFailsWithIncorrectIndices()
         {
             // Create and start cycle Fsm with 4 states and a cycle of length 3
-            List<DummyFSMState> states = FSMUtils.GetMockStateCollection();
+            List<SpyFSMState> states = FSMUtils.GetMockStateCollection();
             List<StatesEnumTest> cycleOrder = new List<StatesEnumTest>()
             {
                 StatesEnumTest.FirstState,

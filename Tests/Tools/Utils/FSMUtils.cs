@@ -1,18 +1,18 @@
-﻿using GameEnginesTest.Tools.Dummy;
+﻿using GameEnginesTest.Tools.Mocks.Spies;
 using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Utils
 {
     public static class FSMUtils
     {
-        public static List<DummyFSMState> GetMockStateCollection()
+        public static List<SpyFSMState> GetMockStateCollection()
         {
-            return new List<DummyFSMState>()
+            return new List<SpyFSMState>()
             {
-                new DummyFSMState(StatesEnumTest.FirstState),
-                new DummyFSMState(StatesEnumTest.SecondState),
-                new DummyFSMState(StatesEnumTest.ThirdState),
-                new DummyFSMState(StatesEnumTest.FourthState)
+                new SpyFSMState(StatesEnumTest.FirstState),
+                new SpyFSMState(StatesEnumTest.SecondState),
+                new SpyFSMState(StatesEnumTest.ThirdState),
+                new SpyFSMState(StatesEnumTest.FourthState)
             };
         }
     }
