@@ -37,6 +37,8 @@ namespace GameEngine.PMR.Modules.States
 
                 m_GameModule.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameModule.Rules.ContainsKey(ruleType)).ToList();
                 m_GameModule.UpdateScheduler = m_Setup.GetUpdateScheduler().Where((scheduler) => m_GameModule.Rules.ContainsKey(scheduler.RuleType)).ToList();
+                m_GameModule.FixedUpdateScheduler = m_Setup.GetFixedUpdateScheduler().Where((scheduler) => m_GameModule.Rules.ContainsKey(scheduler.RuleType)).ToList();
+                m_GameModule.LateUpdateScheduler = m_Setup.GetLateUpdateScheduler().Where((scheduler) => m_GameModule.Rules.ContainsKey(scheduler.RuleType)).ToList();
 
                 m_GameModule.ExceptionPolicy = m_Setup.GetExceptionPolicy();
                 m_GameModule.PerformancePolicy = m_Setup.GetPerformancePolicy();
@@ -72,6 +74,16 @@ namespace GameEngine.PMR.Modules.States
             if (m_GameModule.UpdateScheduler.GroupBy((scheduler) => scheduler.RuleType).Any((group) => group.Count() > 1))
             {
                 throw new Exception("UpdateScheduler contains duplicated rules: rules are not supposed to be updated more than once per frame");
+            }
+
+            if (m_GameModule.FixedUpdateScheduler.GroupBy((scheduler) => scheduler.RuleType).Any((group) => group.Count() > 1))
+            {
+                throw new Exception("FixedUpdateScheduler contains duplicated rules: rules are not supposed to be updated more than once per fixed frame");
+            }
+
+            if (m_GameModule.LateUpdateScheduler.GroupBy((scheduler) => scheduler.RuleType).Any((group) => group.Count() > 1))
+            {
+                throw new Exception("LateUpdateScheduler contains duplicated rules: rules are not supposed to be updated more than once per late frame");
             }
         }
 

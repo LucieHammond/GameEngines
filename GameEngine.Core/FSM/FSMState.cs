@@ -29,18 +29,12 @@ namespace GameEngine.Core.FSM
         /// <summary>
         /// Put here all initialization operations. Called when the FSM starts.
         /// </summary>
-        public virtual void Initialize()
-        {
-
-        }
+        public virtual void Initialize() { }
 
         /// <summary>
         /// Put here all unloading operations. Called when the FSM stops.
         /// </summary>
-        public virtual void Unload()
-        {
-
-        }
+        public virtual void Unload() { }
 
         /// <summary>
         /// Define beginning behaviour. Called each time the FSM enters the state.
@@ -51,6 +45,16 @@ namespace GameEngine.Core.FSM
         /// Define update behaviour. Called at each frame during the time the FSM is inside the state.
         /// </summary>
         public abstract void Update();
+
+        /// <summary>
+        /// Define fixed update behaviour. Called at fixed frames during the time the FSM is inside the state.
+        /// </summary>
+        public virtual void FixedUpdate() { }
+
+        /// <summary>
+        /// Define late update behaviour. Called after each update during the time the FSM is inside the state.
+        /// </summary>
+        public virtual void LateUpdate() { }
 
         /// <summary>
         /// Define end behaviour. Called each time the FSM exits the state.

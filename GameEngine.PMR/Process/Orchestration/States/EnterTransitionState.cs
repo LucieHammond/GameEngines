@@ -21,7 +21,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             if (m_Orchestrator.CurrentTransition == null)
             {
-                m_Orchestrator.GoToState(OrchestratorState.RunTransition);
+                SetState(OrchestratorState.RunTransition);
                 return;
             }
 
@@ -33,7 +33,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
             m_Orchestrator.CurrentTransition.BaseUpdate();
 
             if (m_Orchestrator.CurrentTransition.State == TransitionState.Active)
-                m_Orchestrator.GoToState(OrchestratorState.RunTransition);
+                SetState(OrchestratorState.RunTransition);
         }
 
         public override void Exit()

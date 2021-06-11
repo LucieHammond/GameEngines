@@ -77,7 +77,6 @@ namespace GameEngine.Core.FSM
             if (m_Running)
                 throw new InvalidOperationException($"The state machine is already started");
 #endif
-
             foreach (KeyValuePair<T, FSMState<T>> stateEntry in m_States)
             {
                 stateEntry.Value.Initialize();
@@ -90,8 +89,7 @@ namespace GameEngine.Core.FSM
         }
 
         /// <summary>
-        /// Update the FSM : update the current state and change state if requested.
-        /// Should be called one time per frame.
+        /// Update the FSM : update the current state and change state if requested
         /// </summary>
         public void Update()
         {
@@ -108,6 +106,30 @@ namespace GameEngine.Core.FSM
         }
 
         /// <summary>
+        /// Perform the fixed update of the FSM : call the fixed update of the current state
+        /// </summary>
+        public void FixedUpdate()
+        {
+#if CHECK_OPERATIONS_CONTEXT
+            if (!m_Running)
+                throw new InvalidOperationException($"The state machine should be started before FixedUpdate");
+#endif
+            CurrentState.FixedUpdate();
+        }
+
+        /// <summary>
+        /// Perform the late update of the FSM : call the late update of the current state
+        /// </summary>
+        public void LateUpdate()
+        {
+#if CHECK_OPERATIONS_CONTEXT
+            if (!m_Running)
+                throw new InvalidOperationException($"The state machine should be started before LateUpdate");
+#endif
+            CurrentState.LateUpdate();
+        }
+
+        /// <summary>
         /// Stop the FSM : exit the current state and unload all states
         /// </summary>
         public void Stop()
@@ -116,7 +138,6 @@ namespace GameEngine.Core.FSM
             if (!m_Running)
                 throw new InvalidOperationException($"The state machine should be started before Stop");
 #endif
-
             m_CurrentStateTimeWatch.Stop();
             CurrentState.Exit();
 
@@ -138,7 +159,6 @@ namespace GameEngine.Core.FSM
             if (m_Running)
                 throw new InvalidOperationException($"The state machine cannot be reset while running");
 #endif
-
             CheckStateValidity(resetStateId);
             CurrentStateId = resetStateId;
         }
@@ -147,7 +167,7 @@ namespace GameEngine.Core.FSM
         /// Request a state change.
         /// </summary>
         /// <param name="stateId">The id of the requested state (enum value)</param>
-        /// <param name="immediate">If the change should be applied immediatly or if it should wait the end of the next update. Default = false</param>
+        /// <param name="immediate">If the change should be applied immediatly or if it should wait the start of the next update. Default = false</param>
         /// <param name="ignoreIfCurrentState">If true, the method does nothing when the requested state is the same as the current state. If false, it exits and enters that same state. Default = false</param>
         /// <param name="priority">The priority of the state change request, between 0 (lowest priority) and 255 (highest priority). Used to decide between simultaneous requests. Default = 10</param>
         public void SetState(T stateId, bool immediate = false, bool ignoreIfCurrentState = false, byte priority = 10)
@@ -156,7 +176,6 @@ namespace GameEngine.Core.FSM
             if (!m_Running)
                 throw new InvalidOperationException($"The state machine should be started before changing state");
 #endif
-
             CheckStateValidity(stateId);
 
             if (ignoreIfCurrentState && stateId.Equals(CurrentStateId))

@@ -3,7 +3,9 @@ using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Scheduling;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace GameEngine.PMR.Modules.States
@@ -39,12 +41,32 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Update()
         {
-            foreach (GameRule rule in m_GameModule.Rules.GetRulesInOrderForFrame(m_GameModule.UpdateScheduler, m_Time.FrameCount))
+            UpdateRules(m_GameModule.UpdateScheduler, (rule) => rule.BaseUpdate());
+        }
+
+        public override void FixedUpdate()
+        {
+            UpdateRules(m_GameModule.FixedUpdateScheduler, (rule) => rule.BaseFixedUpdate());
+        }
+
+        public override void LateUpdate()
+        {
+            UpdateRules(m_GameModule.LateUpdateScheduler, (rule) => rule.BaseLateUpdate());
+        }
+
+        public override void Exit()
+        {
+            m_RuleUpdateTime.Reset();
+        }
+
+        private void UpdateRules(List<RuleScheduling> updateScheduler, Action<GameRule> ruleUpdate)
+        {
+            foreach (GameRule rule in m_GameModule.Rules.GetRulesInOrderForFrame(updateScheduler, m_Time.FrameCount))
             {
                 try
                 {
                     m_RuleUpdateTime.Restart();
-                    rule.BaseUpdate();
+                    ruleUpdate(rule);
                     m_RuleUpdateTime.Stop();
                 }
                 catch (Exception e)
@@ -68,11 +90,6 @@ namespace GameEngine.PMR.Modules.States
                         break;
                 }
             }
-        }
-
-        public override void Exit()
-        {
-            m_RuleUpdateTime.Reset();
         }
     }
 }

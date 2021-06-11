@@ -48,6 +48,8 @@ namespace GameEngine.PMR.Modules
         internal RulesDictionary Rules;
         internal List<Type> InitUnloadOrder;
         internal List<RuleScheduling> UpdateScheduler;
+        internal List<RuleScheduling> FixedUpdateScheduler;
+        internal List<RuleScheduling> LateUpdateScheduler;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
         internal DependencyProvider DependencyProvider;
@@ -86,9 +88,19 @@ namespace GameEngine.PMR.Modules
         internal void Update()
         {
             if (!m_IsPaused)
-            {
                 m_StateMachine.Update();
-            }
+        }
+
+        internal void FixedUpdate()
+        {
+            if (!m_IsPaused)
+                m_StateMachine.FixedUpdate();
+        }
+
+        internal void LateUpdate()
+        {
+            if (!m_IsPaused)
+                m_StateMachine.LateUpdate();
         }
 
         internal void Destroy()

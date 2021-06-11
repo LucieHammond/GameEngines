@@ -68,6 +68,16 @@ namespace GameEngine.PMR.Process.Orchestration
             m_StateMachine.Update();
         }
 
+        internal void FixedUpdate()
+        {
+            m_StateMachine.FixedUpdate();
+        }
+
+        internal void LateUpdate()
+        {
+            m_StateMachine.LateUpdate();
+        }
+
         internal void LoadModule(IGameModuleSetup setup, Configuration configuration = null)
         {
             if (!CheckModuleValidity(setup, Parent?.CurrentModule))
@@ -181,11 +191,6 @@ namespace GameEngine.PMR.Process.Orchestration
             }
             CurrentModule?.InnerQuit();
             CurrentTransition?.BaseCleanup();
-        }
-
-        internal void GoToState(OrchestratorState state)
-        {
-            m_StateMachine.SetState(state);
         }
 
         #region private

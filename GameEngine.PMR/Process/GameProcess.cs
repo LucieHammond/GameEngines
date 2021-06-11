@@ -99,6 +99,34 @@ namespace GameEngine.PMR.Process
         }
 
         /// <summary>
+        /// Perform the fixed update of the process, which means call the fixed update of all game rules according to their schedule
+        /// </summary>
+        public void FixedUpdate()
+        {
+            if (!m_IsPaused)
+            {
+                m_GameServiceOrchestrator.FixedUpdate();
+
+                if (m_GameServiceOrchestrator.IsOperational)
+                    m_GameModeOrchestrator.FixedUpdate();
+            }
+        }
+
+        /// <summary>
+        /// Perform the late update of the process, which means call the late update of all game rules according to their schedule
+        /// </summary>
+        public void LateUpdate()
+        {
+            if (!m_IsPaused)
+            {
+                m_GameServiceOrchestrator.LateUpdate();
+
+                if (m_GameServiceOrchestrator.IsOperational)
+                    m_GameModeOrchestrator.LateUpdate();
+            }
+        }
+
+        /// <summary>
         /// Pause the process, which means ignore all subsequent updates
         /// </summary>
         public void Pause()

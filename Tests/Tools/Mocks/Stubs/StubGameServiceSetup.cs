@@ -57,6 +57,16 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
             };
         }
 
+        public List<RuleScheduling> GetFixedUpdateScheduler()
+        {
+            return new List<RuleScheduling>();
+        }
+
+        public List<RuleScheduling> GetLateUpdateScheduler()
+        {
+            return new List<RuleScheduling>();
+        }
+
         public ExceptionPolicy GetExceptionPolicy()
         {
             if (CustomExceptionPolicy != null)

@@ -35,6 +35,26 @@ namespace GameEngine.PMR.Process.Orchestration.States
             m_Orchestrator.Children.RemoveAll((orchestrator) => orchestrator.State == OrchestratorState.Wait);
         }
 
+        public override void FixedUpdate()
+        {
+            m_Orchestrator.CurrentModule.FixedUpdate();
+
+            foreach (Orchestrator childOrchestrator in m_Orchestrator.Children)
+            {
+                childOrchestrator.FixedUpdate();
+            }
+        }
+
+        public override void LateUpdate()
+        {
+            m_Orchestrator.CurrentModule.LateUpdate();
+
+            foreach (Orchestrator childOrchestrator in m_Orchestrator.Children)
+            {
+                childOrchestrator.LateUpdate();
+            }
+        }
+
         public override void Exit()
         {
 

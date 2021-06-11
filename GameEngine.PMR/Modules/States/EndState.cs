@@ -25,12 +25,12 @@ namespace GameEngine.PMR.Modules.States
             m_GameModule.OnFinishUnloading = null;
         }
 
-        public override void Exit()
+        public override void Update()
         {
 
         }
 
-        public override void Update()
+        public override void Exit()
         {
 
         }

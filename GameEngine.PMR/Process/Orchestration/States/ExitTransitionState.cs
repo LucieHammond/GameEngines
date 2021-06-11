@@ -50,7 +50,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
             }
             else if (m_Orchestrator.CurrentModule == null)
             {
-                m_Orchestrator.GoToState(OrchestratorState.Wait);
+                SetState(OrchestratorState.Wait);
                 m_Orchestrator.CurrentTransition?.BaseCleanup();
                 m_Orchestrator.CurrentTransition = null;
 
@@ -59,7 +59,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
             }
             else
             {
-                m_Orchestrator.GoToState(OrchestratorState.Operational);
+                SetState(OrchestratorState.Operational);
             }
         }
     }

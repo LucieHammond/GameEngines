@@ -65,10 +65,11 @@ namespace GameEngine.PMR.Rules
             Initialize();
         }
 
-        internal void BaseUpdate()
-        {
-            Update();
-        }
+        internal void BaseUpdate() { Update(); }
+
+        internal void BaseFixedUpdate() { FixedUpdate(); }
+
+        internal void BaseLateUpdate() { LateUpdate(); }
 
         internal void BaseUnload()
         {
@@ -92,6 +93,16 @@ namespace GameEngine.PMR.Rules
         /// The place where to define custom update operations for the rule. Will be called every relevant frame between Initialize() and Unload()
         /// </summary>
         protected abstract void Update();
+
+        /// <summary>
+        /// The place where to define custom frame-rate independant update operations. Will be called at fixed frequency between Initialize() and Unload()
+        /// </summary>
+        protected virtual void FixedUpdate() { }
+
+        /// <summary>
+        /// The place where to define custom late update operations. Will be called every relevant frame after the Update() of all other rules
+        /// </summary>
+        protected virtual void LateUpdate() { }
 
         /// <summary>
         /// The place where to define custom unloading operations for the rule. Will be called only once after all other methods
