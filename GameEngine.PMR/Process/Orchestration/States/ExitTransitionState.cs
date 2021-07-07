@@ -1,5 +1,5 @@
 ﻿using GameEngine.Core.FSM;
-using GameEngine.PMR.Modules.Transitions;
+using GameEngine.PMR.Process.Transitions;
 
 namespace GameEngine.PMR.Process.Orchestration.States
 {
@@ -25,7 +25,7 @@ namespace GameEngine.PMR.Process.Orchestration.States
                 return;
             }
 
-            m_Orchestrator.CurrentTransition.BaseStop();
+            m_Orchestrator.CurrentTransition.BaseExit();
         }
 
         public override void Update()

@@ -2,9 +2,9 @@
 using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
-using GameEngine.PMR.Modules.Transitions;
 using GameEngine.PMR.Process.Orchestration.States;
 using GameEngine.PMR.Process.Structure;
+using GameEngine.PMR.Process.Transitions;
 using System;
 using System.Collections.Generic;
 
@@ -27,7 +27,7 @@ namespace GameEngine.PMR.Process.Orchestration
         internal Orchestrator Parent;
         internal List<Orchestrator> Children;
         internal GameModule CurrentModule;
-        internal TransitionActivity CurrentTransition;
+        internal Transition CurrentTransition;
 
         internal Action AwaitingAction;
         internal Action OnReset;
@@ -91,7 +91,7 @@ namespace GameEngine.PMR.Process.Orchestration
                 CurrentModule.InnerLoad();
                 CurrentModule.OnFinishLoading += onFinish;
             },
-            setup.GetTransitionActivity());
+            setup.GetTransition());
         }
 
         internal void UnloadModule()
@@ -137,7 +137,7 @@ namespace GameEngine.PMR.Process.Orchestration
                     CurrentModule.OnFinishLoading += onFinish;
                 };
             },
-            setup.GetTransitionActivity());
+            setup.GetTransition());
         }
 
         internal void AddSubmodule(string subcategory, IGameModuleSetup setup, Configuration configuration = null)
@@ -230,7 +230,7 @@ namespace GameEngine.PMR.Process.Orchestration
             return true;
         }
 
-        private void StartOrPlanModuleOperation(OperationDelegate moduleOperation, TransitionActivity transition)
+        private void StartOrPlanModuleOperation(OperationDelegate moduleOperation, Transition transition)
         {
             void performOperationWithTransition(bool skipEnter = false)
             {

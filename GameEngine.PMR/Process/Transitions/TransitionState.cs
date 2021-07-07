@@ -1,7 +1,7 @@
-﻿namespace GameEngine.PMR.Modules.Transitions
+﻿namespace GameEngine.PMR.Process.Transitions
 {
     /// <summary>
-    /// All possible states a TransitionActivity can take during its lifecycle
+    /// All possible states a Transition can take during its lifecycle
     /// </summary>
     public enum TransitionState
     {
@@ -11,9 +11,9 @@
         Inactive,
 
         /// <summary>
-        /// The transition is in starting phase, usually used for fade in
+        /// The transition is in activating phase, usually used for fade in
         /// </summary>
-        Starting,
+        Activating,
 
         /// <summary>
         /// The transition is currently running and fully displayed
@@ -21,8 +21,8 @@
         Active,
 
         /// <summary>
-        /// The transition is in stopping phase, usually used for fade out
+        /// The transition is in deactivating phase, usually used for fade out
         /// </summary>
-        Stopping,
+        Deactivating,
     }
 }

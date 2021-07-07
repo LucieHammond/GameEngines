@@ -1,5 +1,5 @@
 ﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Modules.Transitions;
+using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
 using System;
@@ -63,7 +63,7 @@ namespace GameEngine.PMR.Modules
         /// <summary>
         /// Define the transition activity that should be displayed when the module is loaded or unloaded
         /// </summary>
-        /// <returns>A TransitionActivity object, or null if no transition should be used</returns>
-        TransitionActivity GetTransitionActivity();
+        /// <returns>A Transition object, or null if no transition should be used</returns>
+        Transition GetTransition();
     }
 }

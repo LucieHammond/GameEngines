@@ -1,7 +1,7 @@
 ﻿using GameEngine.PMR.Modules;
-using GameEngine.PMR.Modules.Transitions;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Orchestration;
+using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEnginesTest.Tools.Mocks.Spies;
 using GameEnginesTest.Tools.Mocks.Stubs;
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace GameEnginesTest.IntegrationTests.PMR
 {
     /// <summary>
-    /// Integration tests focusing on the interactions between <see cref="GameModule"/> and <see cref="TransitionActivity"/>
+    /// Integration tests focusing on the interactions between <see cref="GameModule"/> and <see cref="Transition"/>
     /// </summary>
     [TestClass]
     public class ModuleToTransitionTest
@@ -75,7 +75,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Process.CurrentGameMode.Unload();
             m_Scenario.SimulateFrames(1);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode == null);
-            Assert.AreEqual(1, m_Scenario.SecondModeTransition.StartCallCount);
+            Assert.AreEqual(1, m_Scenario.SecondModeTransition.EnterCallCount);
             Assert.IsTrue(m_Scenario.SecondModeTransition.UpdateCallCount > 0);
         }
 
@@ -111,11 +111,11 @@ namespace GameEnginesTest.IntegrationTests.PMR
             Assert.AreEqual(0.7f, m_Scenario.FirstModeTransition.LoadingProgress);
         }
 
-        private void AssertTransitionCompleted(SpyTransitionActivity transition)
+        private void AssertTransitionCompleted(SpyTransition transition)
         {
-            Assert.AreEqual(1, transition.StartCallCount);
+            Assert.AreEqual(1, transition.EnterCallCount);
             Assert.IsTrue(transition.UpdateCallCount > 0);
-            Assert.AreEqual(1, transition.StopCallCount);
+            Assert.AreEqual(1, transition.ExitCallCount);
         }
     }
 }

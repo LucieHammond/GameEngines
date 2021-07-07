@@ -22,10 +22,10 @@ namespace GameEnginesTest.Tools.Scenarios
         public StubGameModeSetup SecondModeSetup { get; private set; }
         public StubGameSubmoduleSetup SubmoduleSetup { get; private set; }
 
-        public SpyTransitionActivity ServiceTransition { get; private set; }
-        public SpyTransitionActivity FirstModeTransition { get; private set; }
-        public SpyTransitionActivity SecondModeTransition { get; private set; }
-        public SpyTransitionActivity SubmoduleTransition { get; private set; }
+        public SpyTransition ServiceTransition { get; private set; }
+        public SpyTransition FirstModeTransition { get; private set; }
+        public SpyTransition SecondModeTransition { get; private set; }
+        public SpyTransition SubmoduleTransition { get; private set; }
 
         public SpyGameRule ServiceRule { get; private set; }
         public SpyGameRule FirstModeRule { get; private set; }
@@ -71,56 +71,56 @@ namespace GameEnginesTest.Tools.Scenarios
         {
             ServiceRule = new SpyGameRule();
             ServiceRule.SetAutomaticCompletion();
-            ServiceTransition = new SpyTransitionActivity();
+            ServiceTransition = new SpyTransition();
             ServiceTransition.SetAutomaticCompletion();
 
             ServiceSetup = new StubGameServiceSetup();
             ServiceSetup.CustomRules = new List<GameRule>() { ServiceRule };
             ServiceSetup.CustomInitUnloadOrder = new List<Type>() { typeof(SpyGameRule) };
             ServiceSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 1, 0) };
-            ServiceSetup.CustomTransitionActivity = ServiceTransition;
+            ServiceSetup.CustomTransition = ServiceTransition;
         }
 
         private void CreateFirstModeSetup()
         {
             FirstModeRule = new SpyGameRule();
             FirstModeRule.SetAutomaticCompletion();
-            FirstModeTransition = new SpyTransitionActivity();
+            FirstModeTransition = new SpyTransition();
             FirstModeTransition.SetAutomaticCompletion();
 
             FirstModeSetup = new StubGameModeSetup();
             FirstModeSetup.CustomRules = new List<GameRule>() { FirstModeRule };
             FirstModeSetup.CustomInitUnloadOrder = new List<Type>() { typeof(SpyGameRule) };
             FirstModeSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 1, 0) };
-            FirstModeSetup.CustomTransitionActivity = FirstModeTransition;
+            FirstModeSetup.CustomTransition = FirstModeTransition;
         }
 
         private void CreateSecondModeSetup()
         {
             SecondModeRule = new SpyGameRule();
             SecondModeRule.SetAutomaticCompletion();
-            SecondModeTransition = new SpyTransitionActivity();
+            SecondModeTransition = new SpyTransition();
             SecondModeTransition.SetAutomaticCompletion();
 
             SecondModeSetup = new StubGameModeSetup();
             SecondModeSetup.CustomRules = new List<GameRule>() { SecondModeRule };
             SecondModeSetup.CustomInitUnloadOrder = new List<Type>() { typeof(SpyGameRule) };
             SecondModeSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 1, 0) };
-            SecondModeSetup.CustomTransitionActivity = SecondModeTransition;
+            SecondModeSetup.CustomTransition = SecondModeTransition;
         }
 
         private void CreateSubmoduleSetup()
         {
             SubmoduleRule = new SpyGameRule();
             SubmoduleRule.SetAutomaticCompletion();
-            SubmoduleTransition = new SpyTransitionActivity();
+            SubmoduleTransition = new SpyTransition();
             SubmoduleTransition.SetAutomaticCompletion();
 
             SubmoduleSetup = new StubGameSubmoduleSetup();
             SubmoduleSetup.CustomRules = new List<GameRule>() { SubmoduleRule };
             SubmoduleSetup.CustomInitUnloadOrder = new List<Type>() { typeof(SpyGameRule) };
             SubmoduleSetup.CustomUpdateScheduler = new List<RuleScheduling>() { new RuleScheduling(typeof(SpyGameRule), 1, 0) };
-            SubmoduleSetup.CustomTransitionActivity = SubmoduleTransition;
+            SubmoduleSetup.CustomTransition = SubmoduleTransition;
         }
     }
 }

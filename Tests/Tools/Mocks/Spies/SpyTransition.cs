@@ -1,20 +1,20 @@
-﻿using GameEngine.PMR.Modules.Transitions;
+﻿using GameEngine.PMR.Process.Transitions;
 using System;
 
 namespace GameEnginesTest.Tools.Mocks.Spies
 {
-    public class SpyTransitionActivity : TransitionActivity
+    public class SpyTransition : Transition
     {
         public int InitializeCallCount { get; private set; }
-        public int StartCallCount { get; private set; }
+        public int EnterCallCount { get; private set; }
         public int UpdateCallCount { get; private set; }
-        public int StopCallCount { get; private set; }
+        public int ExitCallCount { get; private set; }
         public int CleanupCallCount { get; private set; }
 
         public Action OnInitialize;
-        public Action OnStart;
+        public Action OnEnter;
         public Action OnUpdate;
-        public Action OnStop;
+        public Action OnExit;
         public Action OnCleanup;
 
         public float LoadingProgress => m_LoadingProgress;
@@ -23,7 +23,7 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public bool UseDefaultReport { get => m_UseDefaultReport; set => m_UseDefaultReport = value; }
 
-        public SpyTransitionActivity() : base()
+        public SpyTransition() : base()
         {
             ResetCount();
         }
@@ -31,26 +31,26 @@ namespace GameEnginesTest.Tools.Mocks.Spies
         public void ResetCount()
         {
             InitializeCallCount = 0;
-            StartCallCount = 0;
+            EnterCallCount = 0;
             UpdateCallCount = 0;
-            StopCallCount = 0;
+            ExitCallCount = 0;
             CleanupCallCount = 0;
         }
 
         public void SetAutomaticCompletion()
         {
-            OnStart += MarkStartCompleted;
-            OnStop += MarkStopCompleted;
+            OnEnter += MarkActivated;
+            OnExit += MarkDeactivated;
         }
 
-        public void CallMarkStartCompleted()
+        public void CallMarkActivated()
         {
-            MarkStartCompleted();
+            MarkActivated();
         }
 
-        public void CallMarkStopCompleted()
+        public void CallMarkDeactivated()
         {
-            MarkStopCompleted();
+            MarkDeactivated();
         }
 
         protected override void Initialize()
@@ -59,10 +59,10 @@ namespace GameEnginesTest.Tools.Mocks.Spies
             OnInitialize?.Invoke();
         }
 
-        protected override void Start()
+        protected override void Enter()
         {
-            StartCallCount++;
-            OnStart?.Invoke();
+            EnterCallCount++;
+            OnEnter?.Invoke();
         }
 
         protected override void Update()
@@ -71,10 +71,10 @@ namespace GameEnginesTest.Tools.Mocks.Spies
             OnUpdate?.Invoke();
         }
 
-        protected override void Stop()
+        protected override void Exit()
         {
-            StopCallCount++;
-            OnStop?.Invoke();
+            ExitCallCount++;
+            OnExit?.Invoke();
         }
 
         protected override void Cleanup()

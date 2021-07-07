@@ -1,4 +1,4 @@
-﻿using GameEngine.PMR.Modules.Transitions;
+﻿using GameEngine.PMR.Process.Transitions;
 using GameEnginesTest.Tools.Mocks.Fakes;
 using GameEnginesTest.Tools.Mocks.Spies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -6,16 +6,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GameEnginesTest.ComponentTests.PMR
 {
     /// <summary>
-    /// Component tests for the class TransitionActivity
-    /// <see cref="TransitionActivity"/>
+    /// Component tests for the class Transition
+    /// <see cref="Transition"/>
     /// </summary>
     [TestClass]
-    public class TransitionActivityTest
+    public class TransitionTest
     {
         [TestMethod]
         public void PerformCompleteLifeCycle()
         {
-            SpyTransitionActivity transition = new SpyTransitionActivity();
+            SpyTransition transition = new SpyTransition();
             int n = 3;
 
             // Initialize transition
@@ -24,11 +24,11 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(1, transition.InitializeCallCount);
             Assert.AreEqual(TransitionState.Inactive, transition.State);
 
-            // Start transition
-            Assert.AreEqual(0, transition.StartCallCount);
-            transition.BaseStart();
-            Assert.AreEqual(1, transition.StartCallCount);
-            Assert.AreEqual(TransitionState.Starting, transition.State);
+            // Enter transition
+            Assert.AreEqual(0, transition.EnterCallCount);
+            transition.BaseEnter();
+            Assert.AreEqual(1, transition.EnterCallCount);
+            Assert.AreEqual(TransitionState.Activating, transition.State);
 
             // Update n time
             Assert.AreEqual(0, transition.UpdateCallCount);
@@ -36,8 +36,8 @@ namespace GameEnginesTest.ComponentTests.PMR
                 transition.BaseUpdate();
             Assert.AreEqual(n, transition.UpdateCallCount);
 
-            // Mark start completed
-            transition.CallMarkStartCompleted();
+            // Mark activation is completed
+            transition.CallMarkActivated();
             Assert.AreEqual(TransitionState.Active, transition.State);
 
             // Update n time
@@ -46,11 +46,11 @@ namespace GameEnginesTest.ComponentTests.PMR
                 transition.BaseUpdate();
             Assert.AreEqual(2 * n, transition.UpdateCallCount);
 
-            // Stop transition
-            Assert.AreEqual(0, transition.StopCallCount);
-            transition.BaseStop();
-            Assert.AreEqual(1, transition.StopCallCount);
-            Assert.AreEqual(TransitionState.Stopping, transition.State);
+            // Exit transition
+            Assert.AreEqual(0, transition.ExitCallCount);
+            transition.BaseExit();
+            Assert.AreEqual(1, transition.ExitCallCount);
+            Assert.AreEqual(TransitionState.Deactivating, transition.State);
 
             // Update n time
             Assert.AreEqual(2 * n, transition.UpdateCallCount);
@@ -58,8 +58,8 @@ namespace GameEnginesTest.ComponentTests.PMR
                 transition.BaseUpdate();
             Assert.AreEqual(3 * n, transition.UpdateCallCount);
 
-            // Mark stop completed
-            transition.CallMarkStopCompleted();
+            // Mark deactivation is completed
+            transition.CallMarkDeactivated();
             Assert.AreEqual(TransitionState.Inactive, transition.State);
 
             // Cleanup transition
@@ -73,7 +73,7 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void AccessLoadingReports()
         {
             // At initialization, loading reports have default values
-            SpyTransitionActivity transition = new SpyTransitionActivity();
+            SpyTransition transition = new SpyTransition();
             transition.BaseInitialize(new FakeTime());
             Assert.AreEqual(0, transition.LoadingProgress);
             Assert.AreEqual(string.Empty, transition.LoadingAction);
