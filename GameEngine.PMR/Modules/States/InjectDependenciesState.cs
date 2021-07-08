@@ -1,10 +1,10 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.Logger;
-using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace GameEngine.PMR.Modules.States
@@ -19,10 +19,8 @@ namespace GameEngine.PMR.Modules.States
         private GameModule m_GameModule;
         private GameProcess m_MainProcess;
         private GameModule m_ParentModule;
+        private IEnumerator<KeyValuePair<Type, GameRule>> m_RulesEnumerator;
         private Stopwatch m_UpdateTime;
-        private PerformancePolicy m_Performance;
-
-        private bool m_IsProcessInjected;
 
         internal InjectDependenciesState(GameModule gameModule, GameProcess process, GameModule parent)
         {
@@ -36,51 +34,56 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Inject dependencies");
 
-            m_Performance = m_GameModule.PerformancePolicy;
-            m_IsProcessInjected = false;
-
             m_GameModule.ReportLoadingProgress(0f);
+
+            m_RulesEnumerator = m_GameModule.Rules.GetEnumerator();
         }
 
         public override void Update()
         {
-            m_UpdateTime.Restart();
-
-            try
+            if (m_GameModule.DependencyProvider == null)
             {
-                if (!m_IsProcessInjected)
+                try
                 {
-                    foreach (GameRule rule in m_GameModule.Rules.Values)
-                    {
-                        rule.InjectProcessDependencies(m_MainProcess, m_GameModule);
-                    }
-                    m_IsProcessInjected = true;
-
-                    if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
-                        return;
-                }
-
-                if (m_GameModule.DependencyProvider == null)
-                {
-                    m_GameModule.DependencyProvider = DependencyUtils.ExtractDependencies(m_GameModule.Rules);
+                    m_GameModule.DependencyProvider = RuleDependencyOperations.ExtractDependencies(m_GameModule.Rules);
                     if (m_ParentModule != null)
                         m_GameModule.DependencyProvider.LinkToParentProvider(m_ParentModule.DependencyProvider);
-
-                    if (m_UpdateTime.ElapsedMilliseconds >= m_Performance.MaxFrameDuration)
+                }
+                catch (Exception e)
+                {
+                    Log.Exception(m_GameModule.Name, e);
+                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
                         return;
                 }
+            }
 
+            m_UpdateTime.Restart();
+
+            do
+            {
+                if (!m_RulesEnumerator.MoveNext())
+                {
+                    m_GameModule.GoToNextState();
+                    break;
+                }
+
+                GameRule rule = m_RulesEnumerator.Current.Value;
                 DependencyProvider serviceProvider = m_MainProcess.ServiceProvider;
                 DependencyProvider ruleProvider = m_GameModule.DependencyProvider;
-                DependencyUtils.InjectDependencies(m_GameModule.Rules, serviceProvider, ruleProvider);
-
-                m_GameModule.GoToNextState();
+                    
+                try
+                {
+                    rule.InjectProcessDependencies(m_MainProcess, m_GameModule);
+                    rule.InjectRuleDependencies(serviceProvider, ruleProvider);
+                }
+                catch (Exception e)
+                {
+                    Log.Exception(m_GameModule.Name, e);
+                    if (m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad))
+                        break;
+                }
             }
-            catch (Exception e)
-            {
-                Log.Exception(m_GameModule.Name, e);
-                m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad);
-            }
+            while (m_UpdateTime.ElapsedMilliseconds < m_GameModule.PerformancePolicy.MaxFrameDuration);
 
             m_UpdateTime.Stop();
         }

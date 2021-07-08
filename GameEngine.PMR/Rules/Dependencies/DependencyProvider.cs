@@ -35,13 +35,14 @@ namespace GameEngine.PMR.Rules.Dependencies
             m_Dependencies.Add(interfaceType, dependency);
         }
 
-        internal bool TryGet(Type interfaceType, out object dependency)
+        internal bool TryGet(Type interfaceType, out object dependency, bool inherited = true)
         {
             if (!interfaceType.IsInterface)
                 throw new ArgumentException($"Cannot inject dependency for type {interfaceType.Name} because {interfaceType.Name} is not an interface");
 
+            bool test = m_Dependencies.TryGetValue(interfaceType, out dependency);
             return m_Dependencies.TryGetValue(interfaceType, out dependency)
-                || (m_ParentProvider != null && m_ParentProvider.TryGet(interfaceType, out dependency));
+                || (inherited && m_ParentProvider != null && m_ParentProvider.TryGet(interfaceType, out dependency));
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
-using GameEngine.PMR.Rules.Dependencies.Attributes;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
@@ -25,21 +24,21 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
         }
     }
 
-    [DependencyProvider(typeof(IStubGameRuleBis))]
+    [RuleAccess(typeof(IStubGameRuleBis))]
     public class StubGameRuleBis : StubGameRule, IStubGameRuleBis
     {
     }
 
     public class StubGameRuleTer : StubGameRule
     {
-        [DependencyConsumer(DependencyType.Service, false)]
+        [RuleDependency(RuleDependencySource.Service, false)]
         public IStubGameService StubServiceReference;
 
-        [DependencyConsumer(DependencyType.Rule, true)]
+        [RuleDependency(RuleDependencySource.SameModule, true)]
         public IStubGameRuleBis StubRuleBisReference;
     }
 
-    [DependencyProvider(typeof(IStubGameService))]
+    [RuleAccess(typeof(IStubGameService))]
     public class StubGameService : StubGameRule, IStubGameService
     {
 
