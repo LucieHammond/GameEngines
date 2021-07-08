@@ -1,6 +1,7 @@
 ﻿using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
 using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Specialization;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Rules;
@@ -59,8 +60,8 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(GameModuleState.Start, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
 
-            // Perform Setup state
-            Assert.AreEqual(GameModuleState.Setup, module.State);
+            // Perform Configure state
+            Assert.AreEqual(GameModuleState.Configure, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
             Assert.IsNotNull(module.Rules);
             Assert.IsNotNull(module.InitUnloadOrder);
@@ -75,6 +76,12 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.IsTrue(module.DependencyProvider.TryGet(typeof(IStubGameRuleBis), out object rubeBis));
             Assert.AreEqual(rubeBis, ((StubGameRuleTer)module.Rules[typeof(StubGameRuleTer)]).StubRuleBisReference);
             Assert.IsNull(((StubGameRuleTer)module.Rules[typeof(StubGameRuleTer)]).StubServiceReference);
+
+            // Perform Pre-Initialization state
+            Assert.AreEqual(GameModuleState.PreInitialize, module.State);
+            Assert.IsTrue(module.SimulateUpToNextState(m_Time));
+            foreach (SpecializedTask task in module.SpecializedTasks)
+                Assert.IsTrue(task.State == SpecializedTaskState.InitCompleted);
 
             // Perform InitializeRules state
             Assert.AreEqual(GameModuleState.InitializeRules, module.State);
@@ -107,6 +114,12 @@ namespace GameEnginesTest.ComponentTests.PMR
             foreach (GameRule rule in module.Rules.Values)
                 Assert.AreEqual(GameRuleState.Unloaded, rule.State);
 
+            // Perform Post-Unload state
+            Assert.AreEqual(GameModuleState.PostUnload, module.State);
+            Assert.IsTrue(module.SimulateUpToNextState(m_Time));
+            foreach (SpecializedTask task in module.SpecializedTasks)
+                Assert.IsTrue(task.State == SpecializedTaskState.UnloadCompleted);
+
             // End up in End state
             Assert.IsTrue(unloadingCompleted);
             Assert.AreEqual(GameModuleState.End, module.State);
@@ -135,6 +148,16 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Perform UnloadRules state
             Assert.AreEqual(GameModuleState.UnloadRules, module.State);
+            Assert.IsTrue(module.SimulateUpToNextState(m_Time));
+            foreach (GameRule rule in module.Rules.Values)
+                Assert.AreEqual(GameRuleState.Unloaded, rule.State);
+
+            // Perform Post-Unload state
+            Assert.AreEqual(GameModuleState.PostUnload, module.State);
+            Assert.IsTrue(module.SimulateUpToNextState(m_Time));
+
+            // Perform Pre-Initialization state
+            Assert.AreEqual(GameModuleState.PreInitialize, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
 
             // Perform InitializeRules state
@@ -174,15 +197,15 @@ namespace GameEnginesTest.ComponentTests.PMR
             GameModule invalidModule;
             bool simulateUntilState(GameModuleState state) => invalidModule.SimulateExecutionUntil(m_Time, () => invalidModule.State == state);
 
-            // If setup rules order contains duplicated rules -> Setup state logs exception and responds by pausing the module
+            // If setup rules order contains duplicated rules -> Configure state logs exception and responds by pausing the module
             invalidSetup = new StubGameModeSetup();
             invalidSetup.CustomInitUnloadOrder = new List<Type>() { typeof(StubGameRule), typeof(StubGameRuleBis), typeof(StubGameRule) };
             invalidModule = CreateCustomGameModule(invalidSetup);
             invalidModule.InnerLoad();
             AssertUtils.LogException<Exception>(() => Assert.IsFalse(simulateUntilState(GameModuleState.InjectDependencies)));
-            Assert.AreEqual(GameModuleState.Setup, invalidModule.State);
+            Assert.AreEqual(GameModuleState.Configure, invalidModule.State);
 
-            // If setup exception policy is invalid -> Setup state logs exception and responds by pausing the module
+            // If setup exception policy is invalid -> Configure state logs exception and responds by pausing the module
             invalidSetup = new StubGameModeSetup();
             invalidSetup.CustomExceptionPolicy = new ExceptionPolicy()
             {
@@ -192,9 +215,9 @@ namespace GameEnginesTest.ComponentTests.PMR
             invalidModule = CreateCustomGameModule(invalidSetup);
             invalidModule.InnerLoad();
             AssertUtils.LogException<Exception>(() => Assert.IsFalse(simulateUntilState(GameModuleState.InjectDependencies)));
-            Assert.AreEqual(GameModuleState.Setup, invalidModule.State);
+            Assert.AreEqual(GameModuleState.Configure, invalidModule.State);
 
-            // If setup performance policy is invalid -> Setup state logs exception and responds by pausing the module
+            // If setup performance policy is invalid -> Configure state logs exception and responds by pausing the module
             invalidSetup = new StubGameModeSetup();
             invalidSetup.CustomPerformancePolicy = new PerformancePolicy()
             {
@@ -207,7 +230,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             invalidModule = CreateCustomGameModule(invalidSetup);
             invalidModule.InnerLoad();
             AssertUtils.LogException<Exception>(() => Assert.IsFalse(simulateUntilState(GameModuleState.InjectDependencies)));
-            Assert.AreEqual(GameModuleState.Setup, invalidModule.State);
+            Assert.AreEqual(GameModuleState.Configure, invalidModule.State);
 
             // If one of the rule cannot find a required dependency -> InjectDependencies state logs exception and responds by pausing the module
             invalidSetup = new StubGameModeSetup();

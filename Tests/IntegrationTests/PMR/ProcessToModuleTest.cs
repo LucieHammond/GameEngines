@@ -33,7 +33,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Process.Start();
             Assert.AreEqual(GameModuleState.Start, m_Process.Services.State);
             GameModule serviceModule = m_Process.Services;
-            m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.Setup);
+            m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.UpdateRules);
@@ -41,7 +41,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
             Assert.AreEqual(GameModuleState.Start, m_Process.CurrentGameMode.State);
             GameModule firstModule = m_Process.CurrentGameMode;
-            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Setup);
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.UpdateRules);
@@ -54,7 +54,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
 
             Assert.AreEqual(GameModuleState.Start, m_Process.CurrentGameMode.State);
             GameModule secondModule = m_Process.CurrentGameMode;
-            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Setup);
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.UpdateRules);
@@ -81,7 +81,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
 
             // Since the setup problem is detected during load, process launches stop operation
-            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Setup);
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             GameModule gameMode = m_Process.CurrentGameMode;
 

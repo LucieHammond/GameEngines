@@ -33,6 +33,7 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Ready to update rules");
 
+            m_GameModule.ReportLoadingProgress(1f);
             m_GameModule.OnFinishLoading?.Invoke();
             m_GameModule.OnFinishLoading = null;
 

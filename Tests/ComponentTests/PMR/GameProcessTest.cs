@@ -50,7 +50,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(GameModuleState.UpdateRules, process.Services.State);
             Assert.IsNotNull(process.ServiceProvider);
             Assert.IsNotNull(process.CurrentGameMode);
-            Assert.IsTrue(process.CurrentGameMode.State == GameModuleState.Start || process.CurrentGameMode.State == GameModuleState.Setup);
+            Assert.IsTrue(process.CurrentGameMode.State == GameModuleState.Start || process.CurrentGameMode.State == GameModuleState.Configure);
 
             // Run simulation until first game mode is loaded
             Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));

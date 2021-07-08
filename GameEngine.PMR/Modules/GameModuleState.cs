@@ -14,12 +14,17 @@
         /// <summary>
         /// The module is configured using the IGameModuleSetup passed at construction
         /// </summary>
-        Setup,
+        Configure,
 
         /// <summary>
         /// The mudule fills all dependencies needed by its rules
         /// </summary>
         InjectDependencies,
+
+        /// <summary>
+        /// The module executes the custom preparation steps defined in the setup
+        /// </summary>
+        PreInitialize,
 
         /// <summary>
         /// The module initialize its rules in the order specified by the setup
@@ -35,6 +40,11 @@
         /// The module unload its rules in the reverse order specified by the setup
         /// </summary>
         UnloadRules,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        PostUnload,
 
         /// <summary>
         /// The module waits to be stopped and destroyed by its orchestrator

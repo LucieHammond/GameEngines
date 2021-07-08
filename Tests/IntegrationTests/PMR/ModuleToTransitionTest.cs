@@ -91,7 +91,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
 
             // When first game mode begins loading: progress = 0
-            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Setup);
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             Assert.AreEqual(0, m_Scenario.FirstModeTransition.LoadingProgress);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             Assert.AreEqual(0, m_Scenario.FirstModeTransition.LoadingProgress);

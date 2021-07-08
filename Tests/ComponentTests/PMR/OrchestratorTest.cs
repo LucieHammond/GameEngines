@@ -232,7 +232,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             // A) If orchestrator is in RunTransition state -> transition keeps running with a different module operation
             orchestrator.LoadModule(moduleSetup, null);
             orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.RunTransition);
-            Assert.AreEqual(GameModuleState.Setup, orchestrator.CurrentModule.State);
+            Assert.AreEqual(GameModuleState.Configure, orchestrator.CurrentModule.State);
 
             orchestrator.UnloadModule();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));

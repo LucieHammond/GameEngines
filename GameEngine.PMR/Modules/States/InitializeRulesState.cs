@@ -1,5 +1,6 @@
 ﻿using GameEngine.Core.FSM;
 using GameEngine.Core.Logger;
+using GameEngine.Core.Utilities;
 using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Rules;
 using System;
@@ -20,6 +21,7 @@ namespace GameEngine.PMR.Modules.States
         private Stopwatch m_UpdateTime;
         private Stopwatch m_RuleInitTime;
         private PerformancePolicy m_Performance;
+        private float m_InitialProgress;
         private int m_NbRulesInitialized;
         private int m_NbStallingWarnings;
 
@@ -34,12 +36,13 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Initialize rules");
 
-            m_RulesToInitEnumerator = m_GameModule.Rules.GetRulesInOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
+            m_InitialProgress = m_GameModule.SpecializedTasks.Count / (m_GameModule.SpecializedTasks.Count + 3);
+            m_GameModule.ReportLoadingProgress(m_InitialProgress);
+
             m_Performance = m_GameModule.PerformancePolicy;
             m_NbRulesInitialized = 0;
             m_NbStallingWarnings = 0;
-
-            m_GameModule.ReportLoadingProgress(0f);
+            m_RulesToInitEnumerator = m_GameModule.Rules.GetRulesInOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
             if (!m_RulesToInitEnumerator.MoveNext())
                 m_RulesToInitEnumerator = null;
         }
@@ -75,7 +78,6 @@ namespace GameEngine.PMR.Modules.States
 
             if (m_RulesToInitEnumerator == null)
             {
-                m_GameModule.ReportLoadingProgress(1f);
                 m_GameModule.GoToNextState();
                 askExit = true;
             }
@@ -106,7 +108,7 @@ namespace GameEngine.PMR.Modules.States
                 m_NbRulesInitialized++;
                 m_NbStallingWarnings = 0;
 
-                m_GameModule.ReportLoadingProgress(m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count);
+                ReportProgress(m_NbRulesInitialized / (float)m_GameModule.InitUnloadOrder.Count);
                 if (!m_RulesToInitEnumerator.MoveNext())
                     m_RulesToInitEnumerator = null;
             }
@@ -133,6 +135,12 @@ namespace GameEngine.PMR.Modules.States
                         askExit = true;
                 }
             }
+        }
+
+        private void ReportProgress(float initProgress)
+        {
+            float totalProgress = MathUtils.Lerp(initProgress, m_InitialProgress, 1f);
+            m_GameModule.ReportLoadingProgress(totalProgress);
         }
     }
 }

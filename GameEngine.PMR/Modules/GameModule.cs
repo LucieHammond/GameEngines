@@ -3,6 +3,7 @@ using GameEngine.Core.FSM.CustomFSM;
 using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Specialization;
 using GameEngine.PMR.Modules.States;
 using GameEngine.PMR.Process.Orchestration;
 using GameEngine.PMR.Rules;
@@ -42,7 +43,7 @@ namespace GameEngine.PMR.Modules
 
         /// <summary>
         /// The configuration of the module, set at construction and used to transmit runtime information
-        /// </summary|
+        /// </summary>
         public Configuration Configuration { get; private set; }
 
         internal RulesDictionary Rules;
@@ -52,6 +53,7 @@ namespace GameEngine.PMR.Modules
         internal List<RuleScheduling> LateUpdateScheduler;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
+        internal List<SpecializedTask> SpecializedTasks;
         internal DependencyProvider DependencyProvider;
         internal Orchestrator Orchestrator;
 
@@ -60,6 +62,11 @@ namespace GameEngine.PMR.Modules
 
         private QueueFSM<GameModuleState> m_StateMachine;
         private bool m_IsPaused;
+
+        private bool IsSetUp => State != GameModuleState.Start && State != GameModuleState.Configure && State != GameModuleState.InjectDependencies;
+        private bool IsAffectingRules => State == GameModuleState.InitializeRules || State == GameModuleState.UpdateRules || State == GameModuleState.UnloadRules;
+        private bool IsUnloading => State == GameModuleState.UnloadRules || State == GameModuleState.PostUnload || State == GameModuleState.End;
+
 
         internal GameModule(IGameModuleSetup setup, Configuration configuration, Orchestrator orchestrator)
         {
@@ -74,11 +81,13 @@ namespace GameEngine.PMR.Modules
                 new List<FSMState<GameModuleState>>()
                 {
                     new StartState(this),
-                    new SetupState(this, setup),
+                    new ConfigureState(this, setup),
                     new InjectDependenciesState(this, orchestrator.MainProcess, orchestrator.Parent?.CurrentModule),
+                    new PreInitializeState(this),
                     new InitializeRulesState(this),
                     new UpdateRulesState(this, orchestrator.MainProcess.Time),
                     new UnloadRulesState(this),
+                    new PostUnloadState(this),
                     new EndState(this),
                 },
                 new List<GameModuleState>() { GameModuleState.Start });
@@ -131,8 +140,9 @@ namespace GameEngine.PMR.Modules
             Log.Info(TAG, $"Load module {Name}");
 
             m_StateMachine.ClearStateQueue();
-            m_StateMachine.EnqueueState(GameModuleState.Setup);
+            m_StateMachine.EnqueueState(GameModuleState.Configure);
             m_StateMachine.EnqueueState(GameModuleState.InjectDependencies);
+            m_StateMachine.EnqueueState(GameModuleState.PreInitialize);
             m_StateMachine.EnqueueState(GameModuleState.InitializeRules);
             m_StateMachine.EnqueueState(GameModuleState.UpdateRules);
             m_StateMachine.DequeueState();
@@ -140,30 +150,35 @@ namespace GameEngine.PMR.Modules
 
         internal void InnerUnload()
         {
-            if (State == GameModuleState.UnloadRules || State == GameModuleState.End)
+            if (IsUnloading)
                 return;
 
             Log.Info(TAG, $"Unload module {Name}");
 
             m_StateMachine.ClearStateQueue();
-            if (State == GameModuleState.UpdateRules || State == GameModuleState.InitializeRules)
+            if (IsAffectingRules)
                 m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
+            if (IsSetUp)
+                m_StateMachine.EnqueueState(GameModuleState.PostUnload);
             m_StateMachine.EnqueueState(GameModuleState.End);
             m_StateMachine.DequeueState(priority: 100);
         }
 
         internal void InnerReload()
         {
-            if (State == GameModuleState.Start)
+            if (!IsSetUp)
                 InnerLoad();
 
-            if (State == GameModuleState.Setup || State == GameModuleState.InjectDependencies || State == GameModuleState.End)
+            if (State == GameModuleState.End)
                 return;
 
             Log.Info(TAG, $"Reload module {Name}");
 
             m_StateMachine.ClearStateQueue();
-            m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
+            if (IsAffectingRules)
+                m_StateMachine.EnqueueState(GameModuleState.UnloadRules);
+            m_StateMachine.EnqueueState(GameModuleState.PostUnload);
+            m_StateMachine.EnqueueState(GameModuleState.PreInitialize);
             m_StateMachine.EnqueueState(GameModuleState.InitializeRules);
             m_StateMachine.EnqueueState(GameModuleState.UpdateRules);
             m_StateMachine.DequeueState(priority: 100);

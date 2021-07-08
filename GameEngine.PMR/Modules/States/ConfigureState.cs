@@ -9,14 +9,14 @@ namespace GameEngine.PMR.Modules.States
     /// <summary>
     /// The FSM state corresponding to the Setup state of the GameModule, in which configurations are made using the IGameModuleSetup
     /// </summary>
-    internal class SetupState : FSMState<GameModuleState>
+    internal class ConfigureState : FSMState<GameModuleState>
     {
-        public override GameModuleState Id => GameModuleState.Setup;
+        public override GameModuleState Id => GameModuleState.Configure;
 
         private GameModule m_GameModule;
         private IGameModuleSetup m_Setup;
 
-        internal SetupState(GameModule gameModule, IGameModuleSetup setup)
+        internal ConfigureState(GameModule gameModule, IGameModuleSetup setup)
         {
             m_GameModule = gameModule;
             m_Setup = setup;
@@ -24,7 +24,7 @@ namespace GameEngine.PMR.Modules.States
 
         public override void Enter()
         {
-            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Setup parameters");
+            Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Setup");
 
             m_GameModule.ReportLoadingProgress(0f);
         }
@@ -42,6 +42,8 @@ namespace GameEngine.PMR.Modules.States
 
                 m_GameModule.ExceptionPolicy = m_Setup.GetExceptionPolicy();
                 m_GameModule.PerformancePolicy = m_Setup.GetPerformancePolicy();
+
+                m_GameModule.SpecializedTasks = m_Setup.GetSpecializedTasks();
 
                 CheckRulesOrderValidity();
                 CheckExceptionPolicyValidity();
