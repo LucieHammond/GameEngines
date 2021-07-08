@@ -1,4 +1,5 @@
-﻿using GameEngine.Core.Logger.Base;
+﻿#if ENABLE_LOGS
+using GameEngine.Core.Logger.Base;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.IO;
@@ -32,3 +33,4 @@ namespace GameEnginesTest.ComponentTests.Core
         }
     }
 }
+#endif

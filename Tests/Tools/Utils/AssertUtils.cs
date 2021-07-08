@@ -47,8 +47,9 @@ namespace GameEnginesTest.Tools.Utils
                 logger.OnLogInfo += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
 
             action();
-
+#if ENABLE_LOGS
             Assert.IsTrue(logger.LogInfoCalls > 0);
+#endif
             logger.Clear();
             Log.Targets.Clear();
         }
@@ -63,8 +64,9 @@ namespace GameEnginesTest.Tools.Utils
                 logger.OnLogWarning += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
 
             action();
-
+#if ENABLE_LOGS
             Assert.IsTrue(logger.LogWarningCalls > 0);
+#endif
             logger.Clear();
             Log.Targets.Clear();
         }
@@ -79,8 +81,9 @@ namespace GameEnginesTest.Tools.Utils
                 logger.OnLogError += (logTag, logMessage) => Assert.AreEqual(message, logMessage);
 
             action();
-
+#if ENABLE_LOGS
             Assert.IsTrue(logger.LogErrorCalls > 0);
+#endif
             logger.Clear();
             Log.Targets.Clear();
         }
@@ -94,8 +97,9 @@ namespace GameEnginesTest.Tools.Utils
             logger.OnLogException += (logTag, logException) => Assert.IsInstanceOfType(logException, typeof(T));
 
             action();
-
+#if ENABLE_LOGS
             Assert.IsTrue(logger.LogExceptionCalls > 0);
+#endif
             logger.Clear();
             Log.Targets.Clear();
         }
