@@ -1,5 +1,5 @@
-﻿using GameEngine.Core.Pools;
-using GameEngine.Core.Pools.Descriptors;
+﻿using GameEngine.Core.Descriptors;
+using GameEngine.Core.Pools;
 using GameEngine.Core.Pools.Managers;
 using NUnit.Framework;
 using System.Collections;

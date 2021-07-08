@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-namespace GameEngine.Core.Pools.Descriptors
+namespace GameEngine.Core.Descriptors
 {
     /// <summary>
-    /// A descriptor containing the information needed to configure a material in a pool
+    /// A descriptor containing the information needed to configure a material
     /// </summary>
     public struct MaterialDescriptor
     {
