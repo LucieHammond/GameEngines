@@ -1,4 +1,5 @@
 ﻿using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Specialization;
 using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
@@ -71,6 +72,12 @@ namespace GameEngine.PMR.Modules
         /// </summary>
         /// <returns>A PerformancePolicy object</returns>
         PerformancePolicy GetPerformancePolicy();
+
+        /// <summary>
+        /// Define a number of additional custom specialized tasks to be performed before initialization and after unload
+        /// </summary>
+        /// <returns>A list of SpecializedTask to be executed, possibly empty</returns>
+        List<SpecializedTask> GetSpecializedTasks();
 
         /// <summary>
         /// Define the transition activity that should be displayed when the module is loaded or unloaded

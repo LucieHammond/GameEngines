@@ -1,5 +1,6 @@
 ﻿using GameEngine.PMR.Modules;
 using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Specialization;
 using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
@@ -106,6 +107,14 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
             {
                 MaxFrameDuration = 16,
                 CheckStallingRules = false
+            };
+        }
+
+        public List<SpecializedTask> GetSpecializedTasks()
+        {
+            return new List<SpecializedTask>()
+            {
+                new StubSpecializedTask()
             };
         }
 
