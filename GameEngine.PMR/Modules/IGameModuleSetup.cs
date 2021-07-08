@@ -18,6 +18,18 @@ namespace GameEngine.PMR.Modules
         string Name { get; }
 
         /// <summary>
+        /// The service setup that the submodule requires (its rules can have service dependencies to it).
+        /// Set null if no service setup is required
+        /// </summary>
+        Type RequiredServiceSetup { get; }
+
+        /// <summary>
+        /// The parent module setup that the submodule requires (its rules can have rule dependencies to it, and recursively to all the hierarchy).
+        /// Set null if no parent module setup is required
+        /// </summary>
+        Type RequiredParentSetup { get; }
+
+        /// <summary>
         /// Instantiate all the rules of the module and add them to the given RulesDictionary
         /// </summary>
         /// <param name="rules">The dictionary storing all the GameRules used in the module</param>

@@ -1,5 +1,5 @@
-﻿using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Process;
 using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
@@ -8,10 +8,10 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
     {
         public string Name => "TestProcess";
 
-        public IGameServiceSetup CustomServiceSetup;
-        public List<IGameModeSetup> CustomGameModes;
+        public IGameModuleSetup CustomServiceSetup;
+        public List<IGameModuleSetup> CustomGameModes;
 
-        public IGameServiceSetup GetServiceSetup()
+        public IGameModuleSetup GetServiceSetup()
         {
             if (CustomServiceSetup != null)
                 return CustomServiceSetup;
@@ -19,12 +19,12 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
             return new StubGameServiceSetup();
         }
 
-        public List<IGameModeSetup> GetFirstGameModes()
+        public List<IGameModuleSetup> GetFirstGameModes()
         {
             if (CustomGameModes != null)
                 return CustomGameModes;
 
-            return new List<IGameModeSetup>() { new StubGameModeSetup() };
+            return new List<IGameModuleSetup>() { new StubGameModeSetup() };
         }
     }
 }

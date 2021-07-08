@@ -1,5 +1,5 @@
-﻿using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Process;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
 using GameEnginesTest.Tools.Mocks.Fakes;
@@ -46,7 +46,7 @@ namespace GameEnginesTest.Tools.Scenarios
 
             StubGameProcessSetup setup = new StubGameProcessSetup();
             setup.CustomServiceSetup = ServiceSetup;
-            setup.CustomGameModes = new List<IGameModeSetup>() { FirstModeSetup, SecondModeSetup };
+            setup.CustomGameModes = new List<IGameModuleSetup>() { FirstModeSetup, SecondModeSetup };
 
             Process = new GameProcess(setup, m_Time);
         }

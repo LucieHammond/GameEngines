@@ -1,4 +1,4 @@
-﻿using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
 using System.Collections.Generic;
 
 namespace GameEngine.PMR.Process
@@ -17,12 +17,12 @@ namespace GameEngine.PMR.Process
         /// An IGameServiceSetup configuring the game service that will be loaded and run during the whole lifetime of the process
         /// </summary>
         /// <returns>An instance of a custom IGameServiceSetup</returns>
-        IGameServiceSetup GetServiceSetup();
+        IGameModuleSetup GetServiceSetup();
 
         /// <summary>
         /// An ordered list of IGameModeSetups configuring the game modes that are expected to be loaded and run one after another by the process
         /// </summary>
         /// <returns>A list of custom instances of IGameModeSetup</returns>
-        List<IGameModeSetup> GetFirstGameModes();
+        List<IGameModuleSetup> GetFirstGameModes();
     }
 }

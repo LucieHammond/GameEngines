@@ -1,5 +1,5 @@
-﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
@@ -8,11 +8,13 @@ using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class StubGameModeSetup : IGameModeSetup
+    public class StubGameModeSetup : IGameModuleSetup
     {
         public string Name => CustomName ?? "TestMode";
 
         public Type RequiredServiceSetup => CustomRequiredService ?? typeof(StubGameServiceSetup);
+
+        public Type RequiredParentSetup => null;
 
         public string CustomName;
         public Type CustomRequiredService;

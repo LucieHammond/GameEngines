@@ -1,5 +1,5 @@
-﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
@@ -8,11 +8,13 @@ using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class StubGameServiceSetup : IGameServiceSetup
+    public class StubGameServiceSetup : IGameModuleSetup
     {
         public string Name => CustomName ?? "TestServices";
 
-        public bool CheckAppRequirements() => true;
+        public Type RequiredServiceSetup => null;
+
+        public Type RequiredParentSetup => null;
 
         public string CustomName;
         public IEnumerable<GameRule> CustomRules;

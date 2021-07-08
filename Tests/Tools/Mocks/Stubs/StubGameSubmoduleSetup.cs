@@ -1,5 +1,5 @@
-﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Modules.Policies;
 using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class StubGameSubmoduleSetup : IGameSubmoduleSetup
+    public class StubGameSubmoduleSetup : IGameModuleSetup
     {
         public string Name => CustomName ?? "TestSubmodule";
 

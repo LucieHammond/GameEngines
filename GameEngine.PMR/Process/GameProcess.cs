@@ -2,7 +2,6 @@
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process.Orchestration;
-using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules.Dependencies;
 using System;
 using System.Collections.Generic;
@@ -50,8 +49,8 @@ namespace GameEngine.PMR.Process
 
         private Orchestrator m_GameServiceOrchestrator;
         private Orchestrator m_GameModeOrchestrator;
-        private IGameServiceSetup m_ServiceSetup;
-        private Queue<IGameModeSetup> m_GameModesToCome;
+        private IGameModuleSetup m_ServiceSetup;
+        private Queue<IGameModuleSetup> m_GameModesToCome;
         private Dictionary<Type, Configuration> m_Configurations;
         private bool m_IsPaused;
 
@@ -68,7 +67,7 @@ namespace GameEngine.PMR.Process
             m_GameServiceOrchestrator = new Orchestrator("GameServices", this, null);
             m_GameModeOrchestrator = new Orchestrator("GameMode", this, null);
             m_ServiceSetup = setup.GetServiceSetup();
-            m_GameModesToCome = new Queue<IGameModeSetup>(setup.GetFirstGameModes());
+            m_GameModesToCome = new Queue<IGameModuleSetup>(setup.GetFirstGameModes());
             m_Configurations = new Dictionary<Type, Configuration>();
             m_IsPaused = false;
         }
@@ -210,7 +209,7 @@ namespace GameEngine.PMR.Process
         /// </summary>
         /// <param name="setup">The setup defining the new mode to load</param>
         /// <param name="configuration">The initial configuration of the mode. If not set, a pre-registered configuration will be used</param>
-        public void SwitchToGameMode(IGameModeSetup setup, Configuration configuration = null)
+        public void SwitchToGameMode(IGameModuleSetup setup, Configuration configuration = null)
         {
             if (m_GameServiceOrchestrator.IsOperational)
             {
@@ -249,13 +248,13 @@ namespace GameEngine.PMR.Process
         /// </summary>
         /// <param name="gameModes">The ordered list of modes to be run in the future</param>
         /// <param name="replace">If the new given list of modes should replace the existing one</param>
-        public void PlanIncomingGameModes(List<IGameModeSetup> gameModes, bool replace)
+        public void PlanIncomingGameModes(List<IGameModuleSetup> gameModes, bool replace)
         {
             if (replace)
-                m_GameModesToCome = new Queue<IGameModeSetup>(gameModes);
+                m_GameModesToCome = new Queue<IGameModuleSetup>(gameModes);
             else
             {
-                foreach (IGameModeSetup mode in gameModes)
+                foreach (IGameModuleSetup mode in gameModes)
                 {
                     m_GameModesToCome.Enqueue(mode);
                 }

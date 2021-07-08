@@ -1,11 +1,10 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.System;
-using GameEngine.PMR.Modules;
-using GameEngine.PMR.Modules.Transitions;
-using GameEngine.PMR.Process.Structure;
+using GameEngine.PMR.Process.Orchestration;
+using GameEngine.PMR.Process.Transitions;
 using System;
 
-namespace GameEngine.PMR.Process.Orchestration
+namespace GameEngine.PMR.Modules
 {
     /// <summary>
     /// A static class providing safe public interfaces for requiring changes on a GameModule (which will be handled by an orchestrator)
@@ -48,7 +47,7 @@ namespace GameEngine.PMR.Process.Orchestration
         /// <param name="subcategory">The name of the new subcategory to which the submodule (and its successors) will be attached</param>
         /// <param name="setup">The setup defining the submodule to load</param>
         /// <param name="configuration">The initial configuration of the submodule. If not set, a pre-registered configuration will be used</param>
-        public static void LoadSubmodule(this GameModule module, string subcategory, IGameSubmoduleSetup setup, Configuration configuration = null)
+        public static void LoadSubmodule(this GameModule module, string subcategory, IGameModuleSetup setup, Configuration configuration = null)
         {
             try
             {
@@ -101,7 +100,7 @@ namespace GameEngine.PMR.Process.Orchestration
         /// </summary>
         /// <param name="module">The current module</param>
         /// <returns>The current transition activity, managed by the orchestrator</returns>
-        public static TransitionActivity GetTransition(this GameModule module)
+        public static Transition GetTransition(this GameModule module)
         {
             return module.Orchestrator.CurrentTransition;
         }
