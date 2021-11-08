@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "displayName": "GameEngine Core",
   "description": "Common tools for game development",
-  "unity": "2019.2",
-  "unityRelease": "0f1",
+  "unity": "2019.4",
+  "unityRelease": "32f1",
   "keywords": [
+    "utilities",
     "logger",
-    "fsm",
-    "utils",
-    "debug"
+    "state machines",
+    "object pools",
+    "configurations",
+    "data descriptors",
+    "rendering helpers"
   ],
   "author": {
     "name": "Lucie Hammond",

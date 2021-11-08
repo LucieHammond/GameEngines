@@ -31,7 +31,7 @@ namespace GameEngine.Core.UnityEditor.Settings
         [MenuItem("GameEngine/User Settings/Log Settings", priority = 1)]
         public static void DisplayLogSettings()
         {
-            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<LogSettings>(LogSettings.ASSET_NAME, SettingsScope.User); ;
+            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<LogSettings>(LogSettings.ASSET_NAME, SettingsScope.User);
         }
 
         /// <summary>

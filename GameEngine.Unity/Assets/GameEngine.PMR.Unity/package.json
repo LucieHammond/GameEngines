@@ -1,15 +1,15 @@
 {
-  "name": "org.gameengine.pjr.unity",
+  "name": "org.gameengine.pmr.unity",
   "version": "1.0.0",
-  "displayName": "GameEngine PJR",
-  "description": "Framework implementing a Process-Job-Rule architecture",
-  "unity": "2019.2",
-  "unityRelease": "0f1",
+  "displayName": "GameEngine PMR",
+  "description": "Framework implementing a Process-Module-Rule architecture",
+  "unity": "2019.4",
+  "unityRelease": "32f1",
   "keywords": [
     "process",
-    "job",
+    "module",
     "rule",
-    "service"
+    "service",
     "mode"
   ],
   "author": {
