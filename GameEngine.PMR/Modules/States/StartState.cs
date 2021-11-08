@@ -20,6 +20,8 @@ namespace GameEngine.PMR.Modules.States
         public override void Enter()
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Created");
+
+            m_GameModule.ReportLoadingProgress(0f);
         }
 
         public override void Update()

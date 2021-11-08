@@ -1,0 +1,20 @@
+{
+    "name": "GameEngine.PMR.Unity.Editor",
+    "references": [
+        "GameEngine.PMR.Unity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "GameEngine.Core.dll",
+        "GameEngine.PMR.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

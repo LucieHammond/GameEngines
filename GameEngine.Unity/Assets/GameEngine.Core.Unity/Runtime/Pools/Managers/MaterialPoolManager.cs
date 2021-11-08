@@ -1,4 +1,4 @@
-﻿using GameEngine.Core.Pools.Descriptors;
+﻿using GameEngine.Core.Descriptors;
 using GameEngine.Core.Pools.Poolers;
 using UnityEngine;
 

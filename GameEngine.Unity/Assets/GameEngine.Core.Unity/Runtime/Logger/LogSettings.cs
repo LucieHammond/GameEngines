@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = System.Random;
 
 namespace GameEngine.Core.Logger
 {
@@ -84,7 +85,7 @@ namespace GameEngine.Core.Logger
             }
             catch (UnityException)
             {
-                System.Random rand = new System.Random(tag.GetHashCode());
+                Random rand = new Random(tag.GetHashCode());
                 return new Color(0.1f + 0.9f * (float)rand.NextDouble(), 0.1f + 0.9f * (float)rand.NextDouble(), 0.1f + 0.9f * (float)rand.NextDouble());
             }
         }

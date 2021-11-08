@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "displayName": "GameEngine MVC",
   "description": "Framework implementing the Model-View-Controller pattern",
-  "unity": "2019.2",
-  "unityRelease": "0f1",
+  "unity": "2019.4",
+  "unityRelease": "32f1",
   "keywords": [
     "model",
     "view",

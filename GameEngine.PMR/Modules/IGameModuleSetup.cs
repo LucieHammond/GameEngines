@@ -1,5 +1,6 @@
 ﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Modules.Transitions;
+using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
 using System;
@@ -16,6 +17,18 @@ namespace GameEngine.PMR.Modules
         /// The name of the module
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// The service setup that the submodule requires (its rules can have service dependencies to it).
+        /// Set null if no service setup is required
+        /// </summary>
+        Type RequiredServiceSetup { get; }
+
+        /// <summary>
+        /// The parent module setup that the submodule requires (its rules can have rule dependencies to it, and recursively to all the hierarchy).
+        /// Set null if no parent module setup is required
+        /// </summary>
+        Type RequiredParentSetup { get; }
 
         /// <summary>
         /// Instantiate all the rules of the module and add them to the given RulesDictionary
@@ -61,9 +74,15 @@ namespace GameEngine.PMR.Modules
         PerformancePolicy GetPerformancePolicy();
 
         /// <summary>
+        /// Define a number of additional custom specialized tasks to be performed before initialization and after unload
+        /// </summary>
+        /// <returns>A list of SpecializedTask to be executed, possibly empty</returns>
+        List<SpecializedTask> GetSpecializedTasks();
+
+        /// <summary>
         /// Define the transition activity that should be displayed when the module is loaded or unloaded
         /// </summary>
-        /// <returns>A TransitionActivity object, or null if no transition should be used</returns>
-        TransitionActivity GetTransitionActivity();
+        /// <returns>A Transition object, or null if no transition should be used</returns>
+        Transition GetTransition();
     }
 }

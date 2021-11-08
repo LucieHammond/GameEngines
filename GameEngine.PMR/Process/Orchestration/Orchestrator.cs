@@ -2,9 +2,8 @@
 using GameEngine.Core.Logger;
 using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
-using GameEngine.PMR.Modules.Transitions;
 using GameEngine.PMR.Process.Orchestration.States;
-using GameEngine.PMR.Process.Structure;
+using GameEngine.PMR.Process.Transitions;
 using System;
 using System.Collections.Generic;
 
@@ -27,7 +26,7 @@ namespace GameEngine.PMR.Process.Orchestration
         internal Orchestrator Parent;
         internal List<Orchestrator> Children;
         internal GameModule CurrentModule;
-        internal TransitionActivity CurrentTransition;
+        internal Transition CurrentTransition;
 
         internal Action AwaitingAction;
         internal Action OnReset;
@@ -91,7 +90,7 @@ namespace GameEngine.PMR.Process.Orchestration
                 CurrentModule.InnerLoad();
                 CurrentModule.OnFinishLoading += onFinish;
             },
-            setup.GetTransitionActivity());
+            setup.GetTransition());
         }
 
         internal void UnloadModule()
@@ -137,7 +136,7 @@ namespace GameEngine.PMR.Process.Orchestration
                     CurrentModule.OnFinishLoading += onFinish;
                 };
             },
-            setup.GetTransitionActivity());
+            setup.GetTransition());
         }
 
         internal void AddSubmodule(string subcategory, IGameModuleSetup setup, Configuration configuration = null)
@@ -196,41 +195,22 @@ namespace GameEngine.PMR.Process.Orchestration
         #region private
         private bool CheckModuleValidity(IGameModuleSetup moduleSetup, GameModule parent)
         {
-            if (moduleSetup is IGameSubmoduleSetup submoduleSetup)
+            if (moduleSetup.RequiredServiceSetup != null && moduleSetup.RequiredServiceSetup != MainProcess.Services.Id)
             {
-                if (submoduleSetup.RequiredServiceSetup != null && submoduleSetup.RequiredServiceSetup != MainProcess.Services.Id)
-                {
-                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current services: {MainProcess.Services.Id}. Expected services: {submoduleSetup.RequiredServiceSetup}");
-                    return false;
-                }
+                Log.Error(TAG, $"Requirements are not met for module {moduleSetup.Name}. Current services: {MainProcess.Services.Id}. Expected services: {moduleSetup.RequiredServiceSetup}");
+                return false;
+            }
 
-                if (submoduleSetup.RequiredParentSetup != null && submoduleSetup.RequiredParentSetup != parent?.Id)
-                {
-                    Log.Error(TAG, $"Invalid submodule {submoduleSetup.Name}. Current parent module: {parent?.Id}. Expected parent module: {submoduleSetup.RequiredParentSetup}");
-                    return false;
-                }
-            }
-            else if (moduleSetup is IGameModeSetup modeSetup)
+            if (moduleSetup.RequiredParentSetup != null && moduleSetup.RequiredParentSetup != parent?.Id)
             {
-                if (modeSetup.RequiredServiceSetup != null && modeSetup.RequiredServiceSetup != MainProcess.Services.Id)
-                {
-                    Log.Error(TAG, $"Invalid game mode {modeSetup.Name}. Current services: {MainProcess.Services.Id}. Expected services: {modeSetup.RequiredServiceSetup}");
-                    return false;
-                }
-            }
-            else if (moduleSetup is IGameServiceSetup serviceSetup)
-            {
-                if (!serviceSetup.CheckAppRequirements())
-                {
-                    Log.Error(TAG, $"Invalid services {serviceSetup.Name}. Application requirements are not met for these services");
-                    return false;
-                }
+                Log.Error(TAG, $"Requirements are not met for module {moduleSetup.Name}. Current parent module: {parent?.Id}. Expected parent module: {moduleSetup.RequiredParentSetup}");
+                return false;
             }
 
             return true;
         }
 
-        private void StartOrPlanModuleOperation(OperationDelegate moduleOperation, TransitionActivity transition)
+        private void StartOrPlanModuleOperation(OperationDelegate moduleOperation, Transition transition)
         {
             void performOperationWithTransition(bool skipEnter = false)
             {

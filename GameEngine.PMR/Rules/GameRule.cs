@@ -7,7 +7,7 @@ using System;
 namespace GameEngine.PMR.Rules
 {
     /// <summary>
-    /// Abstract template representing a GameRule. Each custom rule in a project must inherit from this class (or from a derivative)
+    /// Abstract template representing a game rule. Each custom rule in a project must inherit from this class (or from a derivative)
     /// </summary>
     public abstract class GameRule
     {

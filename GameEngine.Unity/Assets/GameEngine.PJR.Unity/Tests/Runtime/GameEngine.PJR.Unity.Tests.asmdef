@@ -1,9 +1,0 @@
-{
-    "name": "GameEngine.PJR.Unity.Tests",
-    "references": [
-        "GameEngine.PJR.Unity"
-    ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ]
-}

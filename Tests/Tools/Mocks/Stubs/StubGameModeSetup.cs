@@ -1,6 +1,7 @@
-﻿using GameEngine.PMR.Modules.Policies;
-using GameEngine.PMR.Modules.Transitions;
-using GameEngine.PMR.Process.Structure;
+﻿using GameEngine.PMR.Modules;
+using GameEngine.PMR.Modules.Policies;
+using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
 using System;
@@ -8,11 +9,13 @@ using System.Collections.Generic;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class StubGameModeSetup : IGameModeSetup
+    public class StubGameModeSetup : IGameModuleSetup
     {
         public string Name => CustomName ?? "TestMode";
 
         public Type RequiredServiceSetup => CustomRequiredService ?? typeof(StubGameServiceSetup);
+
+        public Type RequiredParentSetup => null;
 
         public string CustomName;
         public Type CustomRequiredService;
@@ -23,7 +26,7 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
         public List<RuleScheduling> CustomLateUpdateScheduler;
         public ExceptionPolicy CustomExceptionPolicy;
         public PerformancePolicy CustomPerformancePolicy;
-        public TransitionActivity CustomTransitionActivity;
+        public Transition CustomTransition;
 
         public void SetRules(ref RulesDictionary rules)
         {
@@ -107,10 +110,18 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
             };
         }
 
-        public TransitionActivity GetTransitionActivity()
+        public List<SpecializedTask> GetSpecializedTasks()
         {
-            if (CustomTransitionActivity != null)
-                return CustomTransitionActivity;
+            return new List<SpecializedTask>()
+            {
+                new StubSpecializedTask()
+            };
+        }
+
+        public Transition GetTransition()
+        {
+            if (CustomTransition != null)
+                return CustomTransition;
 
             return null;
         }

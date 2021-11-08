@@ -34,12 +34,12 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Unload rules");
 
-            m_RulesToUnloadEnumerator = m_GameModule.Rules.GetRulesInReverseOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
+            m_GameModule.ReportLoadingProgress(0f);
+
             m_Performance = m_GameModule.PerformancePolicy;
             m_SkipCurrrentRule = false;
             m_NbStallingWarnings = 0;
-
-            m_GameModule.ReportLoadingProgress(0f);
+            m_RulesToUnloadEnumerator = m_GameModule.Rules.GetRulesInReverseOrder(m_GameModule.InitUnloadOrder).GetEnumerator();
             if (!m_RulesToUnloadEnumerator.MoveNext())
                 m_RulesToUnloadEnumerator = null;
         }

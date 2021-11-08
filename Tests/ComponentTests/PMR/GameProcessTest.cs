@@ -1,7 +1,6 @@
 ﻿using GameEngine.Core.System;
 using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process;
-using GameEngine.PMR.Process.Structure;
 using GameEngine.PMR.Rules;
 using GameEnginesTest.Tools.Mocks.Fakes;
 using GameEnginesTest.Tools.Mocks.Stubs;
@@ -51,7 +50,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(GameModuleState.UpdateRules, process.Services.State);
             Assert.IsNotNull(process.ServiceProvider);
             Assert.IsNotNull(process.CurrentGameMode);
-            Assert.IsTrue(process.CurrentGameMode.State == GameModuleState.Start || process.CurrentGameMode.State == GameModuleState.Setup);
+            Assert.IsTrue(process.CurrentGameMode.State == GameModuleState.Start || process.CurrentGameMode.State == GameModuleState.Configure);
 
             // Run simulation until first game mode is loaded
             Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
@@ -87,7 +86,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             process.Start();
 
             // Initialize process with a custom game mode
-            IGameModeSetup customMode = GetCustomGameModeSetup("CustomMode");
+            IGameModuleSetup customMode = GetCustomGameModeSetup("CustomMode");
             process.SwitchToGameMode(customMode, null);
             process.SimulateExecutionUntil(m_Time, () => process.IsFullyOperational);
             Assert.AreEqual(setup.GetServiceSetup().Name, process.Services.Name);
@@ -95,7 +94,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(customMode.Name, process.CurrentGameMode.Name);
 
             // Switch to a new game mode
-            IGameModeSetup newMode = GetCustomGameModeSetup("NewMode");
+            IGameModuleSetup newMode = GetCustomGameModeSetup("NewMode");
             Configuration newConfig = new Configuration();
             process.SwitchToGameMode(newMode, newConfig);
             process.SimulateOneFrame(m_Time);
@@ -105,10 +104,10 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(newConfig, process.CurrentGameMode.Configuration);
 
             // Prepare the next game modes to come
-            IGameModeSetup firstMode = GetCustomGameModeSetup("FirstMode");
-            IGameModeSetup secondMode = GetCustomGameModeSetup("SecondMode");
-            IGameModeSetup thirdMode = GetCustomGameModeSetup("ThirdMode");
-            process.PlanIncomingGameModes(new List<IGameModeSetup>() { firstMode, secondMode, thirdMode }, true);
+            IGameModuleSetup firstMode = GetCustomGameModeSetup("FirstMode");
+            IGameModuleSetup secondMode = GetCustomGameModeSetup("SecondMode");
+            IGameModuleSetup thirdMode = GetCustomGameModeSetup("ThirdMode");
+            process.PlanIncomingGameModes(new List<IGameModuleSetup>() { firstMode, secondMode, thirdMode }, true);
 
             // Switch from mode to mode according to the plan
             Assert.IsTrue(process.SwitchToNextGameMode());
@@ -122,7 +121,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.AreEqual(secondMode.Name, process.CurrentGameMode.Name);
 
             // Clear queue of incoming game modes
-            process.PlanIncomingGameModes(new List<IGameModeSetup>(), true);
+            process.PlanIncomingGameModes(new List<IGameModuleSetup>(), true);
             Assert.IsFalse(process.SwitchToNextGameMode());
 
             // Unload current game mode by switching to a null one
@@ -206,13 +205,13 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Create a process with those GameService and GameMode setups
             StubGameProcessSetup processSetup = new StubGameProcessSetup();
             processSetup.CustomServiceSetup = servicesSetup;
-            processSetup.CustomGameModes = new List<IGameModeSetup>() { modeSetup };
+            processSetup.CustomGameModes = new List<IGameModuleSetup>() { modeSetup };
             setup = processSetup;
 
             return new GameProcess(processSetup, m_Time);
         }
 
-        private IGameModeSetup GetCustomGameModeSetup(string name)
+        private IGameModuleSetup GetCustomGameModeSetup(string name)
         {
             // Create an empty GameMode setup with a custom name
             StubGameModeSetup modeSetup = new StubGameModeSetup();
