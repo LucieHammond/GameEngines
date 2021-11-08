@@ -16,7 +16,6 @@ namespace GameEngine.PMR.Process.Transitions
     public class ScreenTransition : Transition
     {
         private const string TAG = "ScreenTransition";
-        private const string TRANSITION_LAYER = "Transition";
 
         /// <summary>
         /// A loading screen that should be managed by the transition
@@ -180,7 +179,6 @@ namespace GameEngine.PMR.Process.Transitions
                 return default;
             }
 
-            canvasObject.layer = LayerMask.NameToLayer(TRANSITION_LAYER);
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 1000;
             return canvas;

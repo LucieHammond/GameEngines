@@ -11,8 +11,6 @@ namespace GameEngine.PMR.Process.Transitions
     /// </summary>
     public class ImageTransition : Transition
     {
-        private const string TRANSITION_LAYER = "Transition";
-
         private ImageDescriptor m_ImageDescriptor;
         private GameObject m_CanvasObject;
         private Image m_ImageComponent;
@@ -36,8 +34,6 @@ namespace GameEngine.PMR.Process.Transitions
         protected override void Initialize()
         {
             m_CanvasObject = new GameObject("Transition Root");
-            m_CanvasObject.layer = LayerMask.NameToLayer(TRANSITION_LAYER);
-
             Canvas canvas = m_CanvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 1000;

@@ -16,7 +16,6 @@ namespace GameEngine.PMR.Process.Transitions
     public class WorldTransition : Transition
     {
         private const string TAG = "WorldTransition";
-        private const string TRANSITION_LAYER = "Transition";
 
         /// <summary>
         /// The solid color of the panel that separates the module scene from the transition scene (default is black)
@@ -179,7 +178,6 @@ namespace GameEngine.PMR.Process.Transitions
                 return null;
             }
 
-            camera.cullingMask = LayerMask.NameToLayer(TRANSITION_LAYER);
             camera.depth = 1;
             return camera;
         }
