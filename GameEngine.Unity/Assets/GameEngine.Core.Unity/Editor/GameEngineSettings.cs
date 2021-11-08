@@ -5,13 +5,13 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameEngine.Core.UnityEditor.Settings
+namespace GameEngine.Core.UnityEditor
 {
     public static class GameEngineSettings
     {
         private const string TAG = "GameEngineSettings";
 
-        private const string SETTINGS_FOLDER_DEFAULT = "Assets/Frameworks/GameEngine";
+        private const string SETTINGS_FOLDER_DEFAULT = "Assets/Packages/GameEngine";
         private const string ROOT_FILE_NAME = "gameengine_settings_root";
 
         private static string m_SettingsFolder;

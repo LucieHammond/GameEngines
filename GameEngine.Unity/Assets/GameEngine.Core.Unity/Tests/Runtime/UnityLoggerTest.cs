@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Test
+namespace GameEngine.Core.Tests
 {
     /// <summary>
     /// Component tests for the UnityLogger class implementing ILogger interface
