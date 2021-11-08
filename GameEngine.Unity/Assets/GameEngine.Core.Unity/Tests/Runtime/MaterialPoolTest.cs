@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Test
+namespace GameEngine.Core.Tests
 {
     /// <summary>
     /// Component tests for the MaterialPoolManager class
@@ -30,11 +30,7 @@ namespace GameEngine.Core.Test
                 PoolId = "material_test_pool",
                 InitialSize = 10,
                 IsExtensible = true,
-                ObjectDescriptor = new MaterialDescriptor()
-                {
-                    Shader = Shader.Find("Standard"),
-                    MainColor = Color.red
-                }
+                ObjectDescriptor = (MaterialDescriptor)Resources.Load("TestDescriptors/material_descriptor")
             };
         }
 

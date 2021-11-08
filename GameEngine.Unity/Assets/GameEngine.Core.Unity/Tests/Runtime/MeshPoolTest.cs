@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Test
+namespace GameEngine.Core.Tests
 {
     /// <summary>
     /// Component tests for the MeshPoolManager class
@@ -25,39 +25,12 @@ namespace GameEngine.Core.Test
         [SetUp]
         public void Initialize()
         {
-            Vector3[] vertices = new Vector3[4]
-            {
-                new Vector3(-10, 0, -10),
-                new Vector3(-10, 0, 10),
-                new Vector3(10, 0, -10),
-                new Vector3(10, 0, 10)
-            };
-
-            int[] triangles = new int[6]
-            {
-                0, 1, 2,
-                3, 2, 1
-            };
-
-            Vector2[] uvs = new Vector2[4]
-            {
-                new Vector2(-1, -1),
-                new Vector2(-1, 1),
-                new Vector2(1, -1),
-                new Vector2(1, 1)
-            };
-
             m_PoolDescriptor = new PoolDescriptor<MeshDescriptor>()
             {
                 PoolId = "mesh_test_pool",
                 InitialSize = 10,
                 IsExtensible = true,
-                ObjectDescriptor = new MeshDescriptor()
-                {
-                    Vertices = vertices,
-                    Triangles = triangles,
-                    UV = uvs
-                }
+                ObjectDescriptor = (MeshDescriptor)Resources.Load("TestDescriptors/mesh_descriptor")
             };
         }
 

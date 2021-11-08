@@ -9,7 +9,7 @@ namespace GameEngine.Core.Pools.Poolers
     public class GameObjectPooler : IObjectPooler<GameObject>
     {
         private readonly GameObject m_ReferencePrefab;
-        private readonly Transform m_Parent;
+        private readonly string m_ParentName;
         private int m_ObjectCount;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace GameEngine.Core.Pools.Poolers
         public GameObjectPooler(GameObjectDescriptor descriptor)
         {
             m_ReferencePrefab = descriptor.ReferencePrefab;
-            m_Parent = descriptor.Parent;
+            m_ParentName = descriptor.ParentName;
             m_ObjectCount = 0;
         }
 
@@ -29,7 +29,8 @@ namespace GameEngine.Core.Pools.Poolers
         public GameObject CreateObject()
         {
             m_ObjectCount++;
-            GameObject gameObject = Object.Instantiate(m_ReferencePrefab, m_Parent);
+            GameObject parent = GameObject.Find(m_ParentName) ?? new GameObject(m_ParentName);
+            GameObject gameObject = Object.Instantiate(m_ReferencePrefab, parent.transform);
             gameObject.gameObject.name = $"{m_ReferencePrefab.name}_{m_ObjectCount}";
             gameObject.SetActive(false);
             return gameObject;

@@ -5,7 +5,8 @@ namespace GameEngine.Core.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a 2D texture
     /// </summary>
-    public struct TextureDescriptor
+    [CreateAssetMenu(fileName = "NewTextureDescriptor", menuName = "Content Descriptors/Texture Descriptor", order = 1)]
+    public class TextureDescriptor : ScriptableObject
     {
         /// <summary>
         /// The width of the texture in pixels

@@ -1,11 +1,13 @@
-﻿using UnityEngine.Video;
+﻿using UnityEngine;
+using UnityEngine.Video;
 
 namespace GameEngine.Core.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a video player
     /// </summary>
-    public struct VideoDescriptor
+    [CreateAssetMenu(fileName = "NewVideoDescriptor", menuName = "Content Descriptors/Video Descriptor", order = 12)]
+    public class VideoDescriptor : ScriptableObject
     {
         /// <summary>
         /// The clip being played by the video player

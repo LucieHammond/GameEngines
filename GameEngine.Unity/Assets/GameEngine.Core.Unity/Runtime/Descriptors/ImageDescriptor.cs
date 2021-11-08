@@ -6,7 +6,8 @@ namespace GameEngine.Core.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure an UI image
     /// </summary>
-    public struct ImageDescriptor
+    [CreateAssetMenu(fileName = "NewImageDescriptor", menuName = "Content Descriptors/Image Descriptor", order = 10)]
+    public class ImageDescriptor : ScriptableObject
     {
         /// <summary>
         /// The source image data (registered as sprite) that is used to render the image object

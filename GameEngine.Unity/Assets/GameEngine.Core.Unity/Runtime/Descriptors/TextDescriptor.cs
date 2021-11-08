@@ -5,7 +5,8 @@ namespace GameEngine.Core.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a UI text
     /// </summary>
-    public struct TextDescriptor
+    [CreateAssetMenu(fileName = "NewTextDescriptor", menuName = "Content Descriptors/Text Descriptor", order = 11)]
+    public class TextDescriptor : ScriptableObject
     {
         /// <summary>
         /// The string value the text object should display

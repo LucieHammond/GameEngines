@@ -5,7 +5,8 @@ namespace GameEngine.Core.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a gameobject
     /// </summary>
-    public struct GameObjectDescriptor
+    [CreateAssetMenu(fileName = "NewGameObjectDescriptor", menuName = "Content Descriptors/GameObject Descriptor", order = 3)]
+    public class GameObjectDescriptor : ScriptableObject
     {
         /// <summary>
         /// The prefab that serves as a reference to create the gameobject
@@ -13,8 +14,8 @@ namespace GameEngine.Core.Descriptors
         public GameObject ReferencePrefab;
 
         /// <summary>
-        /// The parent transform under which to create the gameobject in the scene hierarchy
+        /// The name of the parent object under which to create the gameobject in the scene hierarchy
         /// </summary>
-        public Transform Parent;
+        public string ParentName;
     }
 }

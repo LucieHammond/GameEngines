@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Test
+namespace GameEngine.Core.Tests
 {
     /// <summary>
     /// Component tests for the GameObjectPoolManager class
@@ -28,20 +28,16 @@ namespace GameEngine.Core.Test
         [SetUp]
         public void Initialize()
         {
-            m_TestPrefab = (GameObject)Resources.Load("test_cube");
-            m_PoolRoot = new GameObject("Test Pool").transform;
-
             m_PoolDescriptor = new PoolDescriptor<GameObjectDescriptor>()
             {
                 PoolId = "go_test_pool",
                 InitialSize = 10,
                 IsExtensible = true,
-                ObjectDescriptor = new GameObjectDescriptor()
-                {
-                    ReferencePrefab = m_TestPrefab,
-                    Parent = m_PoolRoot
-                }
+                ObjectDescriptor = (GameObjectDescriptor)Resources.Load("TestDescriptors/gameobject_descriptor")
             };
+
+            m_TestPrefab = m_PoolDescriptor.ObjectDescriptor.ReferencePrefab;
+            m_PoolRoot = new GameObject(m_PoolDescriptor.ObjectDescriptor.ParentName).transform;
         }
 
         [TearDown]
@@ -49,6 +45,7 @@ namespace GameEngine.Core.Test
         {
             m_PoolManager.Clear();
             Object.Destroy(m_PoolRoot.gameObject);
+            m_PoolRoot.gameObject.SetActive(false);
         }
 
         [UnityTest]
@@ -78,6 +75,8 @@ namespace GameEngine.Core.Test
         [UnityTest]
         public IEnumerator ActivateObjectWhenRequested()
         {
+            yield return null;
+
             m_PoolManager.CreatePool(m_PoolDescriptor);
             GameObject gameObject = m_PoolManager.GetObjectFromPool(m_PoolDescriptor.PoolId);
             yield return null;

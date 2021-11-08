@@ -6,7 +6,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Test
+namespace GameEngine.Core.Tests
 {
     /// <summary>
     /// Component tests for the TexturePoolManager class
@@ -30,17 +30,7 @@ namespace GameEngine.Core.Test
                 PoolId = "texture_test_pool",
                 InitialSize = 10,
                 IsExtensible = true,
-                ObjectDescriptor = new TextureDescriptor()
-                {
-                    Width = 64,
-                    Height = 64,
-                    Format = TextureFormat.DXT1,
-                    UseMipMap = true,
-                    Linear = false,
-                    FilterMode = FilterMode.Bilinear,
-                    WrapMode = TextureWrapMode.Repeat,
-                    AnisoLevel = 1
-                }
+                ObjectDescriptor = (TextureDescriptor)Resources.Load("TestDescriptors/texture_descriptor")
             };
         }
 

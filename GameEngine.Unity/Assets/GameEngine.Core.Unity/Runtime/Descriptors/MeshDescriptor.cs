@@ -5,7 +5,8 @@ namespace GameEngine.Core.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a mesh
     /// </summary>
-    public struct MeshDescriptor
+    [CreateAssetMenu(fileName = "NewMeshDescriptor", menuName = "Content Descriptors/Mesh Descriptor", order = 0)]
+    public class MeshDescriptor : ScriptableObject
     {
         /// <summary>
         /// The positions of the mesh vertices
