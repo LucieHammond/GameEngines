@@ -15,7 +15,7 @@ namespace GameEngine.PMR.Modules.States
         public override GameModuleState Id => GameModuleState.PostUnload;
 
         private GameModule m_GameModule;
-        private IEnumerator<SpecializedTask> m_TasksEnumerator;
+        private IEnumerator<SpecialTask> m_TasksEnumerator;
         private Stopwatch m_UpdateTime;
 
         internal PostUnloadState(GameModule gameModule)
@@ -30,7 +30,7 @@ namespace GameEngine.PMR.Modules.States
 
             m_GameModule.ReportLoadingProgress(0f);
 
-            m_TasksEnumerator = m_GameModule.SpecializedTasks.GetEnumerator();
+            m_TasksEnumerator = m_GameModule.SpecialTasks.GetEnumerator();
             if (!m_TasksEnumerator.MoveNext())
                 m_TasksEnumerator = null;
         }
@@ -49,8 +49,8 @@ namespace GameEngine.PMR.Modules.States
 
                 try
                 {
-                    if (m_TasksEnumerator.Current.State == SpecializedTaskState.InitRunning ||
-                    m_TasksEnumerator.Current.State == SpecializedTaskState.InitCompleted)
+                    if (m_TasksEnumerator.Current.State == SpecialTaskState.InitRunning ||
+                    m_TasksEnumerator.Current.State == SpecialTaskState.InitCompleted)
                     {
                         m_TasksEnumerator.Current.BaseUnload(m_GameModule.Rules);
                     }
@@ -63,8 +63,8 @@ namespace GameEngine.PMR.Modules.States
                     m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringUnload);
                 }
 
-                if (m_TasksEnumerator.Current.State == SpecializedTaskState.UnloadCompleted ||
-                    m_TasksEnumerator.Current.State == SpecializedTaskState.Created)
+                if (m_TasksEnumerator.Current.State == SpecialTaskState.UnloadCompleted ||
+                    m_TasksEnumerator.Current.State == SpecialTaskState.Created)
                 {
                     if (!m_TasksEnumerator.MoveNext())
                         m_TasksEnumerator = null;

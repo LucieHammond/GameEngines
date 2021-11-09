@@ -1,9 +1,9 @@
 ﻿namespace GameEngine.PMR.Modules.Specialization
 {
     /// <summary>
-    /// All possible states a SpecializedTask can take during its lifecycle
+    /// All possible states a SpecialTask can take during its lifecycle
     /// </summary>
-    public enum SpecializedTaskState
+    public enum SpecialTaskState
     {
         /// <summary>
         /// The task has been created but is not yet running

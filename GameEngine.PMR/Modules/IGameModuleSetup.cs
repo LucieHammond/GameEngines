@@ -74,10 +74,10 @@ namespace GameEngine.PMR.Modules
         PerformancePolicy GetPerformancePolicy();
 
         /// <summary>
-        /// Define a number of additional custom specialized tasks to be performed before initialization and after unload
+        /// Define a number of additional specialized tasks to be performed before initialization and after unload
         /// </summary>
-        /// <returns>A list of SpecializedTask to be executed, possibly empty</returns>
-        List<SpecializedTask> GetSpecializedTasks();
+        /// <param name="tasks">The list of special tasks that will be performed by the module, to be completed</param>
+        void SetSpecialTasks(ref List<SpecialTask> tasks);
 
         /// <summary>
         /// Define the transition activity that should be displayed when the module is loaded or unloaded

@@ -80,8 +80,8 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Perform Pre-Initialization state
             Assert.AreEqual(GameModuleState.PreInitialize, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
-            foreach (SpecializedTask task in module.SpecializedTasks)
-                Assert.IsTrue(task.State == SpecializedTaskState.InitCompleted);
+            foreach (SpecialTask task in module.SpecialTasks)
+                Assert.IsTrue(task.State == SpecialTaskState.InitCompleted);
 
             // Perform InitializeRules state
             Assert.AreEqual(GameModuleState.InitializeRules, module.State);
@@ -117,8 +117,8 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Perform Post-Unload state
             Assert.AreEqual(GameModuleState.PostUnload, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
-            foreach (SpecializedTask task in module.SpecializedTasks)
-                Assert.IsTrue(task.State == SpecializedTaskState.UnloadCompleted);
+            foreach (SpecialTask task in module.SpecialTasks)
+                Assert.IsTrue(task.State == SpecialTaskState.UnloadCompleted);
 
             // End up in End state
             Assert.IsTrue(unloadingCompleted);

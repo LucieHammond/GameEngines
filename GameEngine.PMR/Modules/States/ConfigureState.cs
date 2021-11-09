@@ -34,6 +34,7 @@ namespace GameEngine.PMR.Modules.States
             try
             {
                 m_Setup.SetRules(ref m_GameModule.Rules);
+                m_Setup.SetSpecialTasks(ref m_GameModule.SpecialTasks);
 
                 m_GameModule.InitUnloadOrder = m_Setup.GetInitUnloadOrder().Where((ruleType) => m_GameModule.Rules.ContainsKey(ruleType)).ToList();
                 m_GameModule.UpdateScheduler = m_Setup.GetUpdateScheduler().Where((scheduler) => m_GameModule.Rules.ContainsKey(scheduler.RuleType)).ToList();
@@ -42,8 +43,6 @@ namespace GameEngine.PMR.Modules.States
 
                 m_GameModule.ExceptionPolicy = m_Setup.GetExceptionPolicy();
                 m_GameModule.PerformancePolicy = m_Setup.GetPerformancePolicy();
-
-                m_GameModule.SpecializedTasks = m_Setup.GetSpecializedTasks();
 
                 CheckRulesOrderValidity();
                 CheckExceptionPolicyValidity();

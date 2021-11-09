@@ -9,7 +9,7 @@ namespace GameEngine.PMR.Modules.Specialization
     /// <summary>
     /// A module configuration task dedicated to the injection of the GameObject dependencies requested by the rules
     /// </summary>
-    public class GameObjectsInsertionTask : SpecializedTask
+    public class GameObjectsInsertionTask : SpecialTask
     {
         private IEnumerator<KeyValuePair<Type, GameRule>> m_RulesEnumerator;
         private int m_NbRulesCovered;

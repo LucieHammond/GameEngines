@@ -36,7 +36,7 @@ namespace GameEngine.PMR.Modules.States
         {
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Initialize rules");
 
-            m_InitialProgress = m_GameModule.SpecializedTasks.Count / (m_GameModule.SpecializedTasks.Count + 3);
+            m_InitialProgress = m_GameModule.SpecialTasks.Count / (m_GameModule.SpecialTasks.Count + 3);
             m_GameModule.ReportLoadingProgress(m_InitialProgress);
 
             m_Performance = m_GameModule.PerformancePolicy;

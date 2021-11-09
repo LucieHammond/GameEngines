@@ -53,7 +53,7 @@ namespace GameEngine.PMR.Modules
         internal List<RuleScheduling> LateUpdateScheduler;
         internal ExceptionPolicy ExceptionPolicy;
         internal PerformancePolicy PerformancePolicy;
-        internal List<SpecializedTask> SpecializedTasks;
+        internal List<SpecialTask> SpecialTasks;
         internal DependencyProvider DependencyProvider;
         internal Orchestrator Orchestrator;
 
@@ -75,6 +75,7 @@ namespace GameEngine.PMR.Modules
             Configuration = configuration;
             Orchestrator = orchestrator;
             Rules = new RulesDictionary();
+            SpecialTasks = new List<SpecialTask>();
 
             m_IsPaused = false;
             m_StateMachine = new QueueFSM<GameModuleState>($"{Name}FSM",

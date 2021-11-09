@@ -3,11 +3,11 @@ using GameEngine.PMR.Rules;
 
 namespace GameEnginesTest.Tools.Mocks.Stubs
 {
-    public class StubSpecializedTask : SpecializedTask
+    public class StubSpecialTask : SpecialTask
     {
         public override float GetProgress()
         {
-            return State == SpecializedTaskState.InitCompleted ? 1f : 0f;
+            return State == SpecialTaskState.InitCompleted ? 1f : 0f;
         }
 
         protected override void Initialize(RulesDictionary rules)

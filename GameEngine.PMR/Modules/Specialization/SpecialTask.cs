@@ -6,19 +6,19 @@ namespace GameEngine.PMR.Modules.Specialization
     /// <summary>
     /// Abstract template representing a specialized configuration task to apply to a module. Each task figuring in the module setup must implement this class
     /// </summary>
-    public abstract class SpecializedTask
+    public abstract class SpecialTask
     {
         /// <summary>
         /// The state of the task
         /// </summary>
-        public SpecializedTaskState State { get; private set; }
+        public SpecialTaskState State { get; private set; }
 
         /// <summary>
-        /// Default constructor of a SpecializedTask
+        /// Default constructor of a SpecialTask
         /// </summary>
-        public SpecializedTask()
+        public SpecialTask()
         {
-            State = SpecializedTaskState.Created;
+            State = SpecialTaskState.Created;
         }
 
         /// <summary>
@@ -29,13 +29,13 @@ namespace GameEngine.PMR.Modules.Specialization
 
         internal void BaseInitialize(RulesDictionary rules)
         {
-            State = SpecializedTaskState.InitRunning;
+            State = SpecialTaskState.InitRunning;
             Initialize(rules);
         }
 
         internal void BaseUnload(RulesDictionary rules)
         {
-            State = SpecializedTaskState.UnloadRunning;
+            State = SpecialTaskState.UnloadRunning;
             Unload(rules);
         }
 
@@ -68,10 +68,10 @@ namespace GameEngine.PMR.Modules.Specialization
         protected void FinishInitialization()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State != SpecializedTaskState.InitRunning)
+            if (State != SpecialTaskState.InitRunning)
                 throw new InvalidOperationException($"Invalid time context for calling FinishInitialization(). Current state: {State}. Expected state: InitRunning");
 #endif
-            State = SpecializedTaskState.InitCompleted;
+            State = SpecialTaskState.InitCompleted;
         }
 
         /// <summary>
@@ -80,10 +80,10 @@ namespace GameEngine.PMR.Modules.Specialization
         protected void FinishUnload()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State != SpecializedTaskState.UnloadRunning)
+            if (State != SpecialTaskState.UnloadRunning)
                 throw new InvalidOperationException($"Invalid time context for calling FinishUnload(). Current state: {State}. Expected state: UnloadRunning");
 #endif
-            State = SpecializedTaskState.UnloadCompleted;
+            State = SpecialTaskState.UnloadCompleted;
         }
     }
 }
