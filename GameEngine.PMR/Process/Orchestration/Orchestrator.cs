@@ -190,6 +190,7 @@ namespace GameEngine.PMR.Process.Orchestration
             }
             CurrentModule?.InnerQuit();
             CurrentTransition?.BaseCleanup();
+            CurrentModule = null;
         }
 
         #region private

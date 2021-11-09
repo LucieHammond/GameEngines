@@ -75,7 +75,8 @@ namespace GameEngine.PMR.Process
         /// </summary>
         public void OnDisable()
         {
-            m_ApplicationProcess.Pause();
+            if (m_ApplicationProcess.IsStarted)
+                m_ApplicationProcess.Pause();
         }
 
         /// <summary>
