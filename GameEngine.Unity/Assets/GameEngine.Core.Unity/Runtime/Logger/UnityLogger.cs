@@ -3,8 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using ILogger = GameEngine.Core.Logger.ILogger;
 
-namespace GameEngine.Core.Logger
+namespace GameEngine.Core.Unity.Logger
 {
     /// <summary>
     /// A predefined logger that logs messages in the Unity console window

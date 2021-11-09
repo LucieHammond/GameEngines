@@ -1,4 +1,4 @@
-﻿namespace GameEngine.Core.Tests.Tools
+﻿namespace GameEngine.Core.UnityTests.Tools
 {
     public enum MonoBehaviourEvent
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameEngine.Core.Tests.Tools
+namespace GameEngine.Core.UnityTests.Tools
 {
     public class SimulationBehaviour : MonoBehaviour
     {
@@ -29,7 +29,7 @@ namespace GameEngine.Core.Tests.Tools
 
         public void ResetBehaviours()
         {
-            foreach(MonoBehaviourEvent behaviourEvent in Enum.GetValues(typeof(MonoBehaviourEvent)))
+            foreach (MonoBehaviourEvent behaviourEvent in Enum.GetValues(typeof(MonoBehaviourEvent)))
             {
                 m_SimulationBehaviours[behaviourEvent] = null;
             }

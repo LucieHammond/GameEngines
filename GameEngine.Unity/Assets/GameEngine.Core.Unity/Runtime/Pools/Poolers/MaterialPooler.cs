@@ -1,7 +1,8 @@
-﻿using GameEngine.Core.Descriptors;
+﻿using GameEngine.Core.Pools;
+using GameEngine.Core.Unity.Descriptors;
 using UnityEngine;
 
-namespace GameEngine.Core.Pools.Poolers
+namespace GameEngine.Core.Unity.Pools.Poolers
 {
     /// <summary>
     /// A pooling helper defining how to pool Unity materials

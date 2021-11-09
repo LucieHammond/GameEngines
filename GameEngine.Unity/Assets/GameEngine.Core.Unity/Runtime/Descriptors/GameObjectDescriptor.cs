@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameEngine.Core.Descriptors
+namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a gameobject

@@ -1,8 +1,9 @@
-﻿using GameEngine.Core.Descriptors;
-using GameEngine.Core.Pools.Poolers;
+﻿using GameEngine.Core.Pools;
+using GameEngine.Core.Unity.Descriptors;
+using GameEngine.Core.Unity.Pools.Poolers;
 using UnityEngine;
 
-namespace GameEngine.Core.Pools.Managers
+namespace GameEngine.Core.Unity.Pools.Managers
 {
     /// <summary>
     /// A manager specialized in the processing of mesh pools

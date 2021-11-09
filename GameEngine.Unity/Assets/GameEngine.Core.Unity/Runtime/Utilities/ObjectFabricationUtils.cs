@@ -1,9 +1,9 @@
-using GameEngine.Core.Descriptors;
+using GameEngine.Core.Unity.Descriptors;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-namespace GameEngine.Core.Utilities
+namespace GameEngine.Core.Unity.Utilities
 {
     /// <summary>
     /// An utility class regrouping useful methods for GameObject fabrication operations at runtime

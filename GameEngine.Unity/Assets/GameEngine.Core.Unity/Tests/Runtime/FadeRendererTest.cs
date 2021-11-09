@@ -1,12 +1,12 @@
-﻿using GameEngine.Core.Rendering;
-using GameEngine.Core.Tests.Tools;
+﻿using GameEngine.Core.Unity.Rendering;
+using GameEngine.Core.UnityTests.Tools;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace GameEngine.Core.Tests
+namespace GameEngine.Core.UnityTests
 {
     /// <summary>
     /// Component tests for the FadeRenderer class

@@ -1,10 +1,11 @@
-﻿using GameEngine.Core.Descriptors;
-using GameEngine.Core.Rendering;
-using GameEngine.Core.Utilities;
+﻿using GameEngine.Core.Unity.Descriptors;
+using GameEngine.Core.Unity.Rendering;
+using GameEngine.Core.Unity.Utilities;
+using GameEngine.PMR.Process.Transitions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameEngine.PMR.Process.Transitions
+namespace GameEngine.PMR.Unity.Transitions
 {
     /// <summary>
     /// A predefined transition that displays a customizable video on screen

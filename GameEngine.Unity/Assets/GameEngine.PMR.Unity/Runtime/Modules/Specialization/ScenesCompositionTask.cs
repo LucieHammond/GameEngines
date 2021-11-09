@@ -1,10 +1,12 @@
-﻿using GameEngine.PMR.Rules;
+﻿using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Rules;
+using GameEngine.PMR.Unity.Rules;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GameEngine.PMR.Modules.Specialization
+namespace GameEngine.PMR.Unity.Modules.Specialization
 {
     /// <summary>
     /// A module configuration task dedicated to the loading and unloading of the scenes requested by the module rules

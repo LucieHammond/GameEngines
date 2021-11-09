@@ -1,12 +1,12 @@
-﻿using GameEngine.Core.Descriptors;
-using GameEngine.Core.Pools;
-using GameEngine.Core.Pools.Managers;
+﻿using GameEngine.Core.Pools;
+using GameEngine.Core.Unity.Descriptors;
+using GameEngine.Core.Unity.Pools.Managers;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Tests
+namespace GameEngine.Core.UnityTests
 {
     /// <summary>
     /// Component tests for the MaterialPoolManager class

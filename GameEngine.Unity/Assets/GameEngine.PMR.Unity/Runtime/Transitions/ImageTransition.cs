@@ -1,30 +1,31 @@
-﻿using GameEngine.Core.Descriptors;
-using GameEngine.Core.Rendering;
-using GameEngine.Core.Utilities;
+﻿using GameEngine.Core.Unity.Descriptors;
+using GameEngine.Core.Unity.Rendering;
+using GameEngine.Core.Unity.Utilities;
+using GameEngine.PMR.Process.Transitions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameEngine.PMR.Process.Transitions
+namespace GameEngine.PMR.Unity.Transitions
 {
     /// <summary>
-    /// A predefined transition that displays a customizable text on screen
+    /// A predefined transition that displays a customizable image on screen
     /// </summary>
-    public class TextTransition : Transition
+    public class ImageTransition : Transition
     {
-        private TextDescriptor m_TextDescriptor;
+        private ImageDescriptor m_ImageDescriptor;
         private GameObject m_CanvasObject;
-        private Text m_TextComponent;
+        private Image m_ImageComponent;
         private float m_FadeDuration;
         private FadeRenderer m_FadeRenderer;
 
         /// <summary>
-        /// Create a new instance of TextTransition
+        /// Create a new instance of ImageTransition
         /// </summary>
-        /// <param name="text">A descriptor characterizing the text to display</param>
-        /// <param name="fadeDuration">The time it should take to fade the text (in seconds)</param>
-        public TextTransition(TextDescriptor text, float fadeDuration)
+        /// <param name="image">A descriptor characterizing the image to display</param>
+        /// <param name="fadeDuration">The time it should take to fade the image (in seconds)</param>
+        public ImageTransition(ImageDescriptor image, float fadeDuration)
         {
-            m_TextDescriptor = text;
+            m_ImageDescriptor = image;
             m_FadeDuration = fadeDuration;
         }
 
@@ -38,11 +39,11 @@ namespace GameEngine.PMR.Process.Transitions
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 1000;
 
-            GameObject textObject = new GameObject("Transition Text");
-            textObject.transform.parent = m_CanvasObject.transform;
+            GameObject imageObject = new GameObject("Transition Image");
+            imageObject.transform.parent = m_CanvasObject.transform;
 
-            m_TextComponent = textObject.CreateText(m_TextDescriptor);
-            m_FadeRenderer = new FadeRenderer(m_TextComponent, m_FadeDuration, false);
+            m_ImageComponent = imageObject.CreateImage(m_ImageDescriptor);
+            m_FadeRenderer = new FadeRenderer(m_ImageComponent, m_FadeDuration, false);
         }
 
         /// <summary>

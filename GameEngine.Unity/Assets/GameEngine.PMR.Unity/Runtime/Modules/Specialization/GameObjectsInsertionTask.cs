@@ -1,10 +1,12 @@
-﻿using GameEngine.PMR.Rules;
-using GameEngine.PMR.Rules.Dependencies;
+﻿using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Rules;
+using GameEngine.PMR.Unity.Rules;
+using GameEngine.PMR.Unity.Rules.Dependencies;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace GameEngine.PMR.Modules.Specialization
+namespace GameEngine.PMR.Unity.Modules.Specialization
 {
     /// <summary>
     /// A module configuration task dedicated to the injection of the GameObject dependencies requested by the rules

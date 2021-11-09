@@ -1,10 +1,11 @@
-﻿using GameEngine.Core.Logger.Base;
+﻿using GameEngine.Core.Logger;
+using GameEngine.Core.Logger.Base;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
 
-namespace GameEngine.Core.Logger
+namespace GameEngine.Core.Unity.Logger
 {
     /// <summary>
     /// Settings for the runtime logs in Unity, allowing customization of display and filtering

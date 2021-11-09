@@ -1,7 +1,8 @@
 ﻿using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Unity.Modules.Specialization;
 using System.Collections.Generic;
 
-namespace GameEngine.PMR.Modules
+namespace GameEngine.PMR.Unity.Modules
 {
     /// <summary>
     /// A static class defining the setup operations specific to Unity modules

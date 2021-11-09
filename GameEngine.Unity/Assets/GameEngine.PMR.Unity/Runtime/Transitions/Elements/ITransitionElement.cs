@@ -1,4 +1,4 @@
-﻿namespace GameEngine.PMR.Process.Transitions.Elements
+﻿namespace GameEngine.PMR.Unity.Transitions.Elements
 {
     /// <summary>
     /// An interface to implement for defining a custom transition element managed by a ScreenTransition or a WorldTransition

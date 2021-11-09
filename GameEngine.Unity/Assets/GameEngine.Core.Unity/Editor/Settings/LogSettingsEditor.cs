@@ -1,5 +1,6 @@
 ﻿using GameEngine.Core.Logger;
 using GameEngine.Core.Logger.Base;
+using GameEngine.Core.Unity.Logger;
 using System;
 using System.Collections.Generic;
 using UnityEditor;

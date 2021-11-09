@@ -1,6 +1,7 @@
 ﻿using GameEngine.Core.Logger;
-using GameEngine.Core.Rendering;
-using GameEngine.PMR.Process.Transitions.Elements;
+using GameEngine.Core.Unity.Rendering;
+using GameEngine.PMR.Process.Transitions;
+using GameEngine.PMR.Unity.Transitions.Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace GameEngine.PMR.Process.Transitions
+namespace GameEngine.PMR.Unity.Transitions
 {
     /// <summary>
     /// A predefined transition that displays a customizable screen canvas loaded from a scene or a prefab

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameEngine.PMR.Process.Transitions.Elements
+namespace GameEngine.PMR.Unity.Transitions.Elements
 {
     /// <summary>
     /// A loading screen with a progress bar, a progress legend and a presentation of the current loading action

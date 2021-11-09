@@ -1,4 +1,6 @@
-﻿namespace GameEngine.Core.System
+﻿using GameEngine.Core.System;
+
+namespace GameEngine.Core.Unity.System
 {
     public class UnityTime : ITime
     {
