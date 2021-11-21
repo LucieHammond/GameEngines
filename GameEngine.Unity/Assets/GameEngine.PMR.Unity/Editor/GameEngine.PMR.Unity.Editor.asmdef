@@ -1,7 +1,9 @@
 {
     "name": "GameEngine.PMR.Unity.Editor",
     "references": [
-        "GameEngine.PMR.Unity"
+        "GameEngine.PMR.Unity",
+        "GameEngine.Core.Unity",
+        "GameEngine.Core.Unity.Editor"
     ],
     "includePlatforms": [
         "Editor"
