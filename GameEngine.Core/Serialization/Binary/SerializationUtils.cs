@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text;
 
-namespace GameEngine.Core.Utilities
+namespace GameEngine.Core.Serialization.Binary
 {
     /// <summary>
-    /// An utility class regrouping useful methods for serialization operations
+    /// An utility class regrouping useful methods for serialization operations into binaries
     /// </summary>
     public static class SerializationUtils
     {

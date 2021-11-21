@@ -1,4 +1,4 @@
-﻿using GameEngine.Core.Utilities;
+﻿using GameEngine.Core.Serialization.Binary;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
