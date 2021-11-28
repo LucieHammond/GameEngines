@@ -1,6 +1,7 @@
 {
     "name": "GameEngine.PMR.Unity.Tests",
     "references": [
+        "GameEngine.Core.Unity",
         "GameEngine.PMR.Unity",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

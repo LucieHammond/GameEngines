@@ -19,6 +19,9 @@ namespace GameEngine.Core.UnityEditor.Build.AssetBundles
                 if (!buildScenario.Activated)
                     continue;
 
+                if (!Directory.Exists(buildScenario.OutputPath))
+                    Directory.CreateDirectory(buildScenario.OutputPath);
+
                 if (buildSettings.BuildAllBundles)
                 {
                     BuildPipeline.BuildAssetBundles(buildScenario.OutputPath, buildScenario.BuildOptions, buildScenario.TargetPlatform);
@@ -61,6 +64,8 @@ namespace GameEngine.Core.UnityEditor.Build.AssetBundles
                     continue;
 
                 DirectoryInfo directory = new DirectoryInfo(buildScenario.OutputPath);
+                if (!directory.Exists)
+                    continue;
 
                 foreach (FileInfo file in directory.EnumerateFiles())
                 {
