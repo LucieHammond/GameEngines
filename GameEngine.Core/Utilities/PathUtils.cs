@@ -237,6 +237,18 @@ namespace GameEngine.Core.Utilities
         }
 
         /// <summary>
+        /// Get the file name information (except extension) contained in the given path, without further checks
+        /// </summary>
+        /// <param name="path">The path to analyze</param>
+        /// <returns>The file name without extention, eventually empty</returns>
+        public static string GetFileNameWithoutExtension(string path)
+        {
+            string fileName = GetFileName(path);
+            string extension = GetFileExtension(fileName);
+            return fileName.Substring(0, fileName.Length - extension.Length);
+        }
+
+        /// <summary>
         /// Check if the given path contains a root
         /// </summary>
         /// <param name="path">The path to analyze</param>

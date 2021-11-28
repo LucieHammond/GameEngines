@@ -1,0 +1,10 @@
+{
+	"Version" : "1.0.0",
+	"Platform": "Windows",
+	"FileNames": {
+		"first": "content_data_first.json",
+		"second": "content_data_second.json",
+		"third": "content_data_third.json",
+		"collection": "collection_data.json"
+	}
+}

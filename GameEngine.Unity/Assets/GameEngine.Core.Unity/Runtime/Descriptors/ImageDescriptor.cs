@@ -1,13 +1,14 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameEngine.Core.Descriptors
+namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure an UI image
     /// </summary>
-    [CreateAssetMenu(fileName = "NewImageDescriptor", menuName = "Content Descriptors/Image Descriptor", order = 10)]
-    public class ImageDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewImageDescriptor", menuName = "Content/Unity Objects/Image Descriptor", order = 100)]
+    public class ImageDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The source image data (registered as sprite) that is used to render the image object

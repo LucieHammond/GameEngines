@@ -1,7 +1,7 @@
 ﻿using GameEngine.PMR.Rules.Dependencies.Model;
 using System;
 
-namespace GameEngine.PMR.Rules.Dependencies
+namespace GameEngine.PMR.Unity.Rules.Dependencies
 {
     /// <summary>
     /// An attribute to use on rule fields in order to make them reference gameobjects from loaded scenes.

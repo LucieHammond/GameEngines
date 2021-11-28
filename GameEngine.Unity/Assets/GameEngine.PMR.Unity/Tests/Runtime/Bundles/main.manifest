@@ -1,0 +1,30 @@
+ManifestFileVersion: 0
+CRC: 422831136
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 9b649b068cf204aeb1039734015c7b29
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 7652f69dff3dcd0741269161f69220a7
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameEngine.PMR.Unity/Tests/Runtime/Content/ContentPrefab.prefab
+Dependencies:
+- C:/Dev/GameEngines/GameEngine.Unity/Assets/GameEngine.PMR.Unity/Tests/Runtime/Bundles/materials

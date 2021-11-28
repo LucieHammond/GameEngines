@@ -17,4 +17,8 @@
     <Exec Command="xcopy $(TargetDir)$(TargetName).pdb $(ProjectDir)..\GameEngine.Unity\Assets\$(TargetName).Unity\Libraries\ /R /Y /Q" />
   </Target>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
 </Project>

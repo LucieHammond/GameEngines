@@ -1,4 +1,4 @@
-﻿using GameEngine.Core.Logger;
+﻿using GameEngine.Core.Unity.Logger;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GameEngine.Core.Tests
+namespace GameEngine.Core.UnityTests
 {
     /// <summary>
     /// Component tests for the UnityLogger class implementing ILogger interface

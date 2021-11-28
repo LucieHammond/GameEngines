@@ -1,17 +1,18 @@
-﻿using GameEngine.PMR.Rules;
+﻿using GameEngine.PMR.Modules.Specialization;
+using GameEngine.PMR.Rules;
+using GameEngine.PMR.Unity.Rules;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GameEngine.PMR.Modules.Specialization
+namespace GameEngine.PMR.Unity.Modules.Specialization
 {
     /// <summary>
     /// A module configuration task dedicated to the loading and unloading of the scenes requested by the module rules
     /// </summary>
-    public class ScenesCompositionTask : SpecializedTask
+    public class ScenesCompositionTask : SpecialTask
     {
-        private HashSet<string> m_DefaultScenes;
         private List<string> m_ScenesPool;
         private int m_CurrentPoolIndex;
         private bool m_Running;
@@ -20,10 +21,9 @@ namespace GameEngine.PMR.Modules.Specialization
         /// <summary>
         /// Create a new instance of ScenesCompositionTask
         /// </summary>
-        /// <param name="defaultScenes">A base list of required scenes declared in the module setup for all rules</param>
-        public ScenesCompositionTask(HashSet<string> defaultScenes) : base()
+        public ScenesCompositionTask() : base()
         {
-            m_DefaultScenes = defaultScenes;
+            m_Running = false;
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace GameEngine.PMR.Modules.Specialization
         /// <returns>A floating number between 0 and 1 representing the progress of the task</returns>
         public override float GetProgress()
         {
-            return State == SpecializedTaskState.InitRunning ? m_CurrentPoolIndex / m_ScenesPool.Count : 0;
+            return State == SpecialTaskState.InitRunning ? m_CurrentPoolIndex / m_ScenesPool.Count : 0;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace GameEngine.PMR.Modules.Specialization
 
         private List<string> GetAllRequiredScenes(RulesDictionary rules)
         {
-            HashSet<string> requiredScenes = m_DefaultScenes;
+            HashSet<string> requiredScenes = new HashSet<string>();
             foreach (KeyValuePair<Type, GameRule> rule in rules)
             {
                 if (rule.Value is ISceneGameRule sceneRule)
@@ -96,7 +96,7 @@ namespace GameEngine.PMR.Modules.Specialization
 
         private void LoadScenesAsync()
         {
-            if (State != SpecializedTaskState.InitRunning)
+            if (State != SpecialTaskState.InitRunning)
             {
                 m_Running = false;
                 return;
@@ -120,7 +120,7 @@ namespace GameEngine.PMR.Modules.Specialization
 
         private void UnloadScenesAsync()
         {
-            if (State != SpecializedTaskState.UnloadRunning)
+            if (State != SpecialTaskState.UnloadRunning)
             {
                 m_Running = false;
                 return;

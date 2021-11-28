@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameEngine.Core.Rendering
+namespace GameEngine.Core.Unity.Rendering
 {
     /// <summary>
     /// A rendering class designed to manage the progressive fading of a single graphic object

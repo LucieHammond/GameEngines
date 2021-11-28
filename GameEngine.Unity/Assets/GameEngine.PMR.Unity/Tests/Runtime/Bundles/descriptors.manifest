@@ -1,0 +1,24 @@
+ManifestFileVersion: 0
+CRC: 345348966
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 345b322d52c62e5a479b4a81a21ec403
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 636c27f9e68d5d836190fc388f63ff5a
+HashAppended: 0
+ClassTypes:
+- Class: 114
+  Script: {fileID: 11500000, guid: addb8df1418e86241b3fd4a4af005c6d, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e65bbf7c9b8527d479254baeaf34d72e, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/GameEngine.PMR.Unity/Tests/Runtime/Content/ContentDescriptor3.asset
+- Assets/GameEngine.PMR.Unity/Tests/Runtime/Content/ContentDescriptor2.asset
+- Assets/GameEngine.PMR.Unity/Tests/Runtime/Content/CollectionDescriptor.asset
+- Assets/GameEngine.PMR.Unity/Tests/Runtime/Content/ContentDescriptor1.asset
+Dependencies: []

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameEngine.PMR.Rules
+namespace GameEngine.PMR.Unity.Rules
 {
     /// <summary>
     /// An interface to be derived on all Unity rules that require loading scenes and referencing dependencies on game objects

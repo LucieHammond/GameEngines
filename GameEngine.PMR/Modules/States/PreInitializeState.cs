@@ -16,7 +16,7 @@ namespace GameEngine.PMR.Modules.States
         public override GameModuleState Id => GameModuleState.PreInitialize;
 
         private GameModule m_GameModule;
-        private IEnumerator<SpecializedTask> m_TasksEnumerator;
+        private IEnumerator<SpecialTask> m_TasksEnumerator;
         private Stopwatch m_UpdateTime;
         private int m_NbStepsExecuted;
         private float m_StepProgress;
@@ -32,10 +32,10 @@ namespace GameEngine.PMR.Modules.States
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Pre-Initialize");
 
             m_GameModule.ReportLoadingProgress(0f);
-            m_StepProgress = 1.0f / (m_GameModule.SpecializedTasks.Count + 3);
+            m_StepProgress = 1.0f / (m_GameModule.SpecialTasks.Count + 3);
 
             m_NbStepsExecuted = 0;
-            m_TasksEnumerator = m_GameModule.SpecializedTasks.GetEnumerator();
+            m_TasksEnumerator = m_GameModule.SpecialTasks.GetEnumerator();
             if (!m_TasksEnumerator.MoveNext())
                 m_TasksEnumerator = null;
         }
@@ -54,8 +54,8 @@ namespace GameEngine.PMR.Modules.States
 
                 try
                 {
-                    if (m_TasksEnumerator.Current.State == SpecializedTaskState.Created ||
-                    m_TasksEnumerator.Current.State == SpecializedTaskState.UnloadCompleted)
+                    if (m_TasksEnumerator.Current.State == SpecialTaskState.Created ||
+                    m_TasksEnumerator.Current.State == SpecialTaskState.UnloadCompleted)
                     {
                         m_TasksEnumerator.Current.BaseInitialize(m_GameModule.Rules);
                     }
@@ -70,7 +70,7 @@ namespace GameEngine.PMR.Modules.States
                     m_GameModule.OnException(m_GameModule.ExceptionPolicy.ReactionDuringLoad);
                 }
 
-                if (m_TasksEnumerator.Current.State == SpecializedTaskState.InitCompleted)
+                if (m_TasksEnumerator.Current.State == SpecialTaskState.InitCompleted)
                 {
                     m_NbStepsExecuted++;
                     if (!m_TasksEnumerator.MoveNext())

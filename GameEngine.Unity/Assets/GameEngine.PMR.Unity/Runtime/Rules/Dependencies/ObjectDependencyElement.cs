@@ -1,4 +1,4 @@
-﻿namespace GameEngine.PMR.Rules.Dependencies
+﻿namespace GameEngine.PMR.Unity.Rules.Dependencies
 {
     /// <summary>
     /// The different parts of a gameobject that can be referenced in a rule as a dependency 

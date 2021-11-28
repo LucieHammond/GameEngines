@@ -1,8 +1,10 @@
-﻿using GameEngine.Core.Logger;
-using GameEngine.Core.System;
+﻿using GameEngine.Core.System;
+using GameEngine.Core.Unity.Logger;
+using GameEngine.Core.Unity.System;
+using GameEngine.PMR.Process;
 using UnityEngine;
 
-namespace GameEngine.PMR.Process
+namespace GameEngine.PMR.Unity.Process
 {
     /// <summary>
     /// Root monobehaviour script that serves as an entry point for the application.
@@ -75,7 +77,8 @@ namespace GameEngine.PMR.Process
         /// </summary>
         public void OnDisable()
         {
-            m_ApplicationProcess.Pause();
+            if (m_ApplicationProcess.IsStarted)
+                m_ApplicationProcess.Pause();
         }
 
         /// <summary>

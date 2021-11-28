@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 
-namespace GameEngine.Core.Descriptors
+namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a material
     /// </summary>
-    [CreateAssetMenu(fileName = "NewMaterialDescriptor", menuName = "Content Descriptors/Material Descriptor", order = 2)]
-    public class MaterialDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewMaterialDescriptor", menuName = "Content/Unity Objects/Material Descriptor", order = 2)]
+    public class MaterialDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The shader script used by the material

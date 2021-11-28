@@ -302,6 +302,24 @@ namespace GameEnginesTest.UnitTests.Core
         }
 
         [TestMethod]
+        public void GetFileNameWithoutExtensionTest()
+        {
+            string fileName = "file_name";
+
+            // When file is alone with no extension
+            Assert.AreEqual(fileName, PathUtils.GetFileNameWithoutExtension(fileName));
+
+            // When file is alone with an extension
+            Assert.AreEqual(fileName, PathUtils.GetFileNameWithoutExtension($"{fileName}.cs"));
+
+            // When file is part of a larger path with no extension
+            Assert.AreEqual(fileName, PathUtils.GetFileNameWithoutExtension($"C://Folder/{fileName}"));
+
+            // When file is part of a larger path with an extension
+            Assert.AreEqual(fileName, PathUtils.GetFileNameWithoutExtension($"Folder/{fileName}.xml"));
+        }
+
+        [TestMethod]
         public void IsRootedTest()
         {
             string basePath = "Folder/file.txt";

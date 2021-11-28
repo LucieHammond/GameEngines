@@ -1,0 +1,17 @@
+ManifestFileVersion: 0
+CRC: 1631428671
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: descriptors
+      Dependencies: {}
+    Info_1:
+      Name: main
+      Dependencies:
+        Dependency_0: materials
+    Info_2:
+      Name: materials
+      Dependencies: {}
+    Info_3:
+      Name: sprites
+      Dependencies: {}

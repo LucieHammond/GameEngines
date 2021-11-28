@@ -97,9 +97,8 @@ namespace GameEnginesTest.Tools.Mocks.Stubs
             };
         }
 
-        public List<SpecializedTask> GetSpecializedTasks()
+        public void SetSpecialTasks(ref List<SpecialTask> tasks)
         {
-            return new List<SpecializedTask>();
         }
 
         public Transition GetTransition()

@@ -1,8 +1,9 @@
-﻿using GameEngine.PMR.Rules.Dependencies.Model;
+﻿using GameEngine.PMR.Rules;
+using GameEngine.PMR.Rules.Dependencies.Model;
 using System;
 using UnityEngine;
 
-namespace GameEngine.PMR.Rules.Dependencies
+namespace GameEngine.PMR.Unity.Rules.Dependencies
 {
     /// <summary>
     /// A class providing methods for injecting gameobject dependencies with reflexion
