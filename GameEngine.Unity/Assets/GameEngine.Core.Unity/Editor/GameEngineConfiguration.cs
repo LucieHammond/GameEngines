@@ -7,16 +7,16 @@ using UnityEngine;
 
 namespace GameEngine.Core.UnityEditor
 {
-    public static class GameEngineSettings
+    public static class GameEngineConfiguration
     {
-        private const string TAG = "GameEngineSettings";
+        private const string TAG = "GameEngineConfiguration";
 
         private const string SETTINGS_FOLDER_DEFAULT = "Assets/Packages/GameEngine";
         private const string ROOT_FILE_NAME = "gameengine_settings_root";
 
         private static string m_SettingsFolder;
 
-        static GameEngineSettings()
+        static GameEngineConfiguration()
         {
             FindSettingsFolder();
             AssetDatabase.Refresh();
@@ -107,6 +107,45 @@ namespace GameEngine.Core.UnityEditor
             return settings;
         }
 
+        /// <summary>
+        /// Read and return the information stored for a given editor setting in the GameEngine setting folder
+        /// </summary>
+        /// <typeparam name="T">The type of the requested editor setting</typeparam>
+        /// <param name="fileName">The name of the requested editor setting</param>
+        /// <returns>The content of the setting file, converted into an instance of type T</returns>
+        public static T GetEditorSetting<T>(string fileName) where T: new()
+        {
+            string fullFilePath = Path.Combine(m_SettingsFolder, $"Editor", "Resources", $"{fileName}.json");
+            if (!File.Exists(fullFilePath))
+                return new T();
+
+            string jsonSetting = File.ReadAllText(fullFilePath);
+            return JsonUtility.FromJson<T>(jsonSetting);
+        }
+
+        /// <summary>
+        /// Write or replace the information stored for a given editor setting in the GameEngine setting folder
+        /// </summary>
+        /// <typeparam name="T">The type of the given editor setting</typeparam>
+        /// <param name="dataName">The name of the given editor setting</param>
+        /// <param name="data">The setting object to be stored</param>
+        public static void SetEditorSetting<T>(string fileName, T setting) where T : new()
+        {
+            string fullFilePath = Path.Combine(m_SettingsFolder, $"Editor", "Resources", $"{fileName}.json");
+            if (!File.Exists(fullFilePath))
+            {
+                if (!Directory.Exists(Path.GetDirectoryName(fullFilePath)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
+
+                File.Create(fullFilePath).Close();
+            }
+
+            string jsonSetting = JsonUtility.ToJson(setting);
+            File.WriteAllText(fullFilePath, jsonSetting);
+            AssetDatabase.Refresh();
+        }
+
+        #region private
         private static void FindSettingsFolder()
         {
             string[] searchResult = Directory.GetFiles("Assets", ROOT_FILE_NAME, SearchOption.AllDirectories);
@@ -176,5 +215,6 @@ namespace GameEngine.Core.UnityEditor
 
             Debug.Log($"[{TAG}] User Settings folder was successfully added to your .gitignore");
         }
+        #endregion
     }
 }
