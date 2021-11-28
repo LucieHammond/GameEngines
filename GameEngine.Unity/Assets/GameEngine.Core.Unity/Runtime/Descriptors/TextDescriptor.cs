@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 
 namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a UI text
     /// </summary>
-    [CreateAssetMenu(fileName = "NewTextDescriptor", menuName = "Content Descriptors/Text Descriptor", order = 11)]
-    public class TextDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewTextDescriptor", menuName = "Content/Unity Objects/Text Descriptor", order = 101)]
+    public class TextDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The string value the text object should display

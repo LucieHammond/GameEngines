@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 
 namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a mesh
     /// </summary>
-    [CreateAssetMenu(fileName = "NewMeshDescriptor", menuName = "Content Descriptors/Mesh Descriptor", order = 0)]
-    public class MeshDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewMeshDescriptor", menuName = "Content/Unity Objects/Mesh Descriptor", order = 0)]
+    public class MeshDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The positions of the mesh vertices

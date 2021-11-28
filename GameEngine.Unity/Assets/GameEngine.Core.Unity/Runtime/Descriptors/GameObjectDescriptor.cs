@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 
 namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a gameobject
     /// </summary>
-    [CreateAssetMenu(fileName = "NewGameObjectDescriptor", menuName = "Content Descriptors/GameObject Descriptor", order = 3)]
-    public class GameObjectDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewGameObjectDescriptor", menuName = "Content/Unity Objects/GameObject Descriptor", order = 3)]
+    public class GameObjectDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The prefab that serves as a reference to create the gameobject

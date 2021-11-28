@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+﻿using GameEngine.Core.Unity.System;
+using UnityEngine;
 
 namespace GameEngine.Core.Unity.Descriptors
 {
     /// <summary>
     /// A descriptor containing the information needed to configure a 2D texture
     /// </summary>
-    [CreateAssetMenu(fileName = "NewTextureDescriptor", menuName = "Content Descriptors/Texture Descriptor", order = 1)]
-    public class TextureDescriptor : ScriptableObject
+    [CreateAssetMenu(fileName = "NewTextureDescriptor", menuName = "Content/Unity Objects/Texture Descriptor", order = 1)]
+    public class TextureDescriptor : ContentDescriptor
     {
         /// <summary>
         /// The width of the texture in pixels
