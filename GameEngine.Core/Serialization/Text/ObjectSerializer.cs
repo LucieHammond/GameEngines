@@ -11,7 +11,7 @@ namespace GameEngine.Core.Serialization.Text
         /// <summary>
         /// Type of character encoding to use when converting the textual serialization format to bytes
         /// </summary>
-        public Encoding EncodingType { get; set; }
+        public Encoding EncodingType = Encoding.UTF8;
 
         /// <summary>
         /// Create a kind of ObjectSerializer corresponding to the given serialization format
