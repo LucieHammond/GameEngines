@@ -1,18 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameEngine.PMR.Unity.Basics.Content
+namespace GameEngine.Core.Unity.System
 {
     /// <summary>
     /// A scriptable object describing a collection of content descriptors
     /// </summary>
+    [CreateAssetMenu(fileName = "NewCollection", menuName = "Content/Collection/Collection Descriptor", order = 1)]
     public class CollectionDescriptor : ScriptableObject
     {
-        /// <summary>
-        /// Id of the collection
-        /// </summary>
-        public string CollectionId;
-
         /// <summary>
         /// The list of the descriptors in the collection, referenced by id
         /// </summary>
@@ -24,7 +20,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// <returns>A string representing the collection descriptor</returns>
         public override string ToString()
         {
-            return $"Collection {CollectionId} -> [{string.Join(",", Collection)}]";
+            return $"Collection -> [{string.Join(",", Collection)}]";
         }
     }
 }

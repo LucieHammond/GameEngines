@@ -1,23 +1,26 @@
-﻿using System.Reflection;
-using UnityEngine;
+﻿using Newtonsoft.Json;
+using System;
+using System.Reflection;
 
-namespace GameEngine.PMR.Unity.Basics.Content
+namespace GameEngine.Core.System
 {
     /// <summary>
     /// Base model to be derived when defining a certain type of game content
-    /// This content takes the form of descriptive scriptable objects stored as assets
+    /// This content takes the form of structured data stored in files
     /// </summary>
-    public abstract class ContentDescriptor : ScriptableObject
+    [Serializable]
+    public abstract class ContentData
     {
         /// <summary>
-        /// Id of the content descriptor, by which it is referenced
+        /// Id of the content data, by which it is referenced
         /// </summary>
+        [JsonIgnore]
         public string ContentId;
 
         /// <summary>
-        /// Returns a string representing the content descriptor
+        /// Returns a string representing the content data
         /// </summary>
-        /// <returns>A string representing the content descriptor</returns>
+        /// <returns>A string representing the content data</returns>
         public override string ToString()
         {
             string description = "";
