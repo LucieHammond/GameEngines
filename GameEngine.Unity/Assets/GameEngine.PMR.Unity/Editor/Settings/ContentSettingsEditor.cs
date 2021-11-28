@@ -18,10 +18,10 @@ namespace GameEngine.PMR.UnityEditor.Settings
         /// <summary>
         /// Find the unique Content Settings asset defined in the project and display it in the inspector window
         /// </summary>
-        [MenuItem("GameEngine/Project Settings/Content Settings", priority = 1)]
+        [MenuItem("GameEngine/Project Settings/Content Settings", priority = 0)]
         public static void DisplayLogSettings()
         {
-            Selection.activeObject = GameEngineSettings.GetOrCreateSettingAsset<ContentSettings>(ContentSettings.ASSET_NAME, SettingsScope.Project);
+            Selection.activeObject = GameEngineConfiguration.GetOrCreateSettingAsset<ContentSettings>(ContentSettings.ASSET_NAME, SettingsScope.Project);
         }
 
         /// <summary>
@@ -34,24 +34,56 @@ namespace GameEngine.PMR.UnityEditor.Settings
             m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
             m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
 
-            EditorGUILayout.LabelField("File Content", m_TitleStyle);
+            DataContentGUI(settings);
+            EditorGUILayout.Space(20);
+
+            DescriptorsContentGUI(settings);
+            EditorGUILayout.Space(20);
+
+            AssetsContentGUI(settings);
+            EditorGUILayout.Space(20);
+        }
+
+        private void DataContentGUI(ContentSettings settings)
+        {
+            EditorGUILayout.LabelField("Data Content", m_TitleStyle);
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox("Common content data loaded from formatted files", MessageType.Info);
             EditorGUILayout.Space();
 
-            settings.Configuration.FileContentPath = EditorGUILayout.TextField("Folder path", settings.Configuration.FileContentPath);
-            settings.Configuration.FileContentFormat = (SerializerFormat)EditorGUILayout.EnumPopup("Content format", settings.Configuration.FileContentFormat);
-            settings.Configuration.FileEncodingType = (EncodingType)EditorGUILayout.EnumPopup("Content encoding", settings.Configuration.FileEncodingType);
+            settings.Configuration.EnableContentData = EditorGUILayout.Toggle("Enable", settings.Configuration.EnableContentData);
+            EditorGUI.BeginDisabledGroup(!settings.Configuration.EnableContentData);
+            settings.Configuration.DataContentPath = EditorGUILayout.TextField("Directory path", settings.Configuration.DataContentPath);
+            settings.Configuration.FileContentFormat = (SerializerFormat)EditorGUILayout.EnumPopup("File format", settings.Configuration.FileContentFormat);
+            settings.Configuration.FileEncodingType = (EncodingType)EditorGUILayout.EnumPopup("File encoding", settings.Configuration.FileEncodingType);
+            EditorGUI.EndDisabledGroup();
+        }
 
-            EditorGUILayout.Space(25);
-
-            EditorGUILayout.LabelField("Unity Content", m_TitleStyle);
+        private void DescriptorsContentGUI(ContentSettings settings)
+        {
+            EditorGUILayout.LabelField("Descriptors Content", m_TitleStyle);
             EditorGUILayout.Space();
-            EditorGUILayout.HelpBox("Unity assets and descriptors loaded from asset bundles", MessageType.Info);
+            EditorGUILayout.HelpBox("Scriptable objects called descriptors loaded from a descriptor bundle", MessageType.Info);
             EditorGUILayout.Space();
 
-            settings.Configuration.AssetBundlesPath = EditorGUILayout.TextField("Folder path", settings.Configuration.AssetBundlesPath);
-            settings.Configuration.DescriptorsBundle = EditorGUILayout.TextField("Descriptors bundle", settings.Configuration.DescriptorsBundle);
+            settings.Configuration.EnableContentDescriptors = EditorGUILayout.Toggle("Enable", settings.Configuration.EnableContentDescriptors);
+            EditorGUI.BeginDisabledGroup(!settings.Configuration.EnableContentDescriptors);
+            settings.Configuration.DescriptorContentPath = EditorGUILayout.TextField("Directory path", settings.Configuration.DescriptorContentPath);
+            settings.Configuration.DescriptorBundleName = EditorGUILayout.TextField("Bundle name", settings.Configuration.DescriptorBundleName);
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void AssetsContentGUI(ContentSettings settings)
+        {
+            EditorGUILayout.LabelField("Assets Content", m_TitleStyle);
+            EditorGUILayout.Space();
+            EditorGUILayout.HelpBox("Unity content assets loaded from different asset bundles", MessageType.Info);
+            EditorGUILayout.Space();
+
+            settings.Configuration.EnableContentAssets = EditorGUILayout.Toggle("Enable", settings.Configuration.EnableContentAssets);
+            EditorGUI.BeginDisabledGroup(!settings.Configuration.EnableContentAssets);
+            settings.Configuration.AssetContentPath = EditorGUILayout.TextField("Directory path", settings.Configuration.AssetContentPath);
+            EditorGUI.EndDisabledGroup();
         }
     }
 }

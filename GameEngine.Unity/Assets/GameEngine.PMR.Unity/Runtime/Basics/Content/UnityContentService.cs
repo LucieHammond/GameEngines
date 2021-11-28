@@ -19,15 +19,18 @@ namespace GameEngine.PMR.Unity.Basics.Content
     {
         private const string TAG = "ContentService";
 
+        private string m_DescriptorsPath;
+        private string m_DescriptorsBundleName;
+
+        private AssetBundle m_DescriptorsBundle;
+        private Dictionary<string, ContentDescriptor> m_LoadedDescriptors;
+        private Dictionary<string, IEnumerable<string>> m_DescriptorsCollections;
+
         private string m_AssetBundlesPath;
-        private string m_DescriptorsBundle;
         private AssetBundleManifest m_AssetBundlesManifest;
 
         private Dictionary<string, AssetBundle> m_LoadedBundles;
         private List<string> m_ActiveAssetBundles;
-
-        private Dictionary<string, ContentDescriptor> m_LoadedDescriptors;
-        private Dictionary<string, IEnumerable<string>> m_DescriptorsCollections;
         private Dictionary<string, Object> m_LoadedAssets;
 
         /// <summary>
@@ -46,16 +49,33 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// Setup the UnityContentService with the given configuration
         /// </summary>
         /// <param name="configuration">The configuration to use</param>
-        protected void SetupFromConfig(UnityContentConfiguration configuration)
+        protected bool SetupFromConfig(UnityContentConfiguration configuration)
         {
-            base.SetupFromConfig(configuration);
+            if (!base.SetupFromConfig(configuration))
+                return false;
 
-            m_AssetBundlesPath = configuration.AssetBundlesPath;
-            m_DescriptorsBundle = configuration.DescriptorsBundle;
+            if (!configuration.EnableContentDescriptors)
+            {
+                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentDescriptors");
+                return false;
+            }
 
-            string mainBundleName = PathUtils.GetFolders(m_AssetBundlesPath).Last();
+            m_DescriptorsPath = configuration.DescriptorContentPath;
+            m_DescriptorsBundleName = configuration.DescriptorBundleName;
+            m_DescriptorsBundle = AssetBundle.LoadFromFile(PathUtils.Join(m_DescriptorsPath, m_DescriptorsBundleName));
+
+            if (!configuration.EnableContentAssets)
+            {
+                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentAssets");
+                return false;
+            }
+
+            m_AssetBundlesPath = configuration.AssetContentPath;
+            string mainBundleName = PathUtils.GetFolders(PathUtils.Normalize(m_AssetBundlesPath, false)).Last();
             AssetBundle mainBundle = AssetBundle.LoadFromFile(PathUtils.Join(m_AssetBundlesPath, mainBundleName));
             m_AssetBundlesManifest = mainBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            return m_DescriptorsBundle != null && m_AssetBundlesManifest != null;
         }
 
         #region GameRule Cycle
@@ -64,14 +84,13 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// </summary>
         protected override void Initialize()
         {
-            UnityContentConfiguration config = ConfigurationService.GetConfiguration<UnityContentConfiguration>(CONTENT_CONFIG_ID);
-            SetupFromConfig(config);
+            UnityContentConfiguration config = ConfigurationService
+                .GetConfiguration<UnityContentConfiguration>(UnityContentConfiguration.CONFIG_ID);
 
-            if (m_AssetBundlesManifest.GetAllDependencies(m_DescriptorsBundle).Length > 0)
-                Log.Warning(TAG, $"Descriptor bundle {m_DescriptorsBundle} has dependencies that will not be handled");
-            LoadAssetBundle(m_DescriptorsBundle);
-
-            MarkInitialized();
+            if (SetupFromConfig(config))
+                MarkInitialized();
+            else
+                MarkError();
         }
 
         /// <summary>
@@ -174,7 +193,11 @@ namespace GameEngine.PMR.Unity.Basics.Content
 
             if (loadAllAssets && bundle != null)
             {
-                Object[] bundleAssets = await Task.Run(() => bundle.LoadAllAssets());
+                TaskCompletionSource<Object[]> taskSource = new TaskCompletionSource<Object[]>();
+                AssetBundleRequest request = bundle.LoadAllAssetsAsync();
+                request.completed += (operation) => taskSource.SetResult(request.allAssets);
+
+                Object[] bundleAssets = await taskSource.Task;
                 foreach (Object asset in bundleAssets)
                 {
                     m_LoadedAssets.Add(asset.name, asset);
@@ -200,10 +223,11 @@ namespace GameEngine.PMR.Unity.Basics.Content
             Log.Debug(TAG, $"Deactivate asset bundle {bundleName}");
             AssetBundle bundle = m_LoadedBundles[bundleName];
 
-            string[] bundleAssets = bundle.GetAllAssetNames();
-            foreach (string assetName in bundleAssets)
+            IEnumerable<string> bundleAssets = bundle.GetAllAssetNames().Select(GetStandardAssetName);
+            IEnumerable<string> assetsToRemove = m_LoadedAssets.Keys.Where((asset) => bundleAssets.Contains(asset.ToLowerInvariant()));
+            foreach (string asset in assetsToRemove.ToList())
             {
-                m_LoadedAssets.Remove(assetName);
+                m_LoadedAssets.Remove(asset);
             }
 
             bundle.Unload(unloadAllAssets);
@@ -232,7 +256,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
                 foreach (string assetName in assetNames)
                 {
                     Object asset = bundle.LoadAsset(assetName);
-                    m_LoadedAssets.Add(assetName, asset);
+                    m_LoadedAssets[asset.name] = asset;
                 }
             }
             else
@@ -240,8 +264,8 @@ namespace GameEngine.PMR.Unity.Basics.Content
                 foreach (string assetName in assetNames)
                 {
                     Object[] assets = bundle.LoadAssetWithSubAssets(assetName);
-                    foreach(Object asset in assets)
-                        m_LoadedAssets.Add(asset.name, asset);
+                    foreach (Object asset in assets)
+                        m_LoadedAssets[asset.name] = asset;
                 }
             }
         }
@@ -262,7 +286,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
                 }
 
                 IEnumerable<string> unusedBundles = inactiveBundles.Except(requiredBundles);
-                foreach (string bundleName in unusedBundles)
+                foreach (string bundleName in unusedBundles.ToList())
                 {
                     m_LoadedBundles[bundleName].Unload(true);
                     m_LoadedBundles.Remove(bundleName);
@@ -281,7 +305,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
         public TDescriptor GetContentDescriptor<TDescriptor>(string name) where TDescriptor : ContentDescriptor
         {
             return GetContent("descriptor", name, ref m_LoadedDescriptors,
-                (descriptorName) => m_LoadedBundles[m_DescriptorsBundle].LoadAsset<TDescriptor>(descriptorName));
+                (descriptorName) => LoadDescriptor<TDescriptor>(descriptorName));
         }
 
         /// <summary>
@@ -293,8 +317,8 @@ namespace GameEngine.PMR.Unity.Basics.Content
         public IEnumerable<TDescriptor> GetDescriptorCollection<TDescriptor>(string collectionName) where TDescriptor : ContentDescriptor
         {
             return GetContentCollection("descriptor", collectionName, ref m_LoadedDescriptors, ref m_DescriptorsCollections,
-                (descriptorName) => m_LoadedBundles[m_DescriptorsBundle].LoadAsset<TDescriptor>(descriptorName),
-                (collection) => m_LoadedBundles[m_DescriptorsBundle].LoadAsset<CollectionDescriptor>(collection).Collection);
+                (descriptorName) => LoadDescriptor<TDescriptor>(descriptorName),
+                (collection) => LoadCollection(collection));
         }
 
         /// <summary>
@@ -330,6 +354,42 @@ namespace GameEngine.PMR.Unity.Basics.Content
         #endregion
 
         #region private
+        private TDescriptor LoadDescriptor<TDescriptor>(string descriptorName) where TDescriptor : ContentDescriptor
+        {
+            TDescriptor descriptor = m_DescriptorsBundle.LoadAsset<TDescriptor>(descriptorName);
+            if (descriptor != null)
+            {
+                descriptor.ContentId = descriptor.name;
+                if (descriptor.name != descriptorName)
+                {
+                    Log.Warning(TAG, $"The descriptor was requested and referenced by a name different from its real name.\n" +
+                        $"(Ref = {descriptorName}, Real = {descriptor.name}. This could cause cached duplicates.");
+                }
+                return descriptor;
+            }
+            else
+            {
+                Log.Error(TAG, $"Invalid descriptor: Unable to load descriptor {descriptorName} from descriptor bundle");
+                return null;
+            }
+        }
+
+        private List<string> LoadCollection(string collectionName)
+        {
+            CollectionDescriptor collection = m_DescriptorsBundle.LoadAsset<CollectionDescriptor>(collectionName);
+            if (collection == null)
+            {
+                Log.Error(TAG, $"Invalid collection: Unable to load collection {collectionName} from descriptor bundle");
+                return null;
+            }
+            if (collection.name != collectionName)
+            {
+                Log.Warning(TAG, $"The collection was requested and referenced by a name different from its real name.\n" +
+                    $"(Ref = {collectionName}, Real = {collection.name}. This could cause cached duplicates.");
+            }
+            return collection.Collection;
+        }
+
         private AssetBundle LoadAssetBundle(string bundleName)
         {
             AssetBundle bundle = AssetBundle.LoadFromFile(PathUtils.Join(m_AssetBundlesPath, bundleName));
@@ -343,7 +403,11 @@ namespace GameEngine.PMR.Unity.Basics.Content
 
         private async Task<AssetBundle> LoadAssetBundleAsync(string bundleName)
         {
-            AssetBundle bundle = await Task.Run(() => AssetBundle.LoadFromFile(PathUtils.Join(m_AssetBundlesPath, bundleName)));
+            TaskCompletionSource<AssetBundle> taskSource = new TaskCompletionSource<AssetBundle>();
+            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(PathUtils.Join(m_AssetBundlesPath, bundleName));
+            request.completed += (operation) => taskSource.SetResult(request.assetBundle);
+
+            AssetBundle bundle = await taskSource.Task;
             if (bundle != null)
                 m_LoadedBundles.Add(bundleName, bundle);
             else
@@ -356,14 +420,31 @@ namespace GameEngine.PMR.Unity.Basics.Content
         {
             foreach (string bundleName in m_ActiveAssetBundles)
             {
-                if (m_LoadedBundles[bundleName].GetAllAssetNames().Contains(bundleName))
+                if (m_LoadedBundles[bundleName].GetAllAssetNames()
+                    .Any((assetPath) => GetStandardAssetName(assetPath) == assetName.ToLowerInvariant()))
                 {
-                    return m_LoadedBundles[bundleName].LoadAsset<TAsset>(assetName);
+                    TAsset asset = m_LoadedBundles[bundleName].LoadAsset<TAsset>(assetName);
+                    if (asset == null)
+                    {
+                        Log.Error(TAG, $"Loading asset error: Failed to load asset '{assetName}' from its bundle");
+                        return null;
+                    }
+                    if (asset.name != assetName)
+                    {
+                        Log.Warning(TAG, $"The asset was requested and referenced by a name different from its real name.\n" +
+                            $"(Ref = {assetName}, Real = {asset.name}. This could cause cached duplicates.");
+                    }
+                    return asset;
                 }
             }
 
             Log.Error(TAG, $"Asset not found: Cannot find asset '{assetName}' in any active asset bundle");
             return null;
+        }
+
+        private string GetStandardAssetName(string assetPath)
+        {
+            return PathUtils.GetFileNameWithoutExtension(assetPath).ToLowerInvariant();
         }
         #endregion
     }

@@ -17,11 +17,6 @@ namespace GameEngine.PMR.Basics.Content
     [RuleAccess(typeof(IContentService))]
     public class ContentService : GameRule, IContentService
     {
-        /// <summary>
-        /// Id for referencing content configuration
-        /// </summary>
-        public const string CONTENT_CONFIG_ID = "Content";
-        
         private const string TAG = "ContentService";
         private const string MANIFEST_FILE = "manifest.json";
 
@@ -51,15 +46,20 @@ namespace GameEngine.PMR.Basics.Content
         /// Setup the ContentService with the given configuration
         /// </summary>
         /// <param name="configuration">The configuration to use</param>
-        protected void SetupFromConfig(ContentConfiguration configuration)
+        protected bool SetupFromConfig(ContentConfiguration configuration)
         {
-            m_ContentPath = configuration.FileContentPath;
+            if (!configuration.EnableContentData)
+            {
+                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentData");
+                return false;
+            }
+
+            m_ContentPath = configuration.DataContentPath;
             m_Serializer = ObjectSerializer.CreateSerializer(
                 configuration.FileContentFormat,
                 EncodingUtils.CreateEncoding(configuration.FileEncodingType));
-
-            string manifestPath = PathUtils.Join(m_ContentPath, MANIFEST_FILE);
-            m_ContentManifest = LoadFileData<ContentManifest>(manifestPath);
+            m_ContentManifest = LoadFileData<ContentManifest>(MANIFEST_FILE);
+            return m_ContentManifest != null;
         }
 
         #region GameRule cycle
@@ -68,10 +68,12 @@ namespace GameEngine.PMR.Basics.Content
         /// </summary>
         protected override void Initialize()
         {
-            ContentConfiguration config = ConfigurationService.GetConfiguration<ContentConfiguration>(CONTENT_CONFIG_ID);
-            SetupFromConfig(config);
+            ContentConfiguration config = ConfigurationService.GetConfiguration<ContentConfiguration>(ContentConfiguration.CONFIG_ID);
 
-            MarkInitialized();
+            if (SetupFromConfig(config))
+                MarkInitialized();
+            else
+                MarkError();
         }
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace GameEngine.PMR.Basics.Content
         {
             return GetContentCollection("data", collectionName, ref m_LoadedData, ref m_DataCollections,
                 (dataName) => LoadContentData<TData>(dataName),
-                (collection) => LoadContentData<List<string>>(collection));
+                (collection) => LoadCollectionData(collection));
         }
 
         /// <summary>
@@ -221,15 +223,33 @@ namespace GameEngine.PMR.Basics.Content
         #endregion
 
         #region private
-        private T LoadContentData<T>(string contentName) where T : class
+        private TData LoadContentData<TData>(string contentName) where TData : ContentData
         {
             if (m_ContentManifest.FileNames.ContainsKey(contentName))
             {
-                return LoadFileData<T>(m_ContentManifest.FileNames[contentName]);
+                TData data = LoadFileData<TData>(m_ContentManifest.FileNames[contentName]);
+                if (data == null)
+                    return null;
+
+                data.ContentId = contentName;
+                return data;
             }
             else
             {
                 Log.Error(TAG, $"Invalid content name: Cannot find content {contentName} in the content manifest");
+                return null;
+            }
+        }
+
+        private List<string> LoadCollectionData(string collectionName)
+        {
+            if (m_ContentManifest.FileNames.ContainsKey(collectionName))
+            {
+                return LoadFileData<List<string>>(m_ContentManifest.FileNames[collectionName]);
+            }
+            else
+            {
+                Log.Error(TAG, $"Invalid collection name: Cannot find collection {collectionName} in the content manifest");
                 return null;
             }
         }
@@ -242,7 +262,16 @@ namespace GameEngine.PMR.Basics.Content
 
             if (fileData.Length > 0)
             {
-                return m_Serializer.DeserializeFromBytes<T>(fileData);
+                try
+                {
+                    return m_Serializer.DeserializeFromBytes<T>(fileData);
+                }
+                catch (Exception exception)
+                {
+                    Log.Error(TAG, $"Format error: The file {fileName} could not be deserialized correctly");
+                    Log.Exception(TAG, exception);
+                    return null;
+                }
             }
             else
             {

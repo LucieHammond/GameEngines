@@ -1,5 +1,4 @@
 ﻿using GameEngine.Core.Unity.System;
-using GameEngine.PMR.Basics.Content;
 using GameEngine.PMR.Unity.Basics.Content;
 using System.IO;
 using UnityEngine;
@@ -19,7 +18,7 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <summary>
         /// A unique identifier used to store and retrieve this configuration
         /// </summary>
-        public const string CONFIG_ID = ContentService.CONTENT_CONFIG_ID;
+        public const string CONFIG_ID = UnityContentConfiguration.CONFIG_ID;
 
         /// <summary>
         /// Get the content settings that have been defined in the project through a dedicated asset (or default if not defined)
@@ -40,11 +39,26 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <returns>True if the configuration is valid, else False</returns>
         public override bool Validate()
         {
-            if (!string.IsNullOrEmpty(Configuration.FileContentPath) && !Directory.Exists(Configuration.FileContentPath))
-                return false;
+            if (Configuration.EnableContentData)
+            {
+                if (string.IsNullOrEmpty(Configuration.DataContentPath) || !Directory.Exists(Configuration.DataContentPath))
+                    return false;
+            }
 
-            if (!string.IsNullOrEmpty(Configuration.AssetBundlesPath) && !Directory.Exists(Configuration.AssetBundlesPath))
-                return false;
+            if (Configuration.EnableContentDescriptors)
+            {
+                if (string.IsNullOrEmpty(Configuration.DescriptorContentPath) || !Directory.Exists(Configuration.DescriptorContentPath))
+                    return false;
+
+                if (string.IsNullOrEmpty(Configuration.DescriptorContentPath))
+                    return false;
+            }
+
+            if (Configuration.EnableContentAssets)
+            {
+                if (!string.IsNullOrEmpty(Configuration.AssetContentPath) && !Directory.Exists(Configuration.AssetContentPath))
+                    return false;
+            }
 
             return true;
         }

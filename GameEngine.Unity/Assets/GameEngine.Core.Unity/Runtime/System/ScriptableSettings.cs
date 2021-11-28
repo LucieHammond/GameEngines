@@ -3,7 +3,7 @@
 namespace GameEngine.Core.Unity.System
 {
     /// <summary>
-    /// A ScriptableObject model allowing the creation and definition of configurations of a given type in Unity
+    /// A ScriptableObject model allowing the creation and definition of a specific configuration in Unity
     /// </summary>
     /// <typeparam name="TConfig">The type of the underlying configuration</typeparam>
     public abstract class ScriptableSettings<TConfig> : ScriptableObject
