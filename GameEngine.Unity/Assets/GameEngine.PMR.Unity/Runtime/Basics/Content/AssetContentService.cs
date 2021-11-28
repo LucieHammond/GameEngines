@@ -1,7 +1,7 @@
 ﻿using GameEngine.Core.Logger;
-using GameEngine.Core.Unity.System;
 using GameEngine.Core.Utilities;
-using GameEngine.PMR.Basics.Content;
+using GameEngine.PMR.Basics.Configuration;
+using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Dependencies;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,19 +12,18 @@ using Object = UnityEngine.Object;
 namespace GameEngine.PMR.Unity.Basics.Content
 {
     /// <summary>
-    /// A service that centralizes and regulates access to the game content, especially Unity assets that can be loaded from asset bundles
+    /// A service that centralizes and regulates access to the game content assets that can be loaded from asset bundles
     /// </summary>
-    [RuleAccess(typeof(IUnityContentService))]
-    public class UnityContentService : ContentService, IUnityContentService
+    [RuleAccess(typeof(IAssetContentService))]
+    public class AssetContentService : GameRule, IAssetContentService
     {
-        private const string TAG = "ContentService";
+        private const string TAG = "AssetContentService";
 
-        private string m_DescriptorsPath;
-        private string m_DescriptorsBundleName;
-
-        private AssetBundle m_DescriptorsBundle;
-        private Dictionary<string, ContentDescriptor> m_LoadedDescriptors;
-        private Dictionary<string, IEnumerable<string>> m_DescriptorsCollections;
+        /// <summary>
+        /// Dependency to IConfigurationService
+        /// </summary>
+        [RuleDependency(RuleDependencySource.Service, Required = true)]
+        public IConfigurationService ConfigurationService;
 
         private string m_AssetBundlesPath;
         private AssetBundleManifest m_AssetBundlesManifest;
@@ -34,48 +33,18 @@ namespace GameEngine.PMR.Unity.Basics.Content
         private Dictionary<string, Object> m_LoadedAssets;
 
         /// <summary>
-        /// Create an instance of UnityContentService
+        /// The number of content assets loaded into memory
         /// </summary>
-        public UnityContentService()
+        public int AssetCacheSize => m_LoadedAssets.Count;
+
+        /// <summary>
+        /// Create an instance of AssetContentService
+        /// </summary>
+        public AssetContentService()
         {
             m_LoadedBundles = new Dictionary<string, AssetBundle>();
             m_ActiveAssetBundles = new List<string>();
-            m_LoadedDescriptors = new Dictionary<string, ContentDescriptor>();
-            m_DescriptorsCollections = new Dictionary<string, IEnumerable<string>>();
             m_LoadedAssets = new Dictionary<string, Object>();
-        }
-
-        /// <summary>
-        /// Setup the UnityContentService with the given configuration
-        /// </summary>
-        /// <param name="configuration">The configuration to use</param>
-        protected bool SetupFromConfig(UnityContentConfiguration configuration)
-        {
-            if (!base.SetupFromConfig(configuration))
-                return false;
-
-            if (!configuration.EnableContentDescriptors)
-            {
-                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentDescriptors");
-                return false;
-            }
-
-            m_DescriptorsPath = configuration.DescriptorContentPath;
-            m_DescriptorsBundleName = configuration.DescriptorBundleName;
-            m_DescriptorsBundle = AssetBundle.LoadFromFile(PathUtils.Join(m_DescriptorsPath, m_DescriptorsBundleName));
-
-            if (!configuration.EnableContentAssets)
-            {
-                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentAssets");
-                return false;
-            }
-
-            m_AssetBundlesPath = configuration.AssetContentPath;
-            string mainBundleName = PathUtils.GetFolders(PathUtils.Normalize(m_AssetBundlesPath, false)).Last();
-            AssetBundle mainBundle = AssetBundle.LoadFromFile(PathUtils.Join(m_AssetBundlesPath, mainBundleName));
-            m_AssetBundlesManifest = mainBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-            return m_DescriptorsBundle != null && m_AssetBundlesManifest != null;
         }
 
         #region GameRule Cycle
@@ -98,10 +67,10 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// </summary>
         protected override void Unload()
         {
-            ResetLoadedContent();
-            ResetLoadedDescriptors();
             ResetLoadedAssets();
-
+            m_LoadedBundles.Clear();
+            m_ActiveAssetBundles.Clear();
+            AssetBundle.UnloadAllAssetBundles(true);
             MarkUnloaded();
         }
 
@@ -111,7 +80,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
         protected override void Update() { }
         #endregion
 
-        #region IUnityContentService API
+        #region IAssetContentService API
         /// <summary>
         /// Load, prepare and activate an asset bundle in order to make all its assets accessible afterwards
         /// </summary>
@@ -264,7 +233,7 @@ namespace GameEngine.PMR.Unity.Basics.Content
                 foreach (string assetName in assetNames)
                 {
                     Object[] assets = bundle.LoadAssetWithSubAssets(assetName);
-                    foreach (Object asset in assets)
+                    foreach(Object asset in assets)
                         m_LoadedAssets[asset.name] = asset;
                 }
             }
@@ -297,41 +266,6 @@ namespace GameEngine.PMR.Unity.Basics.Content
         }
 
         /// <summary>
-        /// Retrieve and cache the content descriptor corresponding to the given name
-        /// </summary>
-        /// <typeparam name="TDescriptor">The type of the content descriptor</typeparam>
-        /// <param name="name">The name that identifies the descriptor</param>
-        /// <returns>A scriptable object of type TDescriptor</returns>
-        public TDescriptor GetContentDescriptor<TDescriptor>(string name) where TDescriptor : ContentDescriptor
-        {
-            return GetContent("descriptor", name, ref m_LoadedDescriptors,
-                (descriptorName) => LoadDescriptor<TDescriptor>(descriptorName));
-        }
-
-        /// <summary>
-        /// Retrieve and cache all the content descriptors listed in the given collection
-        /// </summary>
-        /// <typeparam name="TDescriptor">The common type of the listed content descriptors</typeparam>
-        /// <param name="collectionName">The name that identifies the collection</param>
-        /// <returns>A collection of TDescriptor scriptable objects</returns>
-        public IEnumerable<TDescriptor> GetDescriptorCollection<TDescriptor>(string collectionName) where TDescriptor : ContentDescriptor
-        {
-            return GetContentCollection("descriptor", collectionName, ref m_LoadedDescriptors, ref m_DescriptorsCollections,
-                (descriptorName) => LoadDescriptor<TDescriptor>(descriptorName),
-                (collection) => LoadCollection(collection));
-        }
-
-        /// <summary>
-        /// Clear the cache of content descriptors loaded into memory
-        /// </summary>
-        public void ResetLoadedDescriptors()
-        {
-            Log.Debug(TAG, $"Clearing all content descriptors");
-            m_LoadedDescriptors.Clear();
-            m_DescriptorsCollections.Clear();
-        }
-
-        /// <summary>
         /// Retrieve and cache the content asset corresponding to the given name
         /// </summary>
         /// <typeparam name="TAsset">The type of the content asset</typeparam>
@@ -339,8 +273,28 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// <returns>An asset of type TAsset</returns>
         public TAsset GetContentAsset<TAsset>(string name) where TAsset : Object
         {
-            return GetContent("asset", name, ref m_LoadedAssets,
-                (assetName) => LoadAsset<TAsset>(assetName));
+            if (m_LoadedAssets.ContainsKey(name))
+            {
+                if (m_LoadedAssets[name] is TAsset)
+                {
+                    return (TAsset)m_LoadedAssets[name];
+                }
+                else
+                {
+                    Log.Error(TAG, $"Invalid content type: The '{name}' asset does not match type {typeof(TAsset)}");
+                    return null;
+                }
+            }
+
+            Log.Debug(TAG, $"Loading content asset '{name}'");
+            TAsset content = LoadAsset<TAsset>(name);
+            if (content != null)
+            {
+                m_LoadedAssets.Add(name, content);
+                return content;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -354,40 +308,19 @@ namespace GameEngine.PMR.Unity.Basics.Content
         #endregion
 
         #region private
-        private TDescriptor LoadDescriptor<TDescriptor>(string descriptorName) where TDescriptor : ContentDescriptor
+        private bool SetupFromConfig(UnityContentConfiguration configuration)
         {
-            TDescriptor descriptor = m_DescriptorsBundle.LoadAsset<TDescriptor>(descriptorName);
-            if (descriptor != null)
+            if (!configuration.EnableContentAssets)
             {
-                descriptor.ContentId = descriptor.name;
-                if (descriptor.name != descriptorName)
-                {
-                    Log.Warning(TAG, $"The descriptor was requested and referenced by a name different from its real name.\n" +
-                        $"(Ref = {descriptorName}, Real = {descriptor.name}. This could cause cached duplicates.");
-                }
-                return descriptor;
+                Log.Error(TAG, "Impossible to run service: configuration is disabled for ContentAssets");
+                return false;
             }
-            else
-            {
-                Log.Error(TAG, $"Invalid descriptor: Unable to load descriptor {descriptorName} from descriptor bundle");
-                return null;
-            }
-        }
 
-        private List<string> LoadCollection(string collectionName)
-        {
-            CollectionDescriptor collection = m_DescriptorsBundle.LoadAsset<CollectionDescriptor>(collectionName);
-            if (collection == null)
-            {
-                Log.Error(TAG, $"Invalid collection: Unable to load collection {collectionName} from descriptor bundle");
-                return null;
-            }
-            if (collection.name != collectionName)
-            {
-                Log.Warning(TAG, $"The collection was requested and referenced by a name different from its real name.\n" +
-                    $"(Ref = {collectionName}, Real = {collection.name}. This could cause cached duplicates.");
-            }
-            return collection.Collection;
+            m_AssetBundlesPath = configuration.AssetContentPath;
+            string mainBundleName = PathUtils.GetFolders(PathUtils.Normalize(m_AssetBundlesPath, false)).Last();
+            AssetBundle mainBundle = AssetBundle.LoadFromFile(PathUtils.Join(m_AssetBundlesPath, mainBundleName));
+            m_AssetBundlesManifest = mainBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            return m_AssetBundlesManifest != null;
         }
 
         private AssetBundle LoadAssetBundle(string bundleName)

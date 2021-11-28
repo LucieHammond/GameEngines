@@ -1,15 +1,13 @@
-﻿using GameEngine.Core.Unity.System;
-using GameEngine.PMR.Basics.Content;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GameEngine.PMR.Unity.Basics.Content
 {
     /// <summary>
-    /// Interface that exposes the operations provided by the UnityContentService
+    /// Interface that exposes the operations provided by the AssetContentService
     /// </summary>
-    public interface IUnityContentService : IContentService
+    public interface IAssetContentService
     {
         /// <summary>
         /// Load, prepare and activate an asset bundle in order to make all its assets accessible afterwards
@@ -47,29 +45,6 @@ namespace GameEngine.PMR.Unity.Basics.Content
         /// Unload all bundles and assets that are not used nor referenced elsewhere in code
         /// </summary>
         void CleanUnusedAssets();
-
-
-        /// <summary>
-        /// Retrieve and cache the content descriptor corresponding to the given name
-        /// </summary>
-        /// <typeparam name="TDescriptor">The type of the content descriptor</typeparam>
-        /// <param name="name">The name that identifies the descriptor</param>
-        /// <returns>A scriptable object of type TDescriptor</returns>
-        TDescriptor GetContentDescriptor<TDescriptor>(string name) where TDescriptor : ContentDescriptor;
-
-        /// <summary>
-        /// Retrieve and cache all the content descriptors listed in the given collection
-        /// </summary>
-        /// <typeparam name="TDescriptor">The common type of the listed content descriptors</typeparam>
-        /// <param name="collectionName">The name that identifies the collection</param>
-        /// <returns>A collection of TDescriptor scriptable objects</returns>
-        IEnumerable<TDescriptor> GetDescriptorCollection<TDescriptor>(string collectionName) where TDescriptor : ContentDescriptor;
-
-        /// <summary>
-        /// Clear the cache of content descriptors loaded into memory
-        /// </summary>
-        void ResetLoadedDescriptors();
-
 
         /// <summary>
         /// Retrieve and cache the content asset corresponding to the given name

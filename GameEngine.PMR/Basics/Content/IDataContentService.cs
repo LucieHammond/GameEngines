@@ -6,7 +6,7 @@ namespace GameEngine.PMR.Basics.Content
     /// <summary>
     /// Interface that exposes the operations provided by the ContentService
     /// </summary>
-    public interface IContentService
+    public interface IDataContentService
     {
         /// <summary>
         /// Retrieve and cache the content data corresponding to the given name
