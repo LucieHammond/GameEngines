@@ -3,7 +3,8 @@
     "references": [
         "GameEngine.PMR.Unity",
         "GameEngine.Core.Unity",
-        "GameEngine.Core.Unity.Editor"
+        "GameEngine.Core.Unity.Editor",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

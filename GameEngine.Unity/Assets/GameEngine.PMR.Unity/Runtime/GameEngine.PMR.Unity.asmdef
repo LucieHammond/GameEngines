@@ -1,7 +1,8 @@
 {
     "name": "GameEngine.PMR.Unity",
     "references": [
-        "GameEngine.Core.Unity"
+        "GameEngine.Core.Unity",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
