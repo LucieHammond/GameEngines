@@ -32,6 +32,7 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         protected override void Initialize()
         {
             RegisterSettings(ContentSettings.CONFIG_ID, () => ContentSettings.GetSettings());
+            RegisterSettings(InputSettings.CONFIG_ID, () => InputSettings.GetSettings());
 
             MarkInitialized();
         }
