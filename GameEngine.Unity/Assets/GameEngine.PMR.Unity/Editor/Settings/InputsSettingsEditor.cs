@@ -21,6 +21,7 @@ namespace GameEngine.PMR.UnityEditor.Settings
         {
             InputsSettings settings = (InputsSettings)target;
 
+            EditorGUI.BeginChangeCheck();
             m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
             m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
 
@@ -31,6 +32,9 @@ namespace GameEngine.PMR.UnityEditor.Settings
                 .ObjectField("Actions Asset", settings.Configuration.ActionsAsset, typeof(InputActionAsset), false);
             settings.Configuration.DefaultActionMap = EditorGUILayout.TextField("Default Action Map", settings.Configuration.DefaultActionMap);
             settings.Configuration.CallSynchronously = EditorGUILayout.Toggle("Synchronous Callbacks", settings.Configuration.CallSynchronously);
+
+            if (EditorGUI.EndChangeCheck())
+                EditorUtility.SetDirty(settings);
         }
     }
 }

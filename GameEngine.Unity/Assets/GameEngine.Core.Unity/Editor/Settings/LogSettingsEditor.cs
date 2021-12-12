@@ -42,6 +42,7 @@ namespace GameEngine.Core.UnityEditor.Settings
         {
             LogSettings settings = (LogSettings)target;
 
+            EditorGUI.BeginChangeCheck();
             m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
             m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
 
@@ -63,6 +64,9 @@ namespace GameEngine.Core.UnityEditor.Settings
 
             EditorGUILayout.Space(25);
             AddNewLoggerGUI(settings);
+
+            if (EditorGUI.EndChangeCheck())
+                EditorUtility.SetDirty(settings);
         }
 
         private void TagFilteringGUI(LogSettings settings)

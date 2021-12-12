@@ -31,6 +31,7 @@ namespace GameEngine.PMR.UnityEditor.Settings
         {
             ContentSettings settings = (ContentSettings)target;
 
+            EditorGUI.BeginChangeCheck();
             m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
             m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
 
@@ -42,6 +43,9 @@ namespace GameEngine.PMR.UnityEditor.Settings
 
             AssetsContentGUI(settings);
             EditorGUILayout.Space(20);
+
+            if (EditorGUI.EndChangeCheck())
+                EditorUtility.SetDirty(settings);
         }
 
         private void DataContentGUI(ContentSettings settings)
