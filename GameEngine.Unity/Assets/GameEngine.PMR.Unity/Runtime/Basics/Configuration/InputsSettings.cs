@@ -4,17 +4,17 @@ using UnityEngine;
 
 namespace GameEngine.PMR.Unity.Basics.Configuration
 {
-    public class InputSettings : ScriptableSettings<InputConfiguration>
+    public class InputsSettings : ScriptableSettings<InputConfiguration>
     {
-        public const string ASSET_NAME = "InputSettings";
+        public const string ASSET_NAME = "InputsSettings";
 
         public const string CONFIG_ID = InputConfiguration.CONFIG_ID;
 
-        public static InputSettings GetSettings()
+        public static InputsSettings GetSettings()
         {
-            InputSettings settings = Resources.Load<InputSettings>(ASSET_NAME);
+            InputsSettings settings = Resources.Load<InputsSettings>(ASSET_NAME);
             if (settings == null)
-                settings = CreateInstance<InputSettings>();
+                settings = CreateInstance<InputsSettings>();
 
             return settings;
         }

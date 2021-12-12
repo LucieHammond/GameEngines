@@ -1,25 +1,25 @@
 ﻿using GameEngine.Core.UnityEditor;
+using GameEngine.PMR.Unity.Basics.Configuration;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using InputSettings = GameEngine.PMR.Unity.Basics.Configuration.InputSettings;
 
 namespace GameEngine.PMR.UnityEditor.Settings
 {
-    [CustomEditor(typeof(InputSettings))]
-    public class InputSettingsEditor : Editor
+    [CustomEditor(typeof(InputsSettings))]
+    public class InputsSettingsEditor : Editor
     {
         private GUIStyle m_TitleStyle;
 
-        [MenuItem("GameEngine/Project Settings/Input Settings", priority = 1)]
+        [MenuItem("GameEngine/Project Settings/Inputs Settings", priority = 1)]
         public static void DisplayInputSettings()
         {
-            Selection.activeObject = GameEngineConfiguration.GetOrCreateSettingAsset<InputSettings>(InputSettings.ASSET_NAME, SettingsScope.Project);
+            Selection.activeObject = GameEngineConfiguration.GetOrCreateSettingAsset<InputsSettings>(InputsSettings.ASSET_NAME, SettingsScope.Project);
         }
 
         public override void OnInspectorGUI()
         {
-            InputSettings settings = (InputSettings)target;
+            InputsSettings settings = (InputsSettings)target;
 
             m_TitleStyle = new GUIStyle(EditorStyles.boldLabel);
             m_TitleStyle.normal.textColor = new Color(0.25f, 0.75f, 1f);
