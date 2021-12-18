@@ -23,7 +23,12 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <returns>A ScriptableSettings object wrapping the configuration</returns>
         protected delegate ScriptableSettings<T> GetSettingsDelegate<T>();
         
-        private Dictionary<string, ScriptableObject> m_RegisteredSettings;
+        private Dictionary<string, object> m_RegisteredConfigurations;
+
+        public ConfigurationService()
+        {
+            m_RegisteredConfigurations = new Dictionary<string, object>();
+        }
 
         #region GameRule Cycle
         /// <summary>
@@ -42,7 +47,7 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// </summary>
         protected override void Unload()
         {
-            m_RegisteredSettings.Clear();
+            m_RegisteredConfigurations.Clear();
 
             MarkUnloaded();
         }
@@ -62,34 +67,23 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <returns>A configuration object containing setup values</returns>
         public TConfig GetConfiguration<TConfig>(string configId) where TConfig : class
         {
-            if (m_RegisteredSettings.TryGetValue(configId, out ScriptableObject settings))
+            if (m_RegisteredConfigurations.TryGetValue(configId, out object settings))
             {
-                return (settings as ScriptableSettings<TConfig>).Configuration;
+                if (settings is TConfig)
+                {
+                    return settings as TConfig;
+                } 
+                else
+                {
+                    Log.Error(TAG, $"Configuration {configId} does not match type {typeof(TConfig)}");
+                }
             }
             else
             {
                 Log.Error(TAG, $"Missing configuration {configId}");
-                return default;
             }
-        }
 
-        /// <summary>
-        /// Check if a configuration is valid
-        /// </summary>
-        /// <typeparam name="TConfig">The type of the configuration</typeparam>
-        /// <param name="configId">The id of the configuration</param>
-        /// <returns>A boolean indicating the validity of the configuration</returns>
-        public bool ValidateConfiguration<TConfig>(string configId)
-        {
-            if (m_RegisteredSettings.TryGetValue(configId, out ScriptableObject settings))
-            {
-                return (settings as ScriptableSettings<TConfig>).Validate();
-            }
-            else
-            {
-                Log.Error(TAG, $"Missing configuration {configId}");
-                return false;
-            }
+            return default;
         }
         #endregion
 
@@ -102,7 +96,7 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <param name="getSettings">A method that loads or create the ScriptableSettings wrapping the configuration</param>
         protected void RegisterSettings<T>(string settingId, GetSettingsDelegate<T> getSettings)
         {
-            m_RegisteredSettings.Add(settingId, getSettings());
+            m_RegisteredConfigurations.Add(settingId, getSettings().Configuration);
         }
         #endregion
     }
