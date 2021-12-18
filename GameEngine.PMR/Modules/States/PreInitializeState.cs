@@ -60,7 +60,10 @@ namespace GameEngine.PMR.Modules.States
                         m_TasksEnumerator.Current.BaseInitialize(m_GameModule.Rules);
                     }
 
-                    m_TasksEnumerator.Current.BaseUpdate(m_GameModule.PerformancePolicy.MaxFrameDuration);
+                    if (m_TasksEnumerator.Current.State == SpecialTaskState.InitRunning)
+                    {
+                        m_TasksEnumerator.Current.BaseUpdate(m_GameModule.PerformancePolicy.MaxFrameDuration);
+                    }
 
                     ReportProgress(m_TasksEnumerator.Current.GetProgress());
                 }

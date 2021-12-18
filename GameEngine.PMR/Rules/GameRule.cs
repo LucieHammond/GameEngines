@@ -115,7 +115,10 @@ namespace GameEngine.PMR.Rules
         protected virtual void OnQuit()
         {
             if (State == GameRuleState.Initialized)
+            {
+                State = GameRuleState.Unloading;
                 Unload();
+            }
         }
 
         /// <summary>

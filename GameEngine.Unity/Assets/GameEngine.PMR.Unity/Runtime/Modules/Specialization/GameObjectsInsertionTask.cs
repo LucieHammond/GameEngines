@@ -65,21 +65,27 @@ namespace GameEngine.PMR.Unity.Modules.Specialization
 
             do
             {
-                if (!m_RulesEnumerator.MoveNext())
-                {
-                    FinishInitialization();
-                    break;
-                }
-
-                m_NbRulesCovered++;
-                GameRule rule = m_RulesEnumerator.Current.Value;
-
-                if (rule is ISceneGameRule)
-                    ObjectDependencyOperations.InjectObjectDependencies(rule);
+                if (State == SpecialTaskState.InitRunning)
+                    InsertGameObjects();
             }
             while (m_UpdateTime.ElapsedMilliseconds < maxDuration);
 
             m_UpdateTime.Stop();
+        }
+
+        private void InsertGameObjects()
+        {
+            if (!m_RulesEnumerator.MoveNext())
+            {
+                FinishInitialization();
+                return;
+            }
+
+            m_NbRulesCovered++;
+            GameRule rule = m_RulesEnumerator.Current.Value;
+
+            if (rule is ISceneGameRule)
+                ObjectDependencyOperations.InjectObjectDependencies(rule);
         }
     }
 }
