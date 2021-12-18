@@ -6,7 +6,7 @@ namespace GameEngine.Core.Unity.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a UI text
     /// </summary>
-    [CreateAssetMenu(fileName = "NewTextDescriptor", menuName = "Content/Unity Objects/Text Descriptor", order = 101)]
+    [CreateAssetMenu(fileName = "NewTextDescriptor", menuName = "Content/Unity Objects/Text Descriptor", order = 21)]
     public class TextDescriptor : ContentDescriptor
     {
         /// <summary>
