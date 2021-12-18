@@ -31,7 +31,6 @@ namespace GameEngine.PMR.UnityEditor.Settings
             settings.Configuration.ActionsAsset = (InputActionAsset)EditorGUILayout
                 .ObjectField("Actions Asset", settings.Configuration.ActionsAsset, typeof(InputActionAsset), false);
             settings.Configuration.DefaultActionMap = EditorGUILayout.TextField("Default Action Map", settings.Configuration.DefaultActionMap);
-            settings.Configuration.CallSynchronously = EditorGUILayout.Toggle("Synchronous Callbacks", settings.Configuration.CallSynchronously);
 
             if (EditorGUI.EndChangeCheck())
                 EditorUtility.SetDirty(settings);

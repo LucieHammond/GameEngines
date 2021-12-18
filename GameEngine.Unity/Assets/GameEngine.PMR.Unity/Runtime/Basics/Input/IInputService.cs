@@ -23,22 +23,22 @@ namespace GameEngine.PMR.Unity.Basics.Input
         string GetBindingDisplay(string actionMap, string actionName, string controlSchemes);
         void RebindAction(string actionMap, string actionName, string controlSchemes, string bindingPath);
 
-        void RegisterButtonCallback(string actionMap, string actionName, ButtonCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterStatusCallback(string actionMap, string actionName, StatusCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterNumericCallback(string actionMap, string actionName, NumericCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterRotationCallback(string actionMap, string actionName, RotationCallback callback, InputEvent phase = InputEvent.Perform);
-        void RegisterContextCallback(string actionMap, string actionName, ContextCallback callback, InputEvent phase = InputEvent.Perform);
+        void RegisterButtonCallback(string actionMap, string actionName, ButtonCallback callback);
+        void RegisterStatusCallback(string actionMap, string actionName, StatusCallback callback);
+        void RegisterNumericCallback(string actionMap, string actionName, NumericCallback callback);
+        void RegisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback);
+        void RegisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback);
+        void RegisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback);
+        void RegisterRotationCallback(string actionMap, string actionName, RotationCallback callback);
+        void RegisterContextCallback(string actionMap, string actionName, ContextCallback callback);
 
-        void UnregisterButtonCallback(string actionMap, string actionName, ButtonCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterStatusCallback(string actionMap, string actionName, StatusCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterNumericCallback(string actionMap, string actionName, NumericCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterRotationCallback(string actionMap, string actionName, RotationCallback callback, InputEvent phase = InputEvent.Perform);
-        void UnregisterContextCallback(string actionMap, string actionName, ContextCallback callback, InputEvent phase = InputEvent.Perform);
+        void UnregisterButtonCallback(string actionMap, string actionName, ButtonCallback callback);
+        void UnregisterStatusCallback(string actionMap, string actionName, StatusCallback callback);
+        void UnregisterNumericCallback(string actionMap, string actionName, NumericCallback callback);
+        void UnregisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback);
+        void UnregisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback);
+        void UnregisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback);
+        void UnregisterRotationCallback(string actionMap, string actionName, RotationCallback callback);
+        void UnregisterContextCallback(string actionMap, string actionName, ContextCallback callback);
     }
 }

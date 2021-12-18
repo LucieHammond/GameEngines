@@ -11,7 +11,5 @@ namespace GameEngine.PMR.Unity.Basics.Input
         public InputActionAsset ActionsAsset;
 
         public string DefaultActionMap;
-
-        public bool CallSynchronously;
     }
 }

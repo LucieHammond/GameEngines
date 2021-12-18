@@ -20,27 +20,19 @@ namespace GameEngine.PMR.Unity.Basics.Input
         public IConfigurationService ConfigurationService;
 
         private InputActionAsset m_ActionsAsset;
-        private bool m_CallSynchronously;
 
-        private Dictionary<string, Dictionary<string, ContextCallback>> m_ActionStartCallbacks;
-        private Dictionary<string, Dictionary<string, ContextCallback>> m_ActionPerformCallbacks;
-        private Dictionary<string, Dictionary<string, ContextCallback>> m_ActionCancelCallbacks;
-        private ConcurrentQueue<Action> m_CallbackQueue;
+        private Dictionary<string, Dictionary<string, ContextCallback>> m_ActionCallbacks;
 
         #region GameRule cycle
         public InputService()
         {
-            m_ActionStartCallbacks = new Dictionary<string, Dictionary<string, ContextCallback>>();
-            m_ActionPerformCallbacks = new Dictionary<string, Dictionary<string, ContextCallback>>();
-            m_ActionCancelCallbacks = new Dictionary<string, Dictionary<string, ContextCallback>>();
-            m_CallbackQueue = new ConcurrentQueue<Action>();
+            m_ActionCallbacks = new Dictionary<string, Dictionary<string, ContextCallback>>();
         }
 
         protected override void Initialize()
         {
             InputConfiguration config = ConfigurationService.GetConfiguration<InputConfiguration>(InputConfiguration.CONFIG_ID);
             m_ActionsAsset = config.ActionsAsset;
-            m_CallSynchronously = config.CallSynchronously;
             if (!string.IsNullOrEmpty(config.DefaultActionMap))
                 SetCurrentActionMap(config.DefaultActionMap);
 
@@ -48,13 +40,10 @@ namespace GameEngine.PMR.Unity.Basics.Input
             {
                 foreach (InputAction action in actionMap.actions)
                 {
-                    string fullActionName = $"{actionMap}/{action}";
-                    m_ActionStartCallbacks.Add(fullActionName, new Dictionary<string, ContextCallback>());
-                    m_ActionPerformCallbacks.Add(fullActionName, new Dictionary<string, ContextCallback>());
-                    m_ActionCancelCallbacks.Add(fullActionName, new Dictionary<string, ContextCallback>());
-                    action.started += OnStarted;
-                    action.performed += OnPerformed;
-                    action.canceled += OnCanceled;
+                    string fullActionName = $"{actionMap.name}/{action.name}";
+                    m_ActionCallbacks.Add(fullActionName, new Dictionary<string, ContextCallback>());
+                    action.performed += OnAction;
+                    action.canceled += OnAction;
                 }
             }
 
@@ -63,17 +52,14 @@ namespace GameEngine.PMR.Unity.Basics.Input
 
         protected override void Unload()
         {
-            m_ActionStartCallbacks.Clear();
-            m_ActionPerformCallbacks.Clear();
-            m_ActionCancelCallbacks.Clear();
+            m_ActionCallbacks.Clear();
 
             foreach (InputActionMap actionMap in m_ActionsAsset.actionMaps)
             {
                 foreach (InputAction action in actionMap.actions)
                 {
-                    action.started -= OnStarted;
-                    action.performed -= OnPerformed;
-                    action.canceled -= OnCanceled;
+                    action.performed -= OnAction;
+                    action.canceled -= OnAction;
                 }
             }
 
@@ -82,13 +68,7 @@ namespace GameEngine.PMR.Unity.Basics.Input
 
         protected override void Update()
         {
-            if (m_CallSynchronously)
-            {
-                while (m_CallbackQueue.TryDequeue(out Action callback))
-                {
-                    callback();
-                }
-            }
+            InputSystem.Update();
         }
         #endregion
 
@@ -125,177 +105,143 @@ namespace GameEngine.PMR.Unity.Basics.Input
         }
 
 
-        public void RegisterButtonCallback(string actionMap, string actionName, ButtonCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterButtonCallback(string actionMap, string actionName, ButtonCallback callback)
         {
-            ContextCallback contextCallback = (context) => callback.Invoke();
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            ContextCallback contextCallback = (context) =>
+            {
+                if (context.performed)
+                    callback.Invoke();
+            };
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterStatusCallback(string actionMap, string actionName, StatusCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterStatusCallback(string actionMap, string actionName, StatusCallback callback)
         {
             ContextCallback contextCallback = (context) => callback(context.control.IsPressed());
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterNumericCallback(string actionMap, string actionName, NumericCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterNumericCallback(string actionMap, string actionName, NumericCallback callback)
         {
             ContextCallback contextCallback = (context) =>
             {
                 if (context.valueType == typeof(int))
                     callback(context.ReadValue<int>());
             };
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback)
         {
             ContextCallback contextCallback = (context) =>
             {
                 if (context.valueType == typeof(float))
                     callback(context.ReadValue<float>());
             };
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback)
         {
             ContextCallback contextCallback = (context) =>
             {
                 if (context.valueType == typeof(Vector2))
                     callback(context.ReadValue<Vector2>());
             };
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback)
         {
             ContextCallback contextCallback = (context) =>
             {
                 if (context.valueType == typeof(Vector3))
                     callback(context.ReadValue<Vector3>());
             };
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterRotationCallback(string actionMap, string actionName, RotationCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterRotationCallback(string actionMap, string actionName, RotationCallback callback)
         {
             ContextCallback contextCallback = (context) =>
             {
                 if (context.valueType == typeof(Quaternion))
                     callback(context.ReadValue<Quaternion>());
             };
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), contextCallback);
         }
 
-        public void RegisterContextCallback(string actionMap, string actionName, ContextCallback callback, InputEvent phase = InputEvent.Perform)
+        public void RegisterContextCallback(string actionMap, string actionName, ContextCallback callback)
         {
-            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), callback, phase);
+            RegisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), callback);
         }
 
 
-        public void UnregisterButtonCallback(string actionMap, string actionName, ButtonCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterButtonCallback(string actionMap, string actionName, ButtonCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterStatusCallback(string actionMap, string actionName, StatusCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterStatusCallback(string actionMap, string actionName, StatusCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterNumericCallback(string actionMap, string actionName, NumericCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterNumericCallback(string actionMap, string actionName, NumericCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterAxis1DCallback(string actionMap, string actionName, Axis1DCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterAxis2DCallback(string actionMap, string actionName, Axis2DCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterAxis3DCallback(string actionMap, string actionName, Axis3DCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterRotationCallback(string actionMap, string actionName, RotationCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterRotationCallback(string actionMap, string actionName, RotationCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
 
-        public void UnregisterContextCallback(string actionMap, string actionName, ContextCallback callback, InputEvent phase = InputEvent.Perform)
+        public void UnregisterContextCallback(string actionMap, string actionName, ContextCallback callback)
         {
-            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method), phase);
+            UnregisterActionCallback($"{actionMap}/{actionName}", GetCallbackId(callback.Method));
         }
         #endregion
 
         #region private
-        private void OnStarted(InputAction.CallbackContext context)
+        private void OnAction(InputAction.CallbackContext context)
         {
             string fullActionName = $"{context.action.actionMap.name}/{context.action.name}";
-            if (m_ActionStartCallbacks.ContainsKey(fullActionName))
+            if (m_ActionCallbacks.ContainsKey(fullActionName))
             {
-                foreach (ContextCallback callback in m_ActionStartCallbacks[fullActionName].Values)
+                foreach (ContextCallback callback in m_ActionCallbacks[fullActionName].Values)
                 {
-                    if (!m_CallSynchronously)
-                        callback(context);
-                    else
-                        m_CallbackQueue.Enqueue(() => callback(context));
+                    callback(context);
                 }
             }
         }
 
-        private void OnPerformed(InputAction.CallbackContext context)
+        private void RegisterActionCallback(string fullActionName, string callbackId, ContextCallback actionCallback)
         {
-            string fullActionName = $"{context.action.actionMap.name}/{context.action.name}";
-            if (m_ActionPerformCallbacks.ContainsKey(fullActionName))
+            if (m_ActionCallbacks.ContainsKey(fullActionName))
             {
-                foreach (ContextCallback callback in m_ActionPerformCallbacks[fullActionName].Values)
+                if (!m_ActionCallbacks[fullActionName].ContainsKey(callbackId))
                 {
-                    if (!m_CallSynchronously)
-                        callback(context);
-                    else
-                        m_CallbackQueue.Enqueue(() => callback(context));
-                }
-            }
-        }
-
-        private void OnCanceled(InputAction.CallbackContext context)
-        {
-            string fullActionName = $"{context.action.actionMap.name}/{context.action.name}";
-            if (m_ActionCancelCallbacks.ContainsKey(fullActionName))
-            {
-                foreach (ContextCallback callback in m_ActionCancelCallbacks[fullActionName].Values)
-                {
-                    if (!m_CallSynchronously)
-                        callback(context);
-                    else
-                        m_CallbackQueue.Enqueue(() => callback(context));
-                }
-            }
-        }
-
-        private void RegisterActionCallback(string fullActionName, string callbackId, ContextCallback actionCallback, InputEvent phase)
-        {
-            Dictionary<string, Dictionary<string, ContextCallback>> actionCallbacks =
-                phase == InputEvent.Start ? m_ActionStartCallbacks :
-                phase == InputEvent.Perform ? m_ActionPerformCallbacks :
-                phase == InputEvent.Cancel ? m_ActionCancelCallbacks : null;
-
-            if (actionCallbacks.ContainsKey(fullActionName))
-            {
-                if (!actionCallbacks[fullActionName].ContainsKey(callbackId))
-                {
-                    actionCallbacks[fullActionName].Add(callbackId, actionCallback);
+                    m_ActionCallbacks[fullActionName].Add(callbackId, actionCallback);
                 }
                 else
                 {
-                    Log.Error(TAG, $"Duplicated registry: Callback {callbackId} is already registered for action {fullActionName} at event {phase}");
+                    Log.Error(TAG, $"Duplicated registry: Callback {callbackId} is already registered for action {fullActionName}");
                 }
             }
             else
@@ -304,22 +250,17 @@ namespace GameEngine.PMR.Unity.Basics.Input
             }
         }
 
-        private void UnregisterActionCallback(string fullActionName, string callbackId, InputEvent phase)
+        private void UnregisterActionCallback(string fullActionName, string callbackId)
         {
-            Dictionary<string, Dictionary<string, ContextCallback>> actionCallbacks =
-                phase == InputEvent.Start ? m_ActionStartCallbacks :
-                phase == InputEvent.Perform ? m_ActionPerformCallbacks :
-                phase == InputEvent.Cancel ? m_ActionCancelCallbacks : null;
-
-            if (actionCallbacks.ContainsKey(fullActionName))
+            if (m_ActionCallbacks.ContainsKey(fullActionName))
             {
-                if (actionCallbacks[fullActionName].ContainsKey(callbackId))
+                if (m_ActionCallbacks[fullActionName].ContainsKey(callbackId))
                 {
-                    actionCallbacks[fullActionName].Remove(callbackId);
+                    m_ActionCallbacks[fullActionName].Remove(callbackId);
                 }
                 else
                 {
-                    Log.Error(TAG, $"Unknown registry: Callback {callbackId} is not registered for action {fullActionName} at event {phase}");
+                    Log.Error(TAG, $"Unknown registry: Callback {callbackId} is not registered for action {fullActionName}");
                 }
             }
             else
