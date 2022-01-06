@@ -41,26 +41,36 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         {
             if (Configuration.EnableContentData)
             {
+                Configuration.DataContentPath = EvaluateApplicationPath(Configuration.DataContentPath);
                 if (string.IsNullOrEmpty(Configuration.DataContentPath) || !Directory.Exists(Configuration.DataContentPath))
                     return false;
             }
 
             if (Configuration.EnableContentDescriptors)
             {
+                Configuration.DescriptorContentPath = EvaluateApplicationPath(Configuration.DescriptorContentPath);
                 if (string.IsNullOrEmpty(Configuration.DescriptorContentPath) || !Directory.Exists(Configuration.DescriptorContentPath))
                     return false;
 
-                if (string.IsNullOrEmpty(Configuration.DescriptorContentPath))
+                if (string.IsNullOrEmpty(Configuration.DescriptorBundleName))
                     return false;
             }
 
             if (Configuration.EnableContentAssets)
             {
+                Configuration.AssetContentPath = EvaluateApplicationPath(Configuration.AssetContentPath);
                 if (!string.IsNullOrEmpty(Configuration.AssetContentPath) && !Directory.Exists(Configuration.AssetContentPath))
                     return false;
             }
 
             return true;
+        }
+
+        private string EvaluateApplicationPath(string path)
+        {
+            return path.Replace("{Data}", Application.dataPath)
+                .Replace("{PersistentData}", Application.persistentDataPath)
+                .Replace("{StreamingAssets}", Application.streamingAssetsPath);
         }
     }
 }

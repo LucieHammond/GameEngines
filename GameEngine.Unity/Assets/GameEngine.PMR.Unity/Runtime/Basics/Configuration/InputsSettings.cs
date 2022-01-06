@@ -21,7 +21,7 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
 
         public override bool Validate()
         {
-            if (Configuration.ActionsAsset != null)
+            if (Configuration.ActionsAsset == null)
                 return false;
 
             if (string.IsNullOrEmpty(Configuration.DefaultActionMap) || 

@@ -96,7 +96,11 @@ namespace GameEngine.PMR.Unity.Basics.Configuration
         /// <param name="getSettings">A method that loads or create the ScriptableSettings wrapping the configuration</param>
         protected void RegisterSettings<T>(string settingId, GetSettingsDelegate<T> getSettings)
         {
-            m_RegisteredConfigurations.Add(settingId, getSettings().Configuration);
+            ScriptableSettings<T> settings = getSettings();
+            if (settings.Validate())
+                m_RegisteredConfigurations.Add(settingId, getSettings().Configuration);
+            else
+                Log.Error(TAG, $"Invalid configuration {settingId}");
         }
         #endregion
     }
