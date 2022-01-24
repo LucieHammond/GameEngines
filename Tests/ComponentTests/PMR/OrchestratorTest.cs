@@ -1,6 +1,7 @@
 ﻿using GameEngine.PMR.Modules;
 using GameEngine.PMR.Process;
 using GameEngine.PMR.Process.Orchestration;
+using GameEngine.PMR.Process.Transitions;
 using GameEngine.PMR.Rules;
 using GameEngine.PMR.Rules.Scheduling;
 using GameEnginesTest.Tools.Mocks.Fakes;
@@ -38,11 +39,13 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.IsNull(orchestrator.Parent);
             Assert.AreEqual(0, orchestrator.Children.Count);
 
-            // At creation, orchestrator is in Wait state with null CurrentModule and null CurrentTransition
+            // At creation, orchestrator is in Wait state with null module, null transition and empty operations
             Assert.AreEqual(OrchestratorState.Wait, orchestrator.State);
             Assert.IsFalse(orchestrator.IsOperational);
             Assert.IsNull(orchestrator.CurrentModule);
             Assert.IsNull(orchestrator.CurrentTransition);
+            Assert.AreEqual(0, orchestrator.NextOperations.Count);
+            Assert.AreEqual(0, orchestrator.PastTransitions.Count);
 
             // A new orchestrator can be created as a child of an existing orchestrator
             Orchestrator childOrchestrator = new Orchestrator($"Sub-{category}", process, orchestrator);
@@ -57,8 +60,7 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void ExecuteWithoutTransition()
         {
             Orchestrator orchestrator = CreateValidOrchestrator(out string _, out GameProcess _);
-            IGameModuleSetup moduleSetup = GetModuleSetupWithNullTransition();
-            GameModule createdModule;
+            IGameModuleSetup moduleSetup = GetModuleSetupWithNullTransition("Module");
 
             // Perform the LoadModule operation: Wait -> RunTransition -> Operational
             bool loadCompleted = false;
@@ -74,7 +76,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             // After the LoadModule sequence, CurrentModule has finished loading
             Assert.IsNotNull(orchestrator.CurrentModule);
             Assert.AreEqual(GameModuleState.UpdateRules, orchestrator.CurrentModule.State);
-            createdModule = orchestrator.CurrentModule;
+            GameModule createdModule = orchestrator.CurrentModule;
 
             // Perform the ReloadModule operation: Operational -> RunTransition -> Operational
             bool reloadCompleted = false;
@@ -112,23 +114,27 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void ExecuteWithTransition()
         {
             Orchestrator orchestrator = CreateValidOrchestrator(out string _, out GameProcess _);
-            IGameModuleSetup moduleSetup = GetModuleSetupWithNonNullTransition(out SpyTransition transition);
+            IGameModuleSetup moduleSetup = GetModuleSetupWithNonNullTransition("Module", out SpyTransition transition);
 
             // Perform the LoadModule operation: Wait -> EnterTransition -> RunTransition -> ExitTransition -> Operational
             orchestrator.LoadModule(moduleSetup, null);
+            transition.CallMarkReady();
             Assert.AreEqual(transition, orchestrator.CurrentTransition);
             Assert.AreEqual(OrchestratorState.Wait, orchestrator.State);
+
             orchestrator.SimulateOneFrame(m_Time);
             Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
             Assert.AreEqual(0, transition.LoadingProgress);
 
-            transition.CallMarkActivated();
+            transition.CallMarkEntered();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
+
+            transition.CallMarkCompleted();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
 
-            transition.CallMarkDeactivated();
+            transition.CallMarkExited();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
             Assert.AreEqual(1, transition.LoadingProgress);
@@ -137,17 +143,20 @@ namespace GameEnginesTest.ComponentTests.PMR
             orchestrator.ReloadModule();
             Assert.AreEqual(transition, orchestrator.CurrentTransition);
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
+
             orchestrator.SimulateOneFrame(m_Time);
             Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
             Assert.AreEqual(0, transition.LoadingProgress);
 
-            transition.CallMarkActivated();
+            transition.CallMarkEntered();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
+
+            transition.CallMarkCompleted();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
 
-            transition.CallMarkDeactivated();
+            transition.CallMarkExited();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
             Assert.AreEqual(1, transition.LoadingProgress);
@@ -156,17 +165,20 @@ namespace GameEnginesTest.ComponentTests.PMR
             orchestrator.UnloadModule();
             Assert.AreEqual(transition, orchestrator.CurrentTransition);
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
+
             orchestrator.SimulateOneFrame(m_Time);
             Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
             Assert.AreEqual(0, transition.LoadingProgress);
 
-            transition.CallMarkActivated();
+            transition.CallMarkEntered();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
+
+            transition.CallMarkCompleted();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
 
-            transition.CallMarkDeactivated();
+            transition.CallMarkExited();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.Wait, orchestrator.State);
             Assert.AreEqual(1, transition.LoadingProgress);
@@ -176,46 +188,47 @@ namespace GameEnginesTest.ComponentTests.PMR
         public void ChangeAssociatedModule()
         {
             Orchestrator orchestrator = CreateValidOrchestrator(out string _, out GameProcess _);
-            IGameModuleSetup moduleSetup1 = GetModuleSetupWithNonNullTransition(out SpyTransition transition1);
-            IGameModuleSetup moduleSetup2 = GetModuleSetupWithNonNullTransition(out SpyTransition transition2);
-            GameModule module1;
+            IGameModuleSetup moduleSetup1 = GetModuleSetupWithNonNullTransition("Module1", out SpyTransition transition1);
+            IGameModuleSetup moduleSetup2 = GetModuleSetupWithNonNullTransition("Module2", out SpyTransition transition2);
 
             // Load module 1 with transition 1
+            transition1.SetAutomaticCompletion();
             orchestrator.LoadModule(moduleSetup1, null);
-            module1 = orchestrator.CurrentModule;
+            Assert.IsNull(orchestrator.CurrentModule);
             Assert.AreEqual(transition1, orchestrator.CurrentTransition);
-            transition1.OnEnter += () => transition1.CallMarkActivated();
-            transition1.OnExit += () => transition1.CallMarkDeactivated();
             Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.IsOperational));
 
             // After the LoadModule sequence, the module 1 is fully loaded
-            Assert.AreEqual(module1, orchestrator.CurrentModule);
+            Assert.AreEqual(moduleSetup1.Name, orchestrator.CurrentModule.Name);
             Assert.AreEqual(transition1, orchestrator.CurrentTransition);
             Assert.AreEqual(GameModuleState.UpdateRules, orchestrator.CurrentModule.State);
 
             // Switch to module 2 with transition 2 : Operational -> EnterTransition -> RunTransition -> ExitTransition -> Operational
             orchestrator.SwitchToModule(moduleSetup2, null);
-            Assert.AreEqual(module1, orchestrator.CurrentModule);
+            Assert.AreEqual(moduleSetup1.Name, orchestrator.CurrentModule.Name);
             Assert.AreEqual(transition2, orchestrator.CurrentTransition);
-
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
+
+            transition2.CallMarkReady();
             orchestrator.SimulateOneFrame(m_Time);
             Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
             Assert.AreEqual(0, transition2.LoadingProgress);
 
-            transition2.CallMarkActivated();
+            transition2.CallMarkEntered();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
+
+            transition2.CallMarkCompleted();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
 
-            transition2.CallMarkDeactivated();
+            transition2.CallMarkExited();
             Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
             Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
             Assert.AreEqual(1, transition2.LoadingProgress);
 
             // After the SwitchToModule sequence, the module 2 is fully loaded
-            Assert.AreNotEqual(module1, orchestrator.CurrentModule);
+            Assert.AreEqual(moduleSetup2.Name, orchestrator.CurrentModule.Name);
             Assert.AreEqual(transition2, orchestrator.CurrentTransition);
             Assert.AreEqual(GameModuleState.UpdateRules, orchestrator.CurrentModule.State);
         }
@@ -223,63 +236,74 @@ namespace GameEnginesTest.ComponentTests.PMR
         [TestMethod]
         public void InterruptRunningOperation()
         {
-            // 1) Example with operations requiring the same transition: interrupt a loading operation with an unloading operation
+            // - Example with operations requiring the same transition (load and unload)
             Orchestrator orchestrator = CreateValidOrchestrator(out string _, out GameProcess _);
-            IGameModuleSetup moduleSetup = GetModuleSetupWithNonNullTransition(out SpyTransition transition);
-            transition.OnEnter += () => transition.CallMarkActivated();
-            transition.OnExit += () => transition.CallMarkDeactivated();
+            IGameModuleSetup moduleSetup = GetModuleSetupWithNonNullTransition("Module1", out SpyTransition transition);
+            transition.SetAutomaticCompletion();
 
-            // A) If orchestrator is in RunTransition state -> transition keeps running with a different module operation
+            // A) If orchestrator is in EnterTransition state -> continue in EnterTransition with same transition
             orchestrator.LoadModule(moduleSetup, null);
-            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.RunTransition);
-            Assert.AreEqual(GameModuleState.Configure, orchestrator.CurrentModule.State);
-
-            orchestrator.UnloadModule();
-            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
-            Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
-            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
-            Assert.AreEqual(OrchestratorState.Wait, orchestrator.State);
-            Assert.IsNull(orchestrator.CurrentModule);
-
-            // B) If orchestrator is in ExitTransition state -> transition return to Start immediatly with a different module operation
-            transition.OnExit = null;
-            orchestrator.LoadModule(moduleSetup, null);
-            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.ExitTransition);
-            Assert.AreEqual(GameModuleState.UpdateRules, orchestrator.CurrentModule.State);
+            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.EnterTransition);
 
             orchestrator.UnloadModule();
             orchestrator.SimulateOneFrame(m_Time);
             Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
-            transition.OnExit += () => transition.CallMarkDeactivated();
+            Assert.AreEqual(transition, orchestrator.CurrentTransition);
+
             Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.Wait));
             Assert.IsNull(orchestrator.CurrentModule);
 
-            // 2) Example with operations requiring different transitions: interrupt a loading operation with an switchToModule operation
-            IGameModuleSetup moduleSetup2 = GetModuleSetupWithNonNullTransition(out SpyTransition transition2);
-            transition2.OnEnter += () => transition2.CallMarkActivated();
-            transition2.OnExit += () => transition2.CallMarkDeactivated();
-
-            // C) If orchestrator is in EnterTransition state -> transition goes to Exit immediatly and then the other transition starts
-            transition.OnEnter = null;
+            // B) If orchestrator is in ExitTransition state -> return to EnterTransition with same transition
             orchestrator.LoadModule(moduleSetup, null);
-            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.EnterTransition);
-            Assert.AreEqual(GameModuleState.Start, orchestrator.CurrentModule.State);
+            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.ExitTransition);
+
+            orchestrator.UnloadModule();
+            orchestrator.SimulateOneFrame(m_Time);
+            Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
+            Assert.AreEqual(transition, orchestrator.CurrentTransition);
+
+            Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.Wait));
+            Assert.IsNull(orchestrator.CurrentModule);
+
+            // - Example with operations requiring different transitions (switch transition)
+            IGameModuleSetup moduleSetup2 = GetModuleSetupWithNonNullTransition("Module2", out SpyTransition transition2);
+            transition2.SetAutomaticCompletion();
+
+            // C) If orchestrator is in RunTransition state -> go to ChangeTransition state with new transition
+            orchestrator.LoadModule(moduleSetup, null);
+            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.RunTransition);
 
             orchestrator.SwitchToModule(moduleSetup2, null);
             orchestrator.SimulateOneFrame(m_Time);
-            Assert.AreEqual(OrchestratorState.ExitTransition, orchestrator.State);
-            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
-            Assert.AreEqual(OrchestratorState.EnterTransition, orchestrator.State);
+            Assert.AreEqual(OrchestratorState.ChangeTransition, orchestrator.State);
             Assert.AreEqual(transition2, orchestrator.CurrentTransition);
+            Assert.AreEqual(TransitionState.Running, transition.State);
+
+            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
+            Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
+            Assert.AreEqual(TransitionState.Inactive, transition.State);
+
             Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.Operational));
+            Assert.AreEqual(moduleSetup2.Name, orchestrator.CurrentModule.Name);
+
+            // D) If orchestrator is in SwitchTransition state -> continue in SwitchTransition state with new transition
+            orchestrator.SwitchToModule(moduleSetup, null);
+            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.RunTransition);
+            orchestrator.SwitchToModule(moduleSetup2, null);
+            orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.State == OrchestratorState.ChangeTransition);
+
+            orchestrator.SwitchToModule(moduleSetup, null);
+            orchestrator.SimulateOneFrame(m_Time);
+            Assert.AreEqual(OrchestratorState.ChangeTransition, orchestrator.State);
+            Assert.AreEqual(transition, orchestrator.CurrentTransition);
         }
 
         [TestMethod]
         public void ManageSubmodules()
         {
             Orchestrator orchestrator = CreateValidOrchestrator(out string _, out GameProcess _);
-            IGameModuleSetup moduleSetup = GetModuleSetupWithNullTransition();
-            IGameModuleSetup submoduleSetup = GetModuleSetupWithNullTransition();
+            IGameModuleSetup moduleSetup = GetModuleSetupWithNullTransition("Module");
+            IGameModuleSetup submoduleSetup = GetModuleSetupWithNullTransition("Submodule");
             string submoduleCategory = "TestSubmodule";
             orchestrator.LoadModule(moduleSetup, null);
             orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.IsOperational);
@@ -303,18 +327,15 @@ namespace GameEnginesTest.ComponentTests.PMR
             Assert.IsNull(childOrchestrator.CurrentModule);
             Assert.AreEqual(0, orchestrator.Children.Count);
 
-            // Perform the UnloadModule operation when orchestrator has children: Operational -> Reset -> RunTransition -> Wait
+            // Perform the UnloadModule operation when orchestrator has children: children are unloaded first
             orchestrator.AddSubmodule(submoduleCategory, submoduleSetup, null);
             orchestrator.SimulateExecutionUntil(m_Time, () => childOrchestrator.IsOperational);
 
             orchestrator.UnloadModule();
-            Assert.AreEqual(OrchestratorState.Operational, orchestrator.State);
-            orchestrator.SimulateOneFrame(m_Time);
-            Assert.AreEqual(OrchestratorState.Reset, orchestrator.State);
-            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time, 20));
-            Assert.AreEqual(OrchestratorState.RunTransition, orchestrator.State);
-            Assert.IsTrue(orchestrator.SimulateUpToNextState(m_Time));
-            Assert.AreEqual(OrchestratorState.Wait, orchestrator.State);
+            Assert.IsTrue(orchestrator.Children.Count > 0);
+            Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.Children.Count == 0));
+            Assert.IsNotNull(orchestrator.CurrentModule);
+            Assert.IsTrue(orchestrator.SimulateExecutionUntil(m_Time, () => orchestrator.CurrentModule == null));
         }
 
         private Orchestrator CreateValidOrchestrator(out string category, out GameProcess process)
@@ -324,20 +345,22 @@ namespace GameEnginesTest.ComponentTests.PMR
             return new Orchestrator(category, process, null);
         }
 
-        private IGameModuleSetup GetModuleSetupWithNullTransition()
+        private IGameModuleSetup GetModuleSetupWithNullTransition(string name)
         {
             StubGameServiceSetup setup = new StubGameServiceSetup();
+            setup.CustomName = name;
             setup.CustomRules = new List<GameRule>();
             setup.CustomInitUnloadOrder = new List<Type>();
             setup.CustomUpdateScheduler = new List<RuleScheduling>();
             return setup;
         }
 
-        private IGameModuleSetup GetModuleSetupWithNonNullTransition(out SpyTransition transition)
+        private IGameModuleSetup GetModuleSetupWithNonNullTransition(string name, out SpyTransition transition)
         {
             transition = new SpyTransition();
 
             StubGameServiceSetup setup = new StubGameServiceSetup();
+            setup.CustomName = name;
             setup.CustomRules = new List<GameRule>();
             setup.CustomInitUnloadOrder = new List<Type>();
             setup.CustomUpdateScheduler = new List<RuleScheduling>();

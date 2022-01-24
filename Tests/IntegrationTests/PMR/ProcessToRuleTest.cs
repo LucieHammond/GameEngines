@@ -34,7 +34,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
 
             // Start operation
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             Assert.AreEqual(1, m_Scenario.ServiceRule.InitializeCallCount);
             Assert.IsTrue(m_Scenario.ServiceRule.UpdateCallCount > 0);
             Assert.AreEqual(1, m_Scenario.FirstModeRule.InitializeCallCount);
@@ -57,7 +57,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // SwitchMode Operation
             m_Process.SwitchToNextGameMode();
             m_Scenario.SimulateFrames(1);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             Assert.IsTrue(m_Scenario.ServiceRule.UpdateCallCount > 0);
             Assert.AreEqual(1, m_Scenario.FirstModeRule.UnloadCallCount);
             Assert.AreEqual(1, m_Scenario.SecondModeRule.InitializeCallCount);
@@ -87,8 +87,9 @@ namespace GameEnginesTest.IntegrationTests.PMR
 
             // Start and load submodule
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             m_Process.CurrentGameMode.LoadSubmodule(m_Scenario.SubmoduleCategory, m_Scenario.SubmoduleSetup);
+            m_Scenario.SimulateFrames(2);
             GameModule submodule = m_Process.CurrentGameMode.GetSubmodule(m_Scenario.SubmoduleCategory);
             m_Scenario.SimulateUntil(() => submodule.OrchestrationState == OrchestratorState.Operational && m_Process.Time.FrameCount % 2 == 0);
 
@@ -125,10 +126,10 @@ namespace GameEnginesTest.IntegrationTests.PMR
         {
             // Load services, game mode and submodule
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             m_Process.CurrentGameMode.LoadSubmodule(m_Scenario.SubmoduleCategory, m_Scenario.SubmoduleSetup);
-            GameModule submodule = m_Process.CurrentGameMode.GetSubmodule(m_Scenario.SubmoduleCategory);
-            m_Scenario.SimulateUntil(() => submodule.OrchestrationState == OrchestratorState.Operational);
+            Func<GameModule> getSubmodule = () => m_Process.CurrentGameMode.GetSubmodule(m_Scenario.SubmoduleCategory);
+            m_Scenario.SimulateUntil(() => getSubmodule()?.OrchestrationState == OrchestratorState.Operational);
 
             m_Scenario.ServiceRule.ResetCount();
             m_Scenario.FirstModeRule.ResetCount();
@@ -150,7 +151,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // If an exception is thrown during load, process is paused
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
 
             m_Scenario.FirstModeRule.OnInitialize = () => throw new Exception();
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.InitializeCallCount > 0);
@@ -163,7 +164,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // If an exception is thrown during update, process launches the stop operation
             m_Scenario.FirstModeRule.CallMarkInitialized();
             m_Process.Restart();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
 
             m_Scenario.FirstModeRule.OnUpdate = () => throw new Exception();
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.UpdateCallCount > 0);

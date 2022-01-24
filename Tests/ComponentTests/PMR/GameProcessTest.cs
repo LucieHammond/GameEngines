@@ -39,21 +39,18 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Start process
             process.Start();
+            process.SimulateOneFrame(m_Time);
             Assert.IsTrue(process.IsStarted);
-            Assert.IsNotNull(process.Services);
-            Assert.AreEqual(GameModuleState.Start, process.Services.State);
-            Assert.IsNull(process.ServiceProvider);
-            Assert.IsNull(process.CurrentGameMode);
 
             // Run simulation until game services are loaded
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.Services.Orchestrator.IsOperational));
-            Assert.AreEqual(GameModuleState.UpdateRules, process.Services.State);
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsServiceOperational));
+            Assert.IsNotNull(process.Services);
             Assert.IsNotNull(process.ServiceProvider);
-            Assert.IsNotNull(process.CurrentGameMode);
-            Assert.IsTrue(process.CurrentGameMode.State == GameModuleState.Start || process.CurrentGameMode.State == GameModuleState.Configure);
+            Assert.AreEqual(GameModuleState.UpdateRules, process.Services.State);
 
             // Run simulation until first game mode is loaded
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
+            Assert.IsNotNull(process.CurrentGameMode);
             Assert.AreEqual(GameModuleState.UpdateRules, process.Services.State);
             Assert.AreEqual(GameModuleState.UpdateRules, process.CurrentGameMode.State);
 
@@ -75,8 +72,10 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Run simulation until game services are unloaded
             Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.Services == null));
             Assert.AreEqual(GameModuleState.End, gameServices.State);
-            Assert.IsNull(process.CurrentGameMode);
-            Assert.IsFalse(process.IsStarted);
+            Assert.AreEqual(GameModuleState.End, gameMode.State);
+
+            // Return to inactive state
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => !process.IsStarted));
         }
 
         [TestMethod]
@@ -88,7 +87,7 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Initialize process with a custom game mode
             IGameModuleSetup customMode = GetCustomGameModeSetup("CustomMode");
             process.SwitchToGameMode(customMode, null);
-            process.SimulateExecutionUntil(m_Time, () => process.IsFullyOperational);
+            process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational);
             Assert.AreEqual(setup.GetServiceSetup().Name, process.Services.Name);
             Assert.AreNotEqual(setup.GetFirstGameModes()[0].Name, process.CurrentGameMode.Name);
             Assert.AreEqual(customMode.Name, process.CurrentGameMode.Name);
@@ -98,8 +97,8 @@ namespace GameEnginesTest.ComponentTests.PMR
             Configuration newConfig = new Configuration();
             process.SwitchToGameMode(newMode, newConfig);
             process.SimulateOneFrame(m_Time);
-            Assert.IsFalse(process.CurrentGameMode.Orchestrator.IsOperational);
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsFalse(process.IsGameModeOperational);
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
             Assert.AreEqual(newMode.Name, process.CurrentGameMode.Name);
             Assert.AreEqual(newConfig, process.CurrentGameMode.Configuration);
 
@@ -112,12 +111,12 @@ namespace GameEnginesTest.ComponentTests.PMR
             // Switch from mode to mode according to the plan
             Assert.IsTrue(process.SwitchToNextGameMode());
             process.SimulateOneFrame(m_Time);
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
             Assert.AreEqual(firstMode.Name, process.CurrentGameMode.Name);
 
             Assert.IsTrue(process.SwitchToNextGameMode());
             process.SimulateOneFrame(m_Time);
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
             Assert.AreEqual(secondMode.Name, process.CurrentGameMode.Name);
 
             // Clear queue of incoming game modes
@@ -137,15 +136,15 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Pause during the loading of the services
             process.Pause();
-            Assert.IsFalse(process.SimulateExecutionUntil(m_Time, () => process.Services.Orchestrator.IsOperational));
+            Assert.IsFalse(process.SimulateExecutionUntil(m_Time, () => process.IsServiceOperational));
             process.Restart();
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.Services.Orchestrator.IsOperational));
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsServiceOperational));
 
             // Pause during the loading of the first game mode
             process.Pause();
-            Assert.IsFalse(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsFalse(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
             process.Restart();
-            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.CurrentGameMode.Orchestrator.IsOperational));
+            Assert.IsTrue(process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational));
 
             // Pause during the main operational phase
             process.Pause();
@@ -175,7 +174,7 @@ namespace GameEnginesTest.ComponentTests.PMR
 
             // Complete loading and check configurations are correct
             process.Start();
-            process.SimulateExecutionUntil(m_Time, () => process.IsFullyOperational);
+            process.SimulateExecutionUntil(m_Time, () => process.IsGameModeOperational);
             Assert.AreEqual(serviceConfig, process.Services.Configuration);
             Assert.AreEqual(modeConfig, process.CurrentGameMode.Configuration);
 

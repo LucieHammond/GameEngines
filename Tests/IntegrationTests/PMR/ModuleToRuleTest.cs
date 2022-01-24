@@ -31,27 +31,28 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Process.Start();
 
             // First load operation
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             Assert.AreEqual(1, m_Scenario.FirstModeRule.InitializeCallCount);
             Assert.IsTrue(m_Scenario.FirstModeRule.UpdateCallCount > 0);
 
             // Reload operation
             m_Process.CurrentGameMode.Reload();
             m_Scenario.SimulateFrames(1);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             Assert.AreEqual(1, m_Scenario.FirstModeRule.UnloadCallCount);
             Assert.AreEqual(2, m_Scenario.FirstModeRule.InitializeCallCount);
 
             // Switch operation
             m_Process.CurrentGameMode.SwitchToModule(m_Scenario.SecondModeSetup);
             m_Scenario.SimulateFrames(1);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             Assert.AreEqual(2, m_Scenario.FirstModeRule.UnloadCallCount);
             Assert.AreEqual(1, m_Scenario.SecondModeRule.InitializeCallCount);
             Assert.IsTrue(m_Scenario.SecondModeRule.UpdateCallCount > 0);
 
             // LoadSubmodule operation
             m_Process.CurrentGameMode.LoadSubmodule(m_Scenario.SubmoduleCategory, m_Scenario.SubmoduleSetup);
+            m_Scenario.SimulateFrames(2);
             GameModule submodule = m_Process.CurrentGameMode.GetSubmodule(m_Scenario.SubmoduleCategory);
             m_Scenario.SimulateUntil(() => submodule.OrchestrationState == OrchestratorState.Operational);
             Assert.AreEqual(1, m_Scenario.SubmoduleRule.InitializeCallCount);
@@ -86,7 +87,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
         {
             // The error is reported during the loading of the first mode
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
 
             m_Scenario.FirstModeRule.OnInitialize = () => m_Scenario.FirstModeRule.CallMarkError();
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.InitializeCallCount > 0);
@@ -97,7 +98,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // The error is reported during the update of the first mode
             m_Scenario.ResetFirstGameMode();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             m_Scenario.FirstModeRule.ResetCount();
 
             m_Scenario.FirstModeRule.OnUpdate = () => m_Scenario.FirstModeRule.CallMarkError();
@@ -109,7 +110,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // The error is reported during the unloading of the first mode
             m_Scenario.ResetFirstGameMode();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
 
             m_Scenario.FirstModeRule.OnUnload = () => m_Scenario.FirstModeRule.CallMarkError();
             m_Process.CurrentGameMode.Unload();
@@ -124,7 +125,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // If an exception is thrown during load, module launches the unload operation
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
 
             m_Scenario.FirstModeRule.OnInitialize = () => throw new Exception();
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.InitializeCallCount > 0);
@@ -136,7 +137,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // If an exception is thrown during update, module launches the reload operation
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             m_Scenario.FirstModeRule.ResetCount();
 
             m_Scenario.FirstModeRule.OnUpdate = () => throw new Exception();
@@ -151,7 +152,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             // If an exception is thrown during unload, module launches the switchToFallback operation
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
 
             m_Scenario.FirstModeRule.OnUnload = () => throw new Exception();
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.UpdateCallCount > 0);
@@ -169,7 +170,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Scenario.FirstModeSetup.CustomPerformancePolicy = GetTestPerformancePolicy();
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
 
             m_Scenario.FirstModeRule.OnInitialize = null;
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.InitializeCallCount > 0);
@@ -182,7 +183,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Scenario.FirstModeSetup.CustomPerformancePolicy = GetTestPerformancePolicy();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
             m_Scenario.FirstModeRule.ResetCount();
 
             m_Scenario.FirstModeRule.OnUpdate = () => Thread.Sleep(1);
@@ -198,7 +199,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
             m_Scenario.FirstModeSetup.CustomPerformancePolicy = GetTestPerformancePolicy();
             m_Process.SwitchToGameMode(m_Scenario.FirstModeSetup);
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
 
             m_Scenario.FirstModeRule.OnUnload = null;
             m_Scenario.SimulateUntil(() => m_Scenario.FirstModeRule.UpdateCallCount > 0);

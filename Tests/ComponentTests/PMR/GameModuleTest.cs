@@ -54,8 +54,6 @@ namespace GameEnginesTest.ComponentTests.PMR
             GameModule module = CreateValidGameModule(out IGameModuleSetup _, out Configuration _);
 
             // Trigger the load sequence from the Start state
-            bool loadingCompleted = false;
-            module.OnFinishLoading += () => loadingCompleted = true;
             module.InnerLoad();
             Assert.AreEqual(GameModuleState.Start, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
@@ -90,7 +88,6 @@ namespace GameEnginesTest.ComponentTests.PMR
                 Assert.AreEqual(GameRuleState.Initialized, rule.State);
 
             // End up in UpdateRules state
-            Assert.IsTrue(loadingCompleted);
             Assert.AreEqual(GameModuleState.UpdateRules, module.State);
         }
 
@@ -102,8 +99,6 @@ namespace GameEnginesTest.ComponentTests.PMR
             module.SimulateExecutionUntil(m_Time, () => module.State == GameModuleState.UpdateRules);
 
             // Trigger the unload sequence from the UpdateRules state
-            bool unloadingCompleted = false;
-            module.OnFinishUnloading += () => unloadingCompleted = true;
             module.InnerUnload();
             Assert.AreEqual(GameModuleState.UpdateRules, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
@@ -121,7 +116,6 @@ namespace GameEnginesTest.ComponentTests.PMR
                 Assert.IsTrue(task.State == SpecialTaskState.UnloadCompleted);
 
             // End up in End state
-            Assert.IsTrue(unloadingCompleted);
             Assert.AreEqual(GameModuleState.End, module.State);
 
             // Can trigger unload from InitializeRules state
@@ -140,8 +134,6 @@ namespace GameEnginesTest.ComponentTests.PMR
             module.SimulateExecutionUntil(m_Time, () => module.State == GameModuleState.UpdateRules);
 
             // Trigger the reload sequence from the UpdateRules state
-            bool reloadingCompleted = false;
-            module.OnFinishLoading += () => reloadingCompleted = true;
             module.InnerReload();
             Assert.AreEqual(GameModuleState.UpdateRules, module.State);
             Assert.IsTrue(module.SimulateUpToNextState(m_Time));
@@ -167,7 +159,6 @@ namespace GameEnginesTest.ComponentTests.PMR
                 Assert.AreEqual(GameRuleState.Initialized, rule.State);
 
             // End up in UpdateRules state
-            Assert.IsTrue(reloadingCompleted);
             Assert.AreEqual(GameModuleState.UpdateRules, module.State);
         }
 
