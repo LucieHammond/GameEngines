@@ -17,19 +17,9 @@ namespace GameEngine.Core.Unity.Rendering
         }
 
         /// <summary>
-        /// The graphic Unity object to be faded
+        /// The graphic object to be faded
         /// </summary>
-        public MaskableGraphic Graphic { get; private set; }
-
-        /// <summary>
-        /// The duration of the fading in seconds
-        /// </summary>
-        public float FadeDuration { get => m_FadeDuration; set => m_FadeDuration = value; }
-
-        /// <summary>
-        /// The color characterizing the full faded state of the graphic (by default the base color with a null alpha)
-        /// </summary>
-        public Color FadeColor { get => m_FadeColor; set => m_FadeColor = value; }
+        public Graphic Graphic { get; private set; }
 
         /// <summary>
         /// If the graphic is fully unfaded, which means normally displayed
@@ -54,8 +44,8 @@ namespace GameEngine.Core.Unity.Rendering
         /// </summary>
         /// <param name="graphicToFade">The graphic object to be faded</param>
         /// <param name="initiallyActive">If the graphic should be displayed in the initial state</param>
-        public FadeRenderer(MaskableGraphic graphicToFade, bool initiallyActive = false)
-            : this(graphicToFade, 1.0f, initiallyActive)
+        public FadeRenderer(Graphic graphicToFade, bool initiallyActive = false)
+            : this(graphicToFade, new Color(graphicToFade.color.r, graphicToFade.color.g, graphicToFade.color.b, 0), initiallyActive)
         {
         }
 
@@ -63,26 +53,14 @@ namespace GameEngine.Core.Unity.Rendering
         /// Create a new instance of FadeRenderer
         /// </summary>
         /// <param name="graphicToFade">The graphic object to be faded</param>
-        /// <param name="fadeDuration">The default duration of the fade (in seconds)</param>
-        /// <param name="initiallyActive">If the graphic should be displayed in the initial state</param>
-        public FadeRenderer(MaskableGraphic graphicToFade, float fadeDuration, bool initiallyActive = false)
-            : this(graphicToFade, fadeDuration, new Color(graphicToFade.color.r, graphicToFade.color.g, graphicToFade.color.b, 0), initiallyActive)
-        {
-        }
-
-        /// <summary>
-        /// Create a new instance of FadeRenderer
-        /// </summary>
-        /// <param name="graphicToFade">The graphic object to be faded</param>
-        /// <param name="fadeDuration">The default duration of the fade (in seconds)</param>
         /// <param name="fadeColor">The color that should be applied to the graphic when faded</param>
         /// <param name="initiallyActive">If the graphic should be displayed in the initial state</param>
-        public FadeRenderer(MaskableGraphic graphicToFade, float fadeDuration, Color fadeColor, bool initiallyActive = false)
+        public FadeRenderer(Graphic graphicToFade, Color fadeColor, bool initiallyActive = false)
         {
             Graphic = graphicToFade;
             m_OriginalColor = graphicToFade.color;
             m_FadeColor = fadeColor;
-            m_FadeDuration = fadeDuration;
+            m_FadeDuration = 0f;
             m_CurrentState = FadeState.Inactive;
 
             Graphic.enabled = true;
@@ -91,7 +69,7 @@ namespace GameEngine.Core.Unity.Rendering
         }
 
         /// <summary>
-        /// Update the rendering of the graphic given to the ongoing fading phase
+        /// Update the rendering of the graphic given the ongoing fading phase
         /// </summary>
         public void Update()
         {
@@ -110,9 +88,11 @@ namespace GameEngine.Core.Unity.Rendering
         /// <summary>
         /// Initiate a FadeIn phase, that makes the graphic appear gradually
         /// </summary>
+        /// <param name="fadeDuration">The duration of the fade (in seconds)</param>
         /// <param name="onFinish">A callback method to call when the graphic has fully appeared</param>
-        public void StartFadeIn(Action onFinish = null)
+        public void StartFadeIn(float fadeDuration, Action onFinish = null)
         {
+            m_FadeDuration = fadeDuration;
             m_FadeInCallback = onFinish;
 
             Graphic.gameObject.SetActive(true);
@@ -122,9 +102,11 @@ namespace GameEngine.Core.Unity.Rendering
         /// <summary>
         /// Initiate a FadeOut phase, that makes the graphic disappear gradually
         /// </summary>
+        /// <param name="fadeDuration">The duration of the fade (in seconds)</param>
         /// <param name="onFinish">A callback method to call when the graphic has fully disappeared</param>
-        public void StartFadeOut(Action onFinish = null)
+        public void StartFadeOut(float fadeDuration, Action onFinish = null)
         {
+            m_FadeDuration = fadeDuration;
             m_FadeOutCallback = onFinish;
 
             Graphic.gameObject.SetActive(true);
@@ -134,14 +116,25 @@ namespace GameEngine.Core.Unity.Rendering
         /// <summary>
         /// Initiate a FadeIn phase immediately followed by a FadeOut phase, making the graphing appear and disappear
         /// </summary>
+        /// <param name="fadeDuration">The duration of the fade (in seconds)</param>
+        /// <param name="onHalf">A callback method to call when the first phase is finished</param>
         /// <param name="onFinish">A callback method to call when both consecutive phases are finished</param>
-        public void StartFadeBetween(Action onFinish = null)
+        public void StartFadeBetween(float fadeDuration, Action onHalf = null, Action onFinish = null)
         {
-            m_FadeInCallback = () => m_CurrentState = FadeState.FadeOut;
+            m_FadeDuration = fadeDuration;
+            m_FadeInCallback = () => { onHalf?.Invoke(); m_CurrentState = FadeState.FadeOut; };
             m_FadeOutCallback = onFinish;
 
             Graphic.gameObject.SetActive(true);
             m_CurrentState = FadeState.FadeIn;
+        }
+
+        public void SetFullActivation(bool active)
+        {
+            if (active)
+                SetGraphicOpacity(1f);
+            else
+                SetGraphicOpacity(0f);
         }
 
         private void SetGraphicOpacity(float opacity)
