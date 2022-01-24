@@ -21,19 +21,36 @@ namespace GameEngine.PMR.Process.Orchestration.States
         {
             if (m_Orchestrator.CurrentTransition == null)
             {
-                GoToNextState();
+                SetState(NextState());
                 return;
             }
-
-            m_Orchestrator.CurrentTransition.BaseExit();
         }
 
         public override void Update()
         {
-            m_Orchestrator.CurrentTransition.BaseUpdate();
+            if (m_Orchestrator.CurrentTransition.State == TransitionState.Running)
+                m_Orchestrator.CurrentTransition.BaseExit();
+
+            if (m_Orchestrator.CurrentTransition.State == TransitionState.Exiting)
+                m_Orchestrator.CurrentTransition.BaseUpdate();
 
             if (m_Orchestrator.CurrentTransition.State == TransitionState.Inactive)
-                GoToNextState();
+                SetState(NextState());
+
+            if (m_Orchestrator.CurrentTransition.UpdateDuringExit)
+                m_Orchestrator.CurrentModule?.Update();
+        }
+
+        public override void FixedUpdate()
+        {
+            if (m_Orchestrator.CurrentTransition.UpdateDuringExit)
+                m_Orchestrator.CurrentModule?.FixedUpdate();
+        }
+
+        public override void LateUpdate()
+        {
+            if (m_Orchestrator.CurrentTransition.UpdateDuringExit)
+                m_Orchestrator.CurrentModule?.LateUpdate();
         }
 
         public override void Exit()
@@ -41,25 +58,18 @@ namespace GameEngine.PMR.Process.Orchestration.States
 
         }
 
-        private void GoToNextState()
+        private OrchestratorState NextState()
         {
-            if (m_Orchestrator.AwaitingAction != null)
+            if (m_Orchestrator.CurrentModule == null)
             {
-                m_Orchestrator.AwaitingAction();
-                m_Orchestrator.AwaitingAction = null;
-            }
-            else if (m_Orchestrator.CurrentModule == null)
-            {
-                SetState(OrchestratorState.Wait);
                 m_Orchestrator.CurrentTransition?.BaseCleanup();
                 m_Orchestrator.CurrentTransition = null;
-
-                m_Orchestrator.OnTerminated?.Invoke();
-                m_Orchestrator.OnTerminated = null;
+                
+                return OrchestratorState.Wait;
             }
             else
             {
-                SetState(OrchestratorState.Operational);
+                return OrchestratorState.Operational;
             }
         }
     }

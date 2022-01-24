@@ -12,7 +12,7 @@
         Wait,
 
         /// <summary>
-        /// The orchestrator executes the entry phase of the associated module transition
+        /// The orchestrator executes the entry phase of the module transition
         /// </summary>
         EnterTransition,
 
@@ -22,18 +22,18 @@
         RunTransition,
 
         /// <summary>
-        /// The orchestrator executes the exit phase of the associated module transition
+        /// The orchestrator executes the exit phase of the module transition
         /// </summary>
         ExitTransition,
 
         /// <summary>
-        /// The orchestrator manages the normal execution of the module (and its submodules)
+        /// The orchestrator manages the normal execution of the module
         /// </summary>
         Operational,
 
         /// <summary>
-        /// The orchestrator continues to execute the module while unloading its submodules
+        /// The orchestrator performs a transition change due to a module replacement
         /// </summary>
-        Reset,
+        ChangeTransition
     }
 }
