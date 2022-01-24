@@ -10,7 +10,7 @@ namespace GameEngine.Core.UnityTests
 {
     /// <summary>
     /// Component tests for the FadeRenderer class
-    /// <see cref="FadeRendererTest"/>
+    /// <see cref="FadeRenderer"/>
     /// </summary>
     public class FadeRendererTest
     {
