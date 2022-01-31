@@ -10,7 +10,7 @@ namespace GameEngine.Core.UnityTests
 {
     /// <summary>
     /// Component tests for the FadeRenderer class
-    /// <see cref="FadeRendererTest"/>
+    /// <see cref="FadeRenderer"/>
     /// </summary>
     public class FadeRendererTest
     {
@@ -46,11 +46,11 @@ namespace GameEngine.Core.UnityTests
             bool callbackCalled = false;
 
             // Create a fade renderer associated with the image, which makes it initially inactive
-            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, duration, false);
+            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, false);
             Assert.IsFalse(m_TestImage.gameObject.activeInHierarchy);
 
             // Launch the fade-in phase
-            fadeRenderer.StartFadeIn(() => callbackCalled = true);
+            fadeRenderer.StartFadeIn(duration, () => callbackCalled = true);
             m_Simulation.RegisterBehaviour(MonoBehaviourEvent.Update, fadeRenderer.Update);
 
             // At the start, the image is fully invisible
@@ -78,11 +78,11 @@ namespace GameEngine.Core.UnityTests
             bool callbackCalled = false;
 
             // Create a fade renderer associated with the image, which keeps it initially active
-            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, duration, true);
+            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, true);
             Assert.IsTrue(m_TestImage.gameObject.activeInHierarchy);
 
             // Launch the fade-out phase
-            fadeRenderer.StartFadeOut(() => callbackCalled = true);
+            fadeRenderer.StartFadeOut(duration, () => callbackCalled = true);
             m_Simulation.RegisterBehaviour(MonoBehaviourEvent.Update, fadeRenderer.Update);
 
             // At the start, the image is fully displayed
@@ -107,14 +107,15 @@ namespace GameEngine.Core.UnityTests
         public IEnumerator ExecuteFadeInAndOut()
         {
             float duration = 0.05f;
-            bool callbackCalled = false;
+            bool callback1Called = false;
+            bool callback2Called = false;
 
             // Create a fade renderer associated with the image, which makes it initially inactive
-            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, duration, false);
+            FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, false);
             Assert.IsFalse(m_TestImage.gameObject.activeInHierarchy);
 
             // Launch the fade-between phase
-            fadeRenderer.StartFadeBetween(() => callbackCalled = true);
+            fadeRenderer.StartFadeBetween(duration, () => callback1Called = true, () => callback2Called = true);
             m_Simulation.RegisterBehaviour(MonoBehaviourEvent.Update, fadeRenderer.Update);
 
             // At the start, the image is fully invisible
@@ -130,42 +131,31 @@ namespace GameEngine.Core.UnityTests
             Assert.AreEqual(0, m_TestImage.color.a);
             Assert.IsFalse(m_TestImage.gameObject.activeInHierarchy);
 
-            // The callback method has been called and the renderer return the correct state
-            Assert.IsTrue(callbackCalled);
+            // The callback methods have been called and the renderer return the correct state
+            Assert.IsTrue(callback1Called);
+            Assert.IsTrue(callback2Called);
             Assert.IsTrue(fadeRenderer.IsFullyOut);
         }
 
         [UnityTest]
         public IEnumerator ControlFadeParameters()
         {
-            // Create a fade renderer associated with the image (initially inactive)
+            // With a zero fade duration, the image appears in its final fade state in the next frame
             FadeRenderer fadeRenderer = new FadeRenderer(m_TestImage, false);
             m_Simulation.RegisterBehaviour(MonoBehaviourEvent.Update, fadeRenderer.Update);
-
-            // With a zero fade duration, the image appears in its final fade state in the next frame
-            fadeRenderer.FadeDuration = 0;
             Assert.IsTrue(fadeRenderer.IsFullyOut);
-            fadeRenderer.StartFadeIn();
+            fadeRenderer.StartFadeIn(0);
             yield return null;
             Assert.IsTrue(fadeRenderer.IsFullyIn);
-
-            // With a black transparent fade color, the image darkens when it fade out
-            fadeRenderer.FadeDuration = 0.05f;
-            fadeRenderer.FadeColor = new Color(0, 0, 0, 0);
-            Assert.AreEqual(Color.white, m_TestImage.color);
-            fadeRenderer.StartFadeOut();
-            yield return new WaitForSeconds(fadeRenderer.FadeDuration / 2);
-            Assert.IsTrue(m_TestImage.color.r < 1 && m_TestImage.color.g < 1 && m_TestImage.color.b < 1);
-            yield return new WaitForSeconds(fadeRenderer.FadeDuration / 2);
-            Assert.AreEqual(new Color(0, 0, 0, 0), m_TestImage.color);
+            m_Simulation.ResetBehaviours();
 
             // With a black opaque fade color, the image blend to black instead of fading
-            fadeRenderer.FadeDuration = 0;
-            fadeRenderer.FadeColor = Color.black;
-            fadeRenderer.StartFadeBetween();
-            yield return null;
+            FadeRenderer fadeBlack = new FadeRenderer(m_TestImage, Color.black, false);
+            m_Simulation.RegisterBehaviour(MonoBehaviourEvent.Update, fadeBlack.Update);
+            Assert.AreEqual(Color.black, m_TestImage.color);
+            fadeBlack.SetFullActivation(true);
             Assert.AreEqual(Color.white, m_TestImage.color);
-            yield return null;
+            fadeBlack.SetFullActivation(false);
             Assert.AreEqual(Color.black, m_TestImage.color);
         }
     }

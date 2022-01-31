@@ -2,7 +2,6 @@
 using GameEngine.Core.Unity.Rendering;
 using GameEngine.Core.Unity.Utilities;
 using GameEngine.PMR.Process.Transitions;
-using GameEngine.PMR.Unity.Transitions.Elements;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,67 +13,100 @@ namespace GameEngine.PMR.Unity.Transitions
     /// <summary>
     /// A predefined transition that displays a customizable world scene with a specialized camera
     /// </summary>
-    public class WorldTransition : Transition
+    public class WorldTransition : StandardTransition
     {
         private const string TAG = "WorldTransition";
 
-        /// <summary>
-        /// The solid color of the panel that separates the module scene from the transition scene (default is black)
-        /// </summary>
-        public Color SeparationColor { get; set; }
+        private delegate void LoadDelegate(Action onLoad);
+        private delegate void UnloadDelegate();
 
-        /// <summary>
-        /// A loading screen that should be managed by the transition
-        /// </summary>
-        public LoadingScreen LoadingScreen { get; set; }
+        private bool m_SeparationActive;
+        private float m_SeparationTime;
+        private Color m_SeparationColor;
+        private FadeRenderer m_SeparationRenderer;
 
-        /// <summary>
-        /// A list of custom transition elements that should be managed by the transition
-        /// </summary>
-        public List<ITransitionElement> CustomElements { get; set; }
-
-        private Action m_LoadWorld;
-        private Action m_UnloadWorld;
-        private Camera m_Camera;
-        private float m_FadeDuration;
-        private FadeRenderer m_FadeRenderer;
+        private LoadDelegate m_LoadAction;
+        private UnloadDelegate m_UnloadAction;
+        private Action m_SceneActivation;
+        private Action m_SceneDeactivation;
+        private Queue<Func<ITransitionElement>> m_ElementsToInclude;
 
         /// <summary>
         /// Create a new instance of WorldTransition
         /// </summary>
-        /// <param name="transitionScenes">The list of transition scenes to load (by name)</param>
-        /// <param name="cameraName">The name of the camera gameobject that should render the transition</param>
-        /// <param name="fadeDuration">The time it should takes to fade from the module scene to the transition scene</param>
-        public WorldTransition(List<string> transitionScenes, string cameraName, float fadeDuration)
+        /// <param name="transitionScene">The name of the transition scene to load</param>
+        /// <param name="activation">A method to call during the transition entry for activating the scene</param>
+        /// <param name="deactivation">A method to call during the transition exit for deactivating the scene</param>
+        public WorldTransition(string transitionScene, Action activation = null, Action deactivation = null)
         {
-            m_LoadWorld = () =>
-            {
-                foreach (string scene in transitionScenes)
-                    SceneManager.LoadScene(scene, LoadSceneMode.Additive);
+            m_ElementsToInclude = new Queue<Func<ITransitionElement>>();
+            m_SceneActivation = activation;
+            m_SceneDeactivation = deactivation;
 
-                m_Camera = SetupCamera(cameraName);
-            };
-            m_UnloadWorld = () =>
+            m_LoadAction = (onLoad) =>
             {
-                foreach (string scene in transitionScenes)
-                    SceneManager.UnloadSceneAsync(scene);
-
-                if (m_Camera != null)
-                    m_Camera.gameObject.SetActive(false);
+                SceneManager.LoadSceneAsync(transitionScene, LoadSceneMode.Additive).completed += (_) => onLoad?.Invoke();
             };
 
-            m_FadeDuration = fadeDuration;
-            SeparationColor = Color.black;
+            m_UnloadAction = () =>
+            {
+                SceneManager.UnloadSceneAsync(transitionScene);
+            };
         }
 
         /// <summary>
-        /// <see cref="Transition.Initialize()"/>
+        /// Add a custom transition object to be managed by the transition
         /// </summary>
-        protected override void Initialize()
+        /// <typeparam name="T">The type of the Unity component on which the transition takes place</typeparam>
+        /// <param name="objectName">The name of the concerned gameobject inside the world scene</param>
+        /// <param name="createElement">A method handling the creation of an ITransitionElement from the retrieved component</param>
+        public void AddTransitionObject<T>(string objectName, Func<T, ITransitionElement> createElement)
+            where T : Component
         {
-            Image separationPanel = GetSeparationPanel();
-            separationPanel.color = SeparationColor;
-            m_FadeRenderer = new FadeRenderer(separationPanel, m_FadeDuration / 2, false);
+            m_ElementsToInclude.Enqueue(() =>
+            {
+                T component = FindComponent<T>(objectName);
+                if (component == null)
+                    return null;
+                return createElement(component);
+            });
+        }
+
+        /// <summary>
+        /// Activate the display of a fading solid color separation screen to introduce the transition scene
+        /// </summary>
+        /// <param name="separationColor">The color of the speration screen</param>
+        /// <param name="fadeDuration">The duration of the fade between the two scenes</param>
+        public void ActivateSeparationScreen(Color separationColor, float fadeDuration)
+        {
+            m_SeparationActive = true;
+            m_SeparationTime = fadeDuration;
+            m_SeparationColor = separationColor;
+        }
+
+        /// <summary>
+        /// <see cref="Transition.Prepare()"/>
+        /// </summary>
+        protected override void Prepare()
+        {
+            m_LoadAction(() =>
+            {
+                if (m_SeparationActive)
+                {
+                    Image separationPanel = CreateSeparationPanel();
+                    separationPanel.color = m_SeparationColor;
+                    m_SeparationRenderer = new FadeRenderer(separationPanel, false);
+                }
+
+                while (m_ElementsToInclude.Count > 0)
+                {
+                    ITransitionElement element = m_ElementsToInclude.Dequeue().Invoke();
+                    if (element != null)
+                        m_CustomElements.Add(element);
+                }
+
+                MarkReady();
+            });
         }
 
         /// <summary>
@@ -82,18 +114,12 @@ namespace GameEngine.PMR.Unity.Transitions
         /// </summary>
         protected override void Enter()
         {
-            m_FadeRenderer.StartFadeIn(onFinish: () =>
-            {
-                m_LoadWorld();
-                LoadingScreen?.Setup();
-                OnStartActivation();
+            if (m_SeparationActive)
+                m_SeparationRenderer.StartFadeBetween(m_SeparationTime / 2, () => m_SceneActivation?.Invoke());
+            else
+                m_SceneActivation?.Invoke();
 
-                m_FadeRenderer.StartFadeOut(onFinish: () =>
-                {
-                    OnFinishActivation();
-                    MarkActivated();
-                });
-            });
+            base.Enter();
         }
 
         /// <summary>
@@ -101,15 +127,10 @@ namespace GameEngine.PMR.Unity.Transitions
         /// </summary>
         protected override void Update()
         {
-            if (State != TransitionState.Active)
-            {
-                m_FadeRenderer.Update();
-            }
-            else
-            {
-                LoadingScreen?.Update(m_LoadingProgress, m_LoadingAction);
-                CustomElements?.ForEach((element) => element.UpdateTransition());
-            }
+            if (m_SeparationActive && (State == TransitionState.Entering || State == TransitionState.Exiting))
+                m_SeparationRenderer.Update();
+
+            base.Update();
         }
 
         /// <summary>
@@ -117,17 +138,12 @@ namespace GameEngine.PMR.Unity.Transitions
         /// </summary>
         protected override void Exit()
         {
-            m_FadeRenderer.StartFadeIn(onFinish: () =>
-            {
-                m_UnloadWorld();
-                OnStartDeactivation();
+            if (m_SeparationActive)
+                m_SeparationRenderer.StartFadeBetween(m_SeparationTime / 2, () => m_SceneDeactivation?.Invoke());
+            else
+                m_SceneDeactivation?.Invoke();
 
-                m_FadeRenderer.StartFadeOut(onFinish: () =>
-                {
-                    OnFinishDeactivation();
-                    MarkDeactivated();
-                });
-            });
+            base.Exit();
         }
 
         /// <summary>
@@ -135,24 +151,24 @@ namespace GameEngine.PMR.Unity.Transitions
         /// </summary>
         protected override void Cleanup()
         {
-
+            m_UnloadAction();
+            m_CustomElements.Clear();
         }
 
-        private Image GetSeparationPanel()
+        private Image CreateSeparationPanel()
         {
             string canvasName = "Separator";
-            string panelName = "Solid Color Panel";
+            string panelName = "Panel";
 
             GameObject panelObject = GameObject.Find($"{canvasName}/{panelName}");
             if (panelObject == null)
             {
                 GameObject canvasObject = new GameObject(canvasName);
                 GameObject.DontDestroyOnLoad(canvasObject);
-                canvasObject.layer = LayerMask.NameToLayer("Transition");
 
                 Canvas canvas = canvasObject.AddComponent<Canvas>();
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                canvas.sortingOrder = 2000;
+                canvas.sortingOrder = 101;
 
                 panelObject = new GameObject(panelName);
                 panelObject.transform.parent = canvasObject.transform;
@@ -164,43 +180,23 @@ namespace GameEngine.PMR.Unity.Transitions
             return panelObject.GetComponent<Image>();
         }
 
-        private Camera SetupCamera(string cameraName)
+        private T FindComponent<T>(string objectName) where T : Component
         {
-            GameObject cameraObject = GameObject.Find(cameraName);
-
-            if (cameraObject == null)
+            GameObject gameObject = GameObject.Find(objectName);
+            if (gameObject == null)
             {
-                Log.Error(TAG, $"Failed to find the camera gameobject named {cameraName} for the transition");
-                return null;
-            }
-            if (!cameraObject.TryGetComponent(out Camera camera))
-            {
-                Log.Error(TAG, $"Failed to find a Camera component on the {cameraObject.name} object loaded for the transition");
-                return null;
+                Log.Error(TAG, $"Failed to find a gameobject named {objectName} in the scene hierarchy");
+                return default;
             }
 
-            camera.depth = 1;
-            return camera;
-        }
+            T component = gameObject.GetComponent<T>();
+            if (component == null)
+            {
+                Log.Error(TAG, $"Failed to find a component of type {typeof(T)} on the gameobject {objectName}");
+                return default;
+            }
 
-        private void OnStartActivation()
-        {
-            CustomElements?.ForEach((element) => element.OnStartTransitionActivation());
-        }
-
-        private void OnFinishActivation()
-        {
-            CustomElements?.ForEach((element) => element.OnFinishTransitionActivation());
-        }
-
-        private void OnStartDeactivation()
-        {
-            CustomElements?.ForEach((element) => element.OnStartTransitionDeactivation());
-        }
-
-        private void OnFinishDeactivation()
-        {
-            CustomElements?.ForEach((element) => element.OnFinishTransitionDeactivation());
+            return component;
         }
     }
 }

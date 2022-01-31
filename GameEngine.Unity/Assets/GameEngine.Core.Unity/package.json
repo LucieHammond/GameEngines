@@ -5,6 +5,9 @@
   "description": "Common tools for game development",
   "unity": "2019.4",
   "unityRelease": "32f1",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.2"
+  },
   "keywords": [
     "utilities",
     "logger",

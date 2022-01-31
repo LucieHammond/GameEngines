@@ -7,7 +7,7 @@ namespace GameEngine.Core.Unity.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure an UI image
     /// </summary>
-    [CreateAssetMenu(fileName = "NewImageDescriptor", menuName = "Content/Unity Objects/Image Descriptor", order = 100)]
+    [CreateAssetMenu(fileName = "NewImageDescriptor", menuName = "Content/Unity Objects/Image Descriptor", order = 20)]
     public class ImageDescriptor : ContentDescriptor
     {
         /// <summary>

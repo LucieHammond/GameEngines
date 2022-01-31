@@ -22,8 +22,6 @@ namespace GameEngine.PMR.Modules.States
             Log.Debug(GameModule.TAG, $"{m_GameModule.Name}: Finished");
 
             m_GameModule.ReportLoadingProgress(0f);
-            m_GameModule.OnFinishUnloading?.Invoke();
-            m_GameModule.OnFinishUnloading = null;
         }
 
         public override void Update()

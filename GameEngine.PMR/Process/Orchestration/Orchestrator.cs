@@ -28,13 +28,13 @@ namespace GameEngine.PMR.Process.Orchestration
         internal GameModule CurrentModule;
         internal Transition CurrentTransition;
 
-        internal Action AwaitingAction;
-        internal Action OnReset;
+        internal Queue<Action> NextOperations;
+        internal Queue<Transition> PastTransitions;
         internal Action OnOperational;
         internal Action OnTerminated;
 
         private FSM<OrchestratorState> m_StateMachine;
-        private delegate void OperationDelegate(Action onFinish);
+        private Action m_Requirements;
 
         internal Orchestrator(string category, GameProcess process, Orchestrator parent)
         {
@@ -42,16 +42,18 @@ namespace GameEngine.PMR.Process.Orchestration
             MainProcess = process;
             Parent = parent;
             Children = new List<Orchestrator>();
+            NextOperations = new Queue<Action>();
+            PastTransitions = new Queue<Transition>();
 
             m_StateMachine = new FSM<OrchestratorState>($"{category}OrchestratorFSM",
                 new List<FSMState<OrchestratorState>>()
                 {
-                    new WaitState(),
+                    new WaitState(this),
                     new EnterTransitionState(this),
                     new RunTransitionState(this),
                     new ExitTransitionState(this),
                     new OperationalState(this),
-                    new ResetState(this)
+                    new ChangeTransitionState(this)
                 },
                 OrchestratorState.Wait);
             m_StateMachine.Start();
@@ -60,6 +62,11 @@ namespace GameEngine.PMR.Process.Orchestration
         ~Orchestrator()
         {
             m_StateMachine.Stop();
+        }
+
+        internal void SetPreconditionForChange(Action precondition)
+        {
+            m_Requirements = precondition;
         }
 
         internal void Update()
@@ -84,38 +91,35 @@ namespace GameEngine.PMR.Process.Orchestration
 
             configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.GetType());
 
-            StartOrPlanModuleOperation((onFinish) =>
+            m_Requirements?.Invoke();
+            NextOperations.Clear();
+            NextOperations.Enqueue(() =>
             {
                 CurrentModule = new GameModule(setup, configuration, this);
                 CurrentModule.InnerLoad();
-                CurrentModule.OnFinishLoading += onFinish;
-            },
-            setup.GetTransition());
+            });
+
+            Transition transition = setup.GetTransition();
+            transition?.Configure(MainProcess.Time, configuration);
+            LaunchTransition(transition);
         }
 
         internal void UnloadModule()
         {
-            StartOrPlanModuleOperation((onFinish) =>
-            {
-                CurrentModule.InnerUnload();
-                CurrentModule.OnFinishUnloading += () =>
-                {
-                    CurrentModule.Destroy();
-                    CurrentModule = null;
-                    onFinish();
-                };
-            },
-            CurrentTransition);
+            m_Requirements?.Invoke();
+            NextOperations.Clear();
+            NextOperations.Enqueue(() => { CurrentModule?.InnerUnload(); });
+
+            LaunchTransition(CurrentTransition);
         }
 
         internal void ReloadModule()
         {
-            StartOrPlanModuleOperation((onFinish) =>
-            {
-                CurrentModule.InnerReload();
-                CurrentModule.OnFinishLoading += onFinish;
-            },
-            CurrentTransition);
+            m_Requirements?.Invoke();
+            NextOperations.Clear();
+            NextOperations.Enqueue(() => { CurrentModule?.InnerReload(); });
+
+            LaunchTransition(CurrentTransition);
         }
 
         internal void SwitchToModule(IGameModuleSetup setup, Configuration configuration = null)
@@ -125,18 +129,18 @@ namespace GameEngine.PMR.Process.Orchestration
 
             configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.GetType());
 
-            StartOrPlanModuleOperation((onFinish) =>
+            m_Requirements?.Invoke();
+            NextOperations.Clear();
+            NextOperations.Enqueue(() => { CurrentModule?.InnerUnload(); });
+            NextOperations.Enqueue(() =>
             {
-                CurrentModule.InnerUnload();
-                CurrentModule.OnFinishUnloading += () =>
-                {
-                    CurrentModule.Destroy();
-                    CurrentModule = new GameModule(setup, configuration, this);
-                    CurrentModule.InnerLoad();
-                    CurrentModule.OnFinishLoading += onFinish;
-                };
-            },
-            setup.GetTransition());
+                CurrentModule = new GameModule(setup, configuration, this);
+                CurrentModule.InnerLoad();
+            });
+
+            Transition transition = setup.GetTransition();
+            transition?.Configure(MainProcess.Time, configuration);
+            LaunchTransition(transition);
         }
 
         internal void AddSubmodule(string subcategory, IGameModuleSetup setup, Configuration configuration = null)
@@ -146,19 +150,12 @@ namespace GameEngine.PMR.Process.Orchestration
 
             configuration = configuration ?? MainProcess.GetModuleConfiguration(setup.GetType());
 
-            if (State == OrchestratorState.Reset)
-                throw new InvalidOperationException($"Cannot add submodule during reset phase (all submodules are being unloaded)");
-
-            if (CurrentModule.State == GameModuleState.UnloadRules || CurrentModule.State == GameModuleState.End)
-                throw new InvalidOperationException($"Cannot add submodule when current module is unloading. Module state: {CurrentModule.State}");
+            if (State != OrchestratorState.Operational)
+                throw new InvalidOperationException($"Cannot add a submodule during a transition phase of the parent module");
 
             Orchestrator childOrchestrator = new Orchestrator(subcategory, MainProcess, this);
             Children.Add(childOrchestrator);
-
-            if (CurrentModule.State == GameModuleState.UpdateRules)
-                childOrchestrator.LoadModule(setup, configuration);
-            else
-                CurrentModule.OnFinishLoading += () => childOrchestrator.LoadModule(setup, configuration);
+            childOrchestrator.LoadModule(setup, configuration);
         }
 
         internal void RemoveSubmodule(string subcategory)
@@ -211,56 +208,45 @@ namespace GameEngine.PMR.Process.Orchestration
             return true;
         }
 
-        private void StartOrPlanModuleOperation(OperationDelegate moduleOperation, Transition transition)
+        private void LaunchTransition(Transition transition)
         {
-            void performOperationWithTransition(bool skipEnter = false)
+            switch (State)
             {
-                if (CurrentModule == MainProcess.Services && MainProcess.CurrentGameMode != null)
-                    MainProcess.ResetGameMode();
-
-                if (transition != CurrentTransition)
-                {
-                    CurrentTransition?.BaseCleanup();
-                    CurrentTransition = transition;
-                    CurrentTransition?.BaseInitialize(MainProcess.Time);
-                }
-
-                if (!skipEnter)
+                case OrchestratorState.Wait:
+                case OrchestratorState.Operational:
+                    UpdateTransition(transition, true);
                     m_StateMachine.SetState(OrchestratorState.EnterTransition, priority: 100);
-                else
-                    m_StateMachine.SetState(State, priority: 100);
-                moduleOperation(onFinish: () => m_StateMachine.SetState(OrchestratorState.ExitTransition));
-            }
+                    break;
 
-            if (State == OrchestratorState.EnterTransition || State == OrchestratorState.RunTransition || State == OrchestratorState.ExitTransition)
-            {
-                if (CurrentModule != null)
-                {
-                    CurrentModule.OnFinishLoading = null;
-                    CurrentModule.OnFinishUnloading = null;
-                }
-
-                if (transition == CurrentTransition)
-                {
-                    performOperationWithTransition(State != OrchestratorState.ExitTransition);
-                }
-                else
-                {
-                    m_StateMachine.SetState(OrchestratorState.ExitTransition, priority: 100);
-                    AwaitingAction = () => performOperationWithTransition();
-                }
+                case OrchestratorState.EnterTransition:
+                case OrchestratorState.RunTransition:
+                case OrchestratorState.ExitTransition:
+                case OrchestratorState.ChangeTransition:
+                    if (transition == CurrentTransition)
+                    {
+                        OrchestratorState state = State != OrchestratorState.ExitTransition ? State : OrchestratorState.EnterTransition;
+                        m_StateMachine.SetState(state, priority: 100);
+                    }
+                    else
+                    {
+                        UpdateTransition(transition, false);
+                        m_StateMachine.SetState(OrchestratorState.ChangeTransition, priority: 100);
+                    }
+                    break;
             }
-            else
+        }
+
+        private void UpdateTransition(Transition transition, bool immediate)
+        {
+            if (transition != CurrentTransition)
             {
-                if (Children.Count > 0)
-                {
-                    m_StateMachine.SetState(OrchestratorState.Reset, priority: 100);
-                    OnReset = () => performOperationWithTransition();
-                }
-                else
-                {
-                    performOperationWithTransition();
-                }
+                if (immediate)
+                    CurrentTransition?.BaseCleanup();
+                else if (CurrentTransition != null)
+                    PastTransitions.Enqueue(CurrentTransition);
+
+                CurrentTransition = transition;
+                CurrentTransition?.BasePrepare();
             }
         }
         #endregion

@@ -1,27 +1,32 @@
-﻿using GameEngine.PMR.Process.Transitions;
+﻿using GameEngine.Core.System;
+using GameEngine.PMR.Process.Transitions;
 using System;
 
 namespace GameEnginesTest.Tools.Mocks.Spies
 {
     public class SpyTransition : Transition
     {
-        public int InitializeCallCount { get; private set; }
+        public int PrepareCallCount { get; private set; }
         public int EnterCallCount { get; private set; }
         public int UpdateCallCount { get; private set; }
         public int ExitCallCount { get; private set; }
         public int CleanupCallCount { get; private set; }
 
-        public Action OnInitialize;
+        public Action OnPrepare;
         public Action OnEnter;
         public Action OnUpdate;
         public Action OnExit;
         public Action OnCleanup;
 
+        public Configuration ModuleConfiguration => m_ModuleConfiguration;
+
         public float LoadingProgress => m_LoadingProgress;
 
         public string LoadingAction => m_LoadingAction;
 
-        public bool UseDefaultReport { get => m_UseDefaultReport; set => m_UseDefaultReport = value; }
+        public override bool UpdateDuringEntry => true;
+
+        public override bool UpdateDuringExit => true;
 
         public SpyTransition() : base()
         {
@@ -30,7 +35,7 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public void ResetCount()
         {
-            InitializeCallCount = 0;
+            PrepareCallCount = 0;
             EnterCallCount = 0;
             UpdateCallCount = 0;
             ExitCallCount = 0;
@@ -39,24 +44,36 @@ namespace GameEnginesTest.Tools.Mocks.Spies
 
         public void SetAutomaticCompletion()
         {
-            OnEnter += MarkActivated;
-            OnExit += MarkDeactivated;
+            OnPrepare += MarkReady;
+            OnEnter += MarkEntered;
+            OnExit += MarkExited;
+            OnUpdate += () => { if (!IsComplete) MarkCompleted(); };
         }
 
-        public void CallMarkActivated()
+        public void CallMarkReady()
         {
-            MarkActivated();
+            MarkReady();
         }
 
-        public void CallMarkDeactivated()
+        public void CallMarkEntered()
         {
-            MarkDeactivated();
+            MarkEntered();
         }
 
-        protected override void Initialize()
+        public void CallMarkExited()
         {
-            InitializeCallCount++;
-            OnInitialize?.Invoke();
+            MarkExited();
+        }
+
+        public void CallMarkCompleted()
+        {
+            MarkCompleted();
+        }
+
+        protected override void Prepare()
+        {
+            PrepareCallCount++;
+            OnPrepare?.Invoke();
         }
 
         protected override void Enter()

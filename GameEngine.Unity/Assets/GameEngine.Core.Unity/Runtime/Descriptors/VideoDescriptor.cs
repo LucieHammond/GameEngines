@@ -7,7 +7,7 @@ namespace GameEngine.Core.Unity.Descriptors
     /// <summary>
     /// A descriptor containing the information needed to configure a video player
     /// </summary>
-    [CreateAssetMenu(fileName = "NewVideoDescriptor", menuName = "Content/Unity Objects/Video Descriptor", order = 102)]
+    [CreateAssetMenu(fileName = "NewVideoDescriptor", menuName = "Content/Unity Objects/Video Descriptor", order = 22)]
     public class VideoDescriptor : ContentDescriptor
     {
         /// <summary>

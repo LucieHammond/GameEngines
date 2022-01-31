@@ -38,12 +38,17 @@ namespace GameEngine.PMR.Process
         /// <summary>
         /// If the process has been started
         /// </summary>
-        public bool IsStarted => Services != null;
+        public bool IsStarted => m_GameServiceOrchestrator.State != OrchestratorState.Wait;
 
         /// <summary>
-        /// If the process modules (game services and game mode) are completely loaded and currently running
+        /// If the process game service is completely loaded and currently running
         /// </summary>
-        public bool IsFullyOperational => m_GameServiceOrchestrator.IsOperational && m_GameModeOrchestrator.IsOperational;
+        public bool IsServiceOperational => m_GameServiceOrchestrator.IsOperational;
+
+        /// <summary>
+        /// If the process game mode is completely loaded and currently running
+        /// </summary>
+        public bool IsGameModeOperational => m_GameServiceOrchestrator.IsOperational && m_GameModeOrchestrator.IsOperational;
 
         internal DependencyProvider ServiceProvider => Services?.DependencyProvider;
 
@@ -79,6 +84,7 @@ namespace GameEngine.PMR.Process
         {
             Log.Info(TAG, $"Start process {Name}");
 
+            m_GameServiceOrchestrator.SetPreconditionForChange(ResetGameMode);
             m_GameServiceOrchestrator.LoadModule(m_ServiceSetup);
             m_GameServiceOrchestrator.OnOperational = () => SwitchToNextGameMode();
         }
@@ -261,10 +267,13 @@ namespace GameEngine.PMR.Process
             }
         }
 
-        internal void ResetGameMode()
+        private void ResetGameMode()
         {
-            m_GameModeOrchestrator.OnQuit();
-            m_GameModeOrchestrator.CurrentModule = null;
+            if (CurrentGameMode != null)
+            {
+                m_GameModeOrchestrator.OnQuit();
+                m_GameModeOrchestrator.CurrentModule = null;
+            }
         }
     }
 }

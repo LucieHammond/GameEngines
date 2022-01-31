@@ -15,9 +15,34 @@ namespace GameEngine.PMR.Process.Transitions
         public TransitionState State { get; private set; }
 
         /// <summary>
+        /// Indicates if the transition has been loaded and is ready to be launched
+        /// </summary>
+        public bool IsReady { get; private set; }
+
+        /// <summary>
+        /// Indicates if the transition display is complete and can be ended
+        /// </summary>
+        public bool IsComplete { get; private set; }
+
+        /// <summary>
+        /// Whether the associated module should be updated during the transition entry
+        /// </summary>
+        public abstract bool UpdateDuringEntry { get; }
+
+        /// <summary>
+        /// Whether the associated module should be updated during the transition exit
+        /// </summary>
+        public abstract bool UpdateDuringExit { get; }
+
+        /// <summary>
         /// An object giving time information about the process pace (delta time, frame count, time since startup ...)
         /// </summary>
         protected ITime m_Time;
+
+        /// <summary>
+        /// The configuration of the module being loaded, which contains runtime information
+        /// </summary>
+        protected Configuration m_ModuleConfiguration;
 
         /// <summary>
         /// A floating number between 0 and 1 representing the progress of the loading process occuring during transition
@@ -30,9 +55,15 @@ namespace GameEngine.PMR.Process.Transitions
         protected string m_LoadingAction = "";
 
         /// <summary>
-        /// If the loading progress should be set by default to the proportion of initialized rules in the corresponding module
+        /// Configure the transition with settings relative to the process and the module being loaded
         /// </summary>
-        protected bool m_UseDefaultReport = true;
+        /// <param name="time">The timing object of the process</param>
+        /// <param name="configuration">The configuration of the module being loaded</param>
+        public void Configure(ITime time, Configuration configuration)
+        {
+            m_Time = time;
+            m_ModuleConfiguration = configuration;
+        }
 
         /// <summary>
         /// Report the progress of the loading process for the transition to display it
@@ -52,26 +83,21 @@ namespace GameEngine.PMR.Process.Transitions
             m_LoadingAction = currentAction;
         }
 
-        internal void SetDefaultProgress(float progress)
+        internal void BasePrepare()
         {
-            if (m_UseDefaultReport)
-                m_LoadingProgress = progress;
-        }
+            IsReady = false;
 
-        internal void BaseInitialize(ITime time)
-        {
-            m_Time = time;
             State = TransitionState.Inactive;
-
-            Initialize();
+            Prepare();
         }
 
         internal void BaseEnter()
         {
             m_LoadingProgress = 0;
             m_LoadingAction = "";
+            IsComplete = false;
 
-            State = TransitionState.Activating;
+            State = TransitionState.Entering;
             Enter();
         }
 
@@ -84,23 +110,25 @@ namespace GameEngine.PMR.Process.Transitions
         {
             m_LoadingProgress = 1;
 
-            State = TransitionState.Deactivating;
+            State = TransitionState.Exiting;
             Exit();
         }
 
         internal void BaseCleanup()
         {
+            IsReady = false;
+
             State = TransitionState.Inactive;
             Cleanup();
         }
 
         /// <summary>
-        /// The place where to define custom initializing operations for the transition. Will be called first
+        /// The place where to define custom load operations for the transition. Will be called first
         /// </summary>
-        protected abstract void Initialize();
+        protected abstract void Prepare();
 
         /// <summary>
-        /// The place where to define custom activation operations for the transition (usually fade in)
+        /// The place where to define custom entry operations for the transition (usually fade in)
         /// </summary>
         protected abstract void Enter();
 
@@ -110,39 +138,65 @@ namespace GameEngine.PMR.Process.Transitions
         protected abstract void Update();
 
         /// <summary>
-        /// The place where to define custom deactivation operations for the transition (usually fade out)
+        /// The place where to define custom exit operations for the transition (usually fade out)
         /// </summary>
         protected abstract void Exit();
 
         /// <summary>
-        /// The place where to define custom cleanup operations for the transition. Will be called last
+        /// The place where to define custom unload operations for the transition. Will be called last
         /// </summary>
         protected abstract void Cleanup();
 
         /// <summary>
-        /// Call this method to attest that the transition has complete its activation sequence
+        /// Call this method to attest that the transition has correctly been setup
         /// </summary>
-        protected void MarkActivated()
+        protected void MarkReady()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State != TransitionState.Activating)
-                throw new InvalidOperationException($"Invalid time context for calling MarkActivated(). " +
-                    $"Current state: {State}. Expected state: Activating");
+            if (State != TransitionState.Inactive)
+                throw new InvalidOperationException($"Invalid time context for calling MarkReady(). " +
+                    $"Current state: {State}. Expected state: Inactive");
 #endif
-            State = TransitionState.Active;
+            IsReady = true;
         }
 
         /// <summary>
-        /// Call this method to attest that the transition has complete its deactivation sequence
+        /// Call this method to attest that the transition has completed its entry sequence
         /// </summary>
-        protected void MarkDeactivated()
+        protected void MarkEntered()
         {
 #if CHECK_OPERATIONS_CONTEXT
-            if (State != TransitionState.Deactivating)
-                throw new InvalidOperationException($"Invalid time context for calling MarkDeactivated(). " +
-                    $"Current state: {State}. Expected state: Deactivating");
+            if (State != TransitionState.Entering)
+                throw new InvalidOperationException($"Invalid time context for calling MarkEntered(). " +
+                    $"Current state: {State}. Expected state: Entering");
+#endif
+            State = TransitionState.Running;
+        }
+
+        /// <summary>
+        /// Call this method to attest that the transition has completed its exit sequence
+        /// </summary>
+        protected void MarkExited()
+        {
+#if CHECK_OPERATIONS_CONTEXT
+            if (State != TransitionState.Exiting)
+                throw new InvalidOperationException($"Invalid time context for calling MarkExited(). " +
+                    $"Current state: {State}. Expected state: Exiting");
 #endif
             State = TransitionState.Inactive;
+        }
+
+        /// <summary>
+        /// Call this method to attest that the transition display requirements have been completed
+        /// </summary>
+        protected void MarkCompleted()
+        {
+#if CHECK_OPERATIONS_CONTEXT
+            if (State != TransitionState.Running && State != TransitionState.Entering)
+                throw new InvalidOperationException($"Invalid time context for calling MarkCompleted(). " +
+                    $"Current state: {State}. Expected state: Running, Entering");
+#endif
+            IsComplete = true;
         }
     }
 }

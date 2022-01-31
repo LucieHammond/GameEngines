@@ -57,9 +57,6 @@ namespace GameEngine.PMR.Modules
         internal DependencyProvider DependencyProvider;
         internal Orchestrator Orchestrator;
 
-        internal Action OnFinishLoading;
-        internal Action OnFinishUnloading;
-
         private QueueFSM<GameModuleState> m_StateMachine;
         private bool m_IsPaused;
 
@@ -210,11 +207,15 @@ namespace GameEngine.PMR.Modules
 
         internal void ReportLoadingProgress(float progress)
         {
-            Orchestrator.CurrentTransition?.SetDefaultProgress(progress);
+            Orchestrator.CurrentTransition?.ReportLoadingProgress(progress);
         }
 
         internal void OnManagedError()
         {
+            if (OrchestrationState == OrchestratorState.EnterTransition ||
+                OrchestrationState == OrchestratorState.ExitTransition)
+                return;
+
             if (ExceptionPolicy.FallbackModule == null)
                 Orchestrator.UnloadModule();
             else
@@ -223,6 +224,10 @@ namespace GameEngine.PMR.Modules
 
         internal bool OnException(OnExceptionBehaviour behaviour)
         {
+            if (OrchestrationState == OrchestratorState.EnterTransition || 
+                OrchestrationState == OrchestratorState.ExitTransition)
+                return true;
+
             switch (behaviour)
             {
                 case OnExceptionBehaviour.Continue:

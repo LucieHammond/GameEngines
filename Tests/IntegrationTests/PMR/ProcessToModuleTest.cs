@@ -31,33 +31,32 @@ namespace GameEnginesTest.IntegrationTests.PMR
         {
             // Start operation
             m_Process.Start();
-            Assert.AreEqual(GameModuleState.Start, m_Process.Services.State);
-            GameModule serviceModule = m_Process.Services;
+            m_Scenario.SimulateUntil(() => m_Process.Services != null);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.Services.State == GameModuleState.UpdateRules);
+            GameModule serviceModule = m_Process.Services;
 
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
-            Assert.AreEqual(GameModuleState.Start, m_Process.CurrentGameMode.State);
-            GameModule firstModule = m_Process.CurrentGameMode;
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode != null);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.UpdateRules);
+            GameModule firstModule = m_Process.CurrentGameMode;
 
             // SwitchMode Operation
             m_Process.SwitchToNextGameMode();
             m_Scenario.SimulateUntil(() => firstModule.State == GameModuleState.UnloadRules);
             m_Scenario.SimulateUntil(() => firstModule.State == GameModuleState.End);
-            Assert.AreNotEqual(firstModule, m_Process.CurrentGameMode.State);
+            Assert.AreNotEqual(firstModule, m_Process.CurrentGameMode);
 
-            Assert.AreEqual(GameModuleState.Start, m_Process.CurrentGameMode.State);
-            GameModule secondModule = m_Process.CurrentGameMode;
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InitializeRules);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.UpdateRules);
+            GameModule secondModule = m_Process.CurrentGameMode;
 
             // Stop operation
             m_Process.Stop();
@@ -78,9 +77,10 @@ namespace GameEnginesTest.IntegrationTests.PMR
             m_Scenario.FirstModeSetup.CustomExceptionPolicy = GetTestExceptionPolicy();
 
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.Services.OrchestrationState == OrchestratorState.Operational);
+            m_Scenario.SimulateUntil(() => m_Process.IsServiceOperational);
 
             // Since the setup problem is detected during load, process launches stop operation
+            m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode != null);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.Configure);
             m_Scenario.SimulateUntil(() => m_Process.CurrentGameMode.State == GameModuleState.InjectDependencies);
             GameModule gameMode = m_Process.CurrentGameMode;
@@ -94,7 +94,7 @@ namespace GameEnginesTest.IntegrationTests.PMR
         public void ModuleFailsRequirements_ProcessStopsOperation()
         {
             m_Process.Start();
-            m_Scenario.SimulateUntil(() => m_Process.IsFullyOperational);
+            m_Scenario.SimulateUntil(() => m_Process.IsGameModeOperational);
 
             // If mode setup requirements are not met, process log error and mode is not loaded
             m_Scenario.SecondModeSetup.CustomRequiredService = typeof(StubGameSubmoduleSetup);

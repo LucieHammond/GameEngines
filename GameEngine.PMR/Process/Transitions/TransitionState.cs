@@ -6,23 +6,23 @@
     public enum TransitionState
     {
         /// <summary>
-        /// The transition is inactive
+        /// The transition is created but inactive
         /// </summary>
         Inactive,
 
         /// <summary>
-        /// The transition is in activating phase, usually used for fade in
+        /// The transition is in entry phase, usually used for fade in
         /// </summary>
-        Activating,
+        Entering,
 
         /// <summary>
         /// The transition is currently running and fully displayed
         /// </summary>
-        Active,
+        Running,
 
         /// <summary>
-        /// The transition is in deactivating phase, usually used for fade out
+        /// The transition is in exit phase, usually used for fade out
         /// </summary>
-        Deactivating,
+        Exiting,
     }
 }

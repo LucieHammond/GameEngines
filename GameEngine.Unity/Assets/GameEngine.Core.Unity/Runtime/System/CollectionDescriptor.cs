@@ -6,7 +6,7 @@ namespace GameEngine.Core.Unity.System
     /// <summary>
     /// A scriptable object describing a collection of content descriptors
     /// </summary>
-    [CreateAssetMenu(fileName = "NewCollection", menuName = "Content/Collection/Collection Descriptor", order = 1)]
+    [CreateAssetMenu(fileName = "NewCollection", menuName = "Content/Collection/Collection Descriptor", order = 0)]
     public class CollectionDescriptor : ScriptableObject
     {
         /// <summary>
